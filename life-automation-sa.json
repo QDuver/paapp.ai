@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "life-automation-409102",
+  "private_key_id": "3052e85493da2140747e43fe8b8394b5cdc0a818",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDH6fUP2+lqcUvs\nv4K7Z/4GSklr5wybvONIz52Fuok82ZcU2CpQYoFPon57nwWdkydNfJ8G5UlmfLIz\nRylZgtkTBJL56Do19CfvsxaaNjfNf1gMlhOgE44yJ5Ii1g6AgBhOXJ6ntRYvMD2D\nv11SlLOysGLQx1uhQZeiodVwT8rRVszPth6g7oTWKhHrmoJAIGwJOW1MtySWR5uQ\n4jxIAkOVrDxvMbT0bRHmsFiL0tZi5uIkMPXhZNiGFANLb+VFPTPqzaXoGNkFXAMc\n9k+l5JhGcT2B1OGBATDowCABX5n/Ae5pquAys4/pc1a2mxuBemmTQN1kJv5fpsWM\npYP4FAbJAgMBAAECggEADR24pvZRS/S4++rb6e3HVdeD4uEOC7dXdiYULXtXZVDY\njIgnzPRZi/ibGDZ1VakbWAZU7LMYa/GPqehn7YG1oLDMVjpTr2LtR9jviUvRwQxm\nbq6ROELWmBkBvOiSzppMF4zhTLS6pHsjkURGtcdTbuYLTBIrkEEccMTxzjExNMDB\nmP8sGZXdtWD/aXt7NxwIpOI+K5Y19Q31R3uihIVedKgQORDwdKlRsjfpRCpcwMy4\n94cGl1uYaMj4mM7S6xPyanz8knf5/ZpCBM2ynWnZdVawhpDrHoZ2DpyK6ZEPkVoJ\noyNHzHiivn/BnTefXkk8Fffn3Jr1i5cASKnVyl397QKBgQDxz1UQcCGy0Hz2hccZ\neJGVeqH3TNJdtXHAJjGiWRs/uOsx7qtwRY/ql367puD1vQWBqETPeMovk+yONr+O\nPSMTILE5k0RXhd7xnEreY+RYh0IPzXJ+cKZokibO0DcgxNUrzlcO4nwBh2h+aUtt\naOpUkLQx7uVsVrDfqU+pnbTS7wKBgQDTpTqQhWSo3fhc978+eP05Q3AjmQODd0Gf\nyxYf943UPhpazHkUU5gas/d/w5D6mMQD0RLatqKOfRGMbser1L2yPOZDncE/cruR\n2ajeidvtQI0BjFYwRpIeL+9mtt6ONSM8HNavZ1DJji13HUMeVHITpv40zgaJLcgl\nFuBAPuDhxwKBgQCrLqa+k1MX3oaIkt4HBxaxJnagtq66Digv6hn7H2+t5cACwj51\npZkjbwoV2CarcJwEVNYZth4UHnk5mEJ1dIxvDxbHdpzMBQZ2LrnFxBu0HFTFESE7\np432u3hjsn1EYnOypkl1TRqSjoSH8QynsL0rDqGyM7gQwTJHs/mkTvPi2wKBgF/e\nOjb4lW4Ajd3ewxwTRfDIYWVejD7iqDEvlugIBJCdSObUNAxHCWEfH/8ZoPRCepeX\n/shfbibI9Ef+biehiAPSniMGtGB/IgOg6mNTYvGHCdgnr2rSrKFL6U9Himw0Ga/D\nCGQPkoKaCnIoKRz19257eC6HHGLLABv8zruLP+ZFAoGAcPVe3ny8LS4ljUVPnrj+\ns1oIaeRpfWk5jnteiZcZ5jAVsKinBgVlL1XLio2mgmEKAYlgji0vkNoSxNmOt8JS\nU2lKWPj8BK+VU0z02dYjZC7aUYbijlN7mEH3ss/6cUjRHGSQXTFXzQW7ILzpxGbu\nKoNcqfWOlmnnIULYu79K0bU=\n-----END PRIVATE KEY-----\n",
+  "client_email": "calendar@life-automation-409102.iam.gserviceaccount.com",
+  "client_id": "117913573891335080815",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/calendar%40life-automation-409102.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
