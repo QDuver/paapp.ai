@@ -1,3 +1,8 @@
+# 2024-01-10
+
+Hier soir et ce matin constituent la phase la plus dure pour l'instant de cette nouvelle vie de routine. Hier soir car je me suis senti vite acculé en rentrant du boulot, je voulais boire et j'ai bu (pas trop), et ce matin car j'ai tres mal dormi mais j'ai tout de meme du me lever a 6h30 du matin pour aller au sport avant le bureau. Je peux me feliciter de ce reveil ce matin, j'ai longtemps été tres proche de le reporter.
+Il y aura d'autres matins difficiles, au sens noble du terme, et il faut que je m'y habitue, c'est mon quotidien maintenant, au moins je suis dans le controle des moments difficiles.
+
 # 2024-01-09
 
 Hier fut une bonne representation de ce que ma journée type devrait etre, aussi bien dans ce que j'ai fait que ce que j'ai ressenti. Levé tot, ecriture, sport, douche froide, méditation.
