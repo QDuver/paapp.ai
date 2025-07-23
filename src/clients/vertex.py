@@ -23,7 +23,7 @@ class Vertex:
             model=self.model,
             config=types.GenerateContentConfig( 
                 system_instruction=agent, 
-                response_mime_type="application/json" if schema else None,
+                response_mime_type="application/json",
                 response_schema=schema,
                 max_output_tokens=8192
                 ),
