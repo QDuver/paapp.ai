@@ -8,6 +8,22 @@ import os
 class Firestore:
     def __init__(self):
         self.client = firestore.Client(database='routine')
+        
+    def insert(self, collection, data, doc_id=None):
+        try:
+            collection_ref = self.client.collection(collection)
+            if doc_id:
+                doc_ref = collection_ref.document(doc_id)
+                doc_ref.set(data)
+                print(f"Document set with ID: {doc_id}")
+                return doc_id
+            else:
+                timestamp, doc_ref = collection_ref.add(data)
+                print(f"Document added with ID: {doc_ref.id}")
+                return doc_ref.id
+        except Exception as e:
+            print(f"Error inserting data into Firestore: {str(e)}")
+            return None
 
     def query(self, collection="routine", limit=10):
         try:
