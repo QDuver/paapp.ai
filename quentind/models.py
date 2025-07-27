@@ -5,11 +5,13 @@ from enum import Enum
 
 
 class RunningDistance(BaseModel):
+    model_config = {"extra": "forbid"}
     distance_km: float
     duration: str
 
 
 class RunningIntervals(BaseModel):
+    model_config = {"extra": "forbid"}
     speed_km: float
     duration: str
     rest: str
@@ -17,14 +19,15 @@ class RunningIntervals(BaseModel):
 
 
 class WorkOut(BaseModel):
+    model_config = {"extra": "forbid"}
     name: str
     weight_kg: Optional[float] = None
     repetitions: Optional[int] = None
     sets: Optional[int] = None
     duration_sec: Optional[int] = None
-    at_home: bool = False
 
 class Day(BaseModel):
+    model_config = {"extra": "forbid"}
     date: str = datetime.now().strftime("%Y-%m-%d")
     wakeup_time: Optional[str] = None
     sleep_quality: int = None  # Scale from 1 to 10

@@ -1,65 +1,40 @@
 
 
-from clients.firestore import Firestore
-from clients.vertex import Vertex
-from agents import exercice
-import json
-from datetime import date
-from models import Day
-import requests
-
-def call_agent_mock():
-    print("Mock call to agent")
-    return {"message": "Hello, Agent!"}
+from quentind.exercices import call_exercice_agent
+from quentind.models import Day, WorkOut, RunningDistance, RunningIntervals
+from pydantic import ValidationError
 
 
-def call_agent():
-    
-    SLEEP_QUALITY = 7
-    WAKEUP_TIME = "05:30"
-    AVAILABLE_EXERCISE_TIME = 40
-    today = Day(
-        sleep_quality=SLEEP_QUALITY,
-        wakeup_time=WAKEUP_TIME,
-        available_exercise_time=AVAILABLE_EXERCISE_TIME,
-        at_home=True,
-    )
-
-    fs = Firestore()
-    historics = fs.query(collection='routine', limit=10)
-    historics = [x for x in historics if x['date'] < date.today().strftime("%Y-%m-%d")]
-    print(historics)
-
-    prompt = f'''
-    HISTORICAL_TRAINING_DATA --
-    {json.dumps(historics, indent=2)}
-    --------------
-    
-    CURRENT_DAY --
-    {json.dumps(today.model_dump(), indent=2)}
-    --------------
-    Based on this data, fill in today's Exercise plan.
-    '''
-    print(prompt)
-    vertex = Vertex()
-    output = vertex.call_agent(agent=exercice, prompt=prompt)
-    print(output)
-    
-    output_data = json.loads(output)
-    if isinstance(output_data, list) and len(output_data) > 0:
-        today = Day(**output_data[0])
-    else:
-        today = Day(**output_data)
-
-    print(today)
-    fs.insert(collection='routine', data=today.model_dump(), doc_id=today.date)
-    
-    
 if __name__ == "__main__":
-    baseURL = 'https://life-automation-api-1050310982145.europe-west2.run.app'
-    # baseURL = "http://localhost:8000"   
-    response = requests.get(f"{baseURL}/")
-    print(response.json())
-    # call_agent_mock()
-    
- 
+    # baseURL = 'https://life-automation-api-1050310982145.europe-west2.run.app'
+    # baseURL = "http://localhost:8000"
+    # response = requests.get(f"{baseURL}/")
+    # print(response.json())
+    call_exercice_agent()
+
+    # obj = {
+    #     "date": "2025-07-27",
+    #     "wakeup_time": "05:30",
+    #     "sleep_quaeeelity": 7,  # This typo will be filtered out
+    #     "sleep_quality": 8,     # This is the correct field name
+    #     "available_exercise_time": 40,
+    #     "invalid_field": "this will be removed",  # This will be filtered out
+    #     "exercises": [
+    #         {
+    #             "name": "Easy Run",
+    #             "type": "Cardio",  # This will be filtered out (not in any exercise model)
+    #             "distance_km": 5.0,  # This matches RunningDistance
+    #             "duration": "30:00",  # This matches RunningDistance
+    #             "intensity": "Easy",  # This will be filtered out
+    #             "notes": "Focus on maintaining a conversational pace."  # This will be filtered out
+    #         },
+    #         {
+    #             "name": "Push-ups",
+    #             "weight_kg": None,  # This matches WorkOut
+    #             "repetitions": 20,  # This matches WorkOut
+    #             "sets": 3,  # This matches WorkOut
+    #             "invalid_exercise_field": "remove me",  # This will be filtered out
+    #             "at_home": True  # This matches WorkOut
+    #         }
+    #     ]
+    # }
