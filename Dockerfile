@@ -15,7 +15,7 @@ COPY . .
 EXPOSE 8080
 
 # Run the app with Uvicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8080"]
 
-# uvicorn main:app --reload --host 0.0.0.0 --port 8000
-# gcloud builds submit --tag gcr.io/final-app-429707/openintro-linkedin-fetch && gcloud run deploy openintro-linkedin-fetch     --image gcr.io/final-app-429707/openintro-linkedin-fetch     --platform managed     --region europe-west2     --allow-unauthenticated
+# uvicorn api:app --reload --host 0.0.0.0 --port 8000
+# gcloud builds submit --tag gcr.io/final-app-429707/life-automation-api && gcloud run deploy life-automation-api     --image gcr.io/final-app-429707/life-automation-api     --platform managed     --region europe-west2     --allow-unauthenticated
