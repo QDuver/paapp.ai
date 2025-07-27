@@ -22,6 +22,7 @@ class WorkOut(BaseModel):
     repetitions: Optional[int] = None
     sets: Optional[int] = None
     duration_sec: Optional[int] = None
+    at_home: bool = False
 
 class Day(BaseModel):
     date: str = datetime.now().strftime("%Y-%m-%d")
