@@ -5,19 +5,24 @@ from clients.vertex import Vertex
 from agents import exercice
 import json
 from datetime import date
-
-from database import database
 from models import Day
+import requests
 
-if __name__ == "__main__":
+def call_agent_mock():
+    print("Mock call to agent")
+    return {"message": "Hello, Agent!"}
 
+
+def call_agent():
+    
     SLEEP_QUALITY = 7
-    WAKEUP_TIME = "06:00"
+    WAKEUP_TIME = "05:30"
     AVAILABLE_EXERCISE_TIME = 40
     today = Day(
         sleep_quality=SLEEP_QUALITY,
         wakeup_time=WAKEUP_TIME,
-        available_exercise_time=AVAILABLE_EXERCISE_TIME
+        available_exercise_time=AVAILABLE_EXERCISE_TIME,
+        at_home=True,
     )
 
     fs = Firestore()
@@ -41,11 +46,20 @@ if __name__ == "__main__":
     print(output)
     
     output_data = json.loads(output)
-    # The AI returns a list with one Day object, so we take the first item
     if isinstance(output_data, list) and len(output_data) > 0:
         today = Day(**output_data[0])
     else:
         today = Day(**output_data)
+
     print(today)
     fs.insert(collection='routine', data=today.model_dump(), doc_id=today.date)
     
+    
+if __name__ == "__main__":
+    baseURL = 'https://life-automation-api-1050310982145.europe-west2.run.app'
+    # baseURL = "http://localhost:8000"   
+    response = requests.get(f"{baseURL}/")
+    print(response.json())
+    # call_agent_mock()
+    
+ 
