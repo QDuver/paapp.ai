@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#317EFB"/>
+    <link rel="manifest" href="manifest.json">
+    <title>Hello World PWA</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+    </style>
+</head>
+<body>
+    <h1>Hello World</h1>
+    <p>This is a simple Progressive Web App.</p>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('service-worker.js');
+            });
+        }
+    </script>
+</body>
+</html>
