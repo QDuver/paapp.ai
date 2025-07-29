@@ -24,6 +24,19 @@ class Firestore:
         except Exception as e:
             print(f"Error inserting data into Firestore: {str(e)}")
             return None
+        
+    def get(self, collection, doc_id):
+        try:
+            doc_ref = self.client.collection(collection).document(doc_id)
+            doc = doc_ref.get()
+            if doc.exists:
+                return doc.to_dict()
+            else:
+                print(f"No document found with ID: {doc_id}")
+                return None
+        except Exception as e:
+            print(f"Error retrieving document: {str(e)}")
+            return None
 
     def query(self, collection="routine", limit=10):
         try:
@@ -62,3 +75,10 @@ class Firestore:
         except Exception as e:
             print(f"Error querying Firestore with filters: {str(e)}")
             return []
+
+    def delete(self, collection, doc_id):
+        try:
+            doc_ref = self.client.collection(collection).document(doc_id)
+            doc_ref.delete()
+        except Exception as e:
+            print(f"Error deleting document: {str(e)}")

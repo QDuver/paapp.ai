@@ -16,13 +16,13 @@ class RunningIntervals(BaseModel):
     repetitions: int
 
 
+    
 class WorkOut(BaseModel):
     name: str
     weight_kg: Optional[float] = None
     repetitions: Optional[int] = None
-    sets: Optional[int] = None
     duration_sec: Optional[int] = None
-    at_home: bool = False
+    rest: Optional[int] = 90
 
 class Day(BaseModel):
     date: str = datetime.now().strftime("%Y-%m-%d")
