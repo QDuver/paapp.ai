@@ -6,16 +6,14 @@ from enum import Enum
 
 class RunningDistance(BaseModel):
     distance_km: float
-    duration: str
+    duration_min: str
 
 
 class RunningIntervals(BaseModel):
     speed_km: float
-    duration: str
+    duration_sec: str
     rest: str
     repetitions: int
-
-
     
 class WorkOut(BaseModel):
     name: str
@@ -30,4 +28,5 @@ class Day(BaseModel):
     sleep_quality: int = None  # Scale from 1 to 10
     available_exercise_time: Optional[int] = None
     exercises: list[WorkOut | RunningDistance | RunningIntervals] = []
+    at_home: bool = True
 

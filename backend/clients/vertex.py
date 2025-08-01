@@ -1,11 +1,14 @@
 from google import genai
 from google.genai import types
 
+from config import is_local_environment
+
 
 class Vertex:
-    def __init__(self):
-        self.client = client = genai.Client( vertexai=True, project="final-app-429707", location="us-central1" )
-        self.model = "gemini-2.0-flash-lite-001"
+    def __init__(self, model='gemini-2.5-pro'):
+        # gemini-2.0-flash-lite-001
+        self.client = genai.Client( vertexai=True, project="final-app-429707", location="us-central1" )
+        self.model = model
 
     def generate_content(self, prompt, text_contexts=[], image_contexts=[]):
         contents = [prompt]
