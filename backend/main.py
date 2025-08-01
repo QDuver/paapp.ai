@@ -2,12 +2,11 @@
 
 from clients.firestore import Firestore
 from clients.vertex import Vertex
-from config import get_base_url, Config
 import json
 from datetime import date
 from models import Day
+from agents import agent
 import requests
-
 vertex = Vertex()
 fs = Firestore()
 
@@ -20,16 +19,17 @@ def process_output(output):
         return Day(**output_data)
 
 
-def init_day():
+def init_day(extra_comments="None"):
     
-    SLEEP_QUALITY = 8
+    SLEEP_QUALITY = 5
     WAKEUP_TIME = "09:00"
     AVAILABLE_EXERCISE_TIME = 60
+    AT_HOME = False
     today_init = Day(
         sleep_quality=SLEEP_QUALITY,
         wakeup_time=WAKEUP_TIME,
         available_exercise_time=AVAILABLE_EXERCISE_TIME,
-        at_home=True,
+        at_home=AT_HOME,
     )
 
     fs.delete(collection='routine', doc_id=today_init.date)
@@ -47,11 +47,11 @@ def init_day():
     --------------
     
     EXTRA COMMENTS --
-    Today, I'd specifically like to train the back
+    {extra_comments}
     --------------
     '''
     print(prompt)
-    output = vertex.call_agent(agent=open("agents.md").read(), prompt=prompt)
+    output = vertex.call_agent(agent=agent, prompt=prompt)
     today = process_output(output)
     fs.insert(collection='routine', data=today.model_dump(), doc_id=today.date)
     
@@ -71,7 +71,7 @@ def modify_day():
     --------------
     '''
     print(prompt)
-    output = vertex.call_agent(agent=open("agents.md").read(), prompt=prompt)
+    output = vertex.call_agent(agent=open("backend/agents.md").read(), prompt=prompt)
     today = process_output(output)
     
     fs.insert(collection='routine', data=today.model_dump(), doc_id=today.date)
@@ -79,5 +79,13 @@ def modify_day():
     
 if __name__ == "__main__":
     init_day()
-    # modify_day()
-    # print(requests.get(f"{Config.BASE_URL}/todays-exercices").json())
+    # day = fs.get(collection='routine', doc_id='2025-07-30')
+    # fs.insert(collection='routine', data=day, doc_id='2025-07-31')
+    # fs.update(collection='routine', doc_id='2025-07-31', path=['exercises', 0, 'rest'], value=60)
+    # exercisesx3 = []
+    # for exercise in day['exercises']:
+    #     exercisesx3.extend([exercise] * 3)
+    # # print(exercisesx3)
+    # day['exercises'] = exercisesx3
+    # fs.insert(collection='routine', data=day, doc_id='2025-07-30')
+    # requests.post("http://localhost:8000/update-db/routine/2025-07-31", json={"path": ["exercises", 0, "rest"], "value": 90})

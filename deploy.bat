@@ -1,2 +1,0 @@
-gcloud builds submit backend --tag gcr.io/final-app-429707/life-automation-api 
-gcloud run deploy life-automation-api  --image gcr.io/final-app-429707/life-automation-api --platform managed --region europe-west2 --allow-unauthenticated

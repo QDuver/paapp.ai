@@ -82,3 +82,46 @@ class Firestore:
             doc_ref.delete()
         except Exception as e:
             print(f"Error deleting document: {str(e)}")
+            
+            
+    def update(self, collection, doc_id, path, value):
+        # path is an array of string / numbers.
+        # if string, it is a key in the dict.
+        # if number, it is an index in the list.
+        
+        # if value can be casted to float, it will be casted.
+        if isinstance(value, str) and value.replace('.', '', 1).isdigit():
+            value = float(value)
+
+        try:
+            doc_ref = self.client.collection(collection).document(doc_id)
+            doc = doc_ref.get()
+            if not doc.exists:
+                print(f"No document found with ID: {doc_id}")
+                return
+            
+            data = doc.to_dict()
+            current = data
+            for key in path[:-1]:
+                if isinstance(current, dict):
+                    current = current.setdefault(key, {})
+                elif isinstance(current, list) and isinstance(key, int):
+                    while len(current) <= key:
+                        current.append(None)
+                    current = current[key]
+                else:
+                    raise ValueError("Invalid path for update")
+            
+            if isinstance(current, dict):
+                current[path[-1]] = value
+            elif isinstance(current, list) and isinstance(path[-1], int):
+                while len(current) <= path[-1]:
+                    current.append(None)
+                current[path[-1]] = value
+            else:
+                raise ValueError("Invalid path for update")
+            
+            doc_ref.set(data)
+            print(f"Document updated with ID: {doc_id}")
+        except Exception as e:
+            print(f"Error updating document: {str(e)}")
