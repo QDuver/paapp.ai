@@ -1,0 +1,402 @@
+"""
+Centralized models definition and code generation
+Run: python models.py to regenerate all models
+"""
+import json
+import os
+from pathlib import Path
+from typing import Optional, Union, List
+from datetime import datetime
+
+# =============================================================================
+# JSON SCHEMA DEFINITION (Single Source of Truth)
+# =============================================================================
+
+models_json = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Life Automation Models",
+    "definitions": {
+        "Exercise": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Name of the exercise"
+                },
+                "weight_kg": {
+                    "type": ["number", "null"],
+                    "description": "Weight in kilograms"
+                },
+                "repetitions": {
+                    "type": ["integer", "null"],
+                    "description": "Number of repetitions"
+                },
+                "duration_sec": {
+                    "type": ["integer", "null"],
+                    "description": "Duration in seconds"
+                },
+                "rest": {
+                    "type": ["integer", "null"],
+                    "default": 90,
+                    "description": "Rest time in seconds"
+                }
+            },
+            "required": ["name"],
+            "additionalProperties": False
+        },
+        "RunningDistance": {
+            "type": "object",
+            "properties": {
+                "distance_km": {
+                    "type": "number",
+                    "description": "Distance in kilometers"
+                },
+                "duration_min": {
+                    "type": "string",
+                    "description": "Duration in minutes"
+                }
+            },
+            "required": ["distance_km", "duration_min"],
+            "additionalProperties": False
+        },
+        "RunningIntervals": {
+            "type": "object",
+            "properties": {
+                "speed_km": {
+                    "type": "number",
+                    "description": "Speed in km/h"
+                },
+                "duration_sec": {
+                    "type": "string",
+                    "description": "Duration in seconds"
+                },
+                "rest": {
+                    "type": "string",
+                    "description": "Rest time"
+                },
+                "repetitions": {
+                    "type": "integer",
+                    "description": "Number of repetitions"
+                }
+            },
+            "required": ["speed_km", "duration_sec", "rest", "repetitions"],
+            "additionalProperties": False
+        },
+        "ExerciseDay": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Date in YYYY-MM-DD format"
+                },
+                "wakeup_time": {
+                    "type": ["string", "null"],
+                    "description": "Wake up time"
+                },
+                "sleep_quality": {
+                    "type": ["integer", "null"],
+                    "minimum": 1,
+                    "maximum": 10,
+                    "description": "Sleep quality scale from 1 to 10"
+                },
+                "available_exercise_time": {
+                    "type": ["integer", "null"],
+                    "description": "Available exercise time in minutes"
+                },
+                "exercises": {
+                    "type": "array",
+                    "items": {
+                        "oneOf": [
+                            {"$ref": "#/definitions/Exercise"},
+                            {"$ref": "#/definitions/RunningDistance"},
+                            {"$ref": "#/definitions/RunningIntervals"}
+                        ]
+                    },
+                    "default": []
+                },
+                "at_home": {
+                    "type": "boolean",
+                    "default": True,
+                    "description": "Whether the person is at home"
+                }
+            },
+            "required": ["date", "wakeup_time"],
+            "additionalProperties": False
+        }
+    }
+}
+
+# =============================================================================
+# CODE GENERATION FUNCTIONS
+# =============================================================================
+
+def generate_python_models():
+    """Generate Python models from JSON schema"""
+    definitions = models_json.get('definitions', {})
+    
+    models_code = '''"""
+Auto-generated models from JSON Schema
+DO NOT EDIT THIS FILE MANUALLY
+Run: python models.py to regenerate
+"""
+from pydantic import BaseModel
+from typing import Optional, Union, List
+from datetime import datetime
+
+
+'''
+    
+    for model_name, model_def in definitions.items():
+        models_code += f"class {model_name}(BaseModel):\n"
+        
+        properties = model_def.get('properties', {})
+        required = model_def.get('required', [])
+        
+        for prop_name, prop_def in properties.items():
+            prop_type = get_python_type(prop_def)
+            is_required = prop_name in required
+            default_value = get_default_value(prop_def, is_required)
+            description = prop_def.get('description', '')
+            
+            if is_required and default_value is None:
+                models_code += f"    {prop_name}: {prop_type}"
+            else:
+                models_code += f"    {prop_name}: {prop_type} = {default_value}"
+            
+            if description:
+                models_code += f"  # {description}"
+            models_code += "\n"
+        
+        models_code += "\n"
+    
+    # Add legacy aliases
+    models_code += """
+# Legacy aliases for backward compatibility
+Day = ExerciseDay
+WorkOut = Exercise
+"""
+    
+    return models_code
+
+def generate_dart_models():
+    """Generate Dart models from JSON schema"""
+    definitions = models_json.get('definitions', {})
+    
+    models_code = '''/// Auto-generated models from JSON Schema
+/// DO NOT EDIT THIS FILE MANUALLY
+/// Run: python models.py to regenerate
+
+'''
+    
+    for model_name, model_def in definitions.items():
+        models_code += f"class {model_name} {{\n"
+        
+        properties = model_def.get('properties', {})
+        required = model_def.get('required', [])
+        
+        # Generate properties
+        for prop_name, prop_def in properties.items():
+            dart_type = get_dart_type(prop_def)
+            is_required = prop_name in required
+            description = prop_def.get('description', '')
+            
+            if description:
+                models_code += f"  /// {description}\n"
+            
+            if not is_required or 'null' in str(prop_def.get('type', '')):
+                models_code += f"  {dart_type}? {prop_name};\n"
+            else:
+                models_code += f"  {dart_type} {prop_name};\n"
+        
+        models_code += "\n"
+        
+        # Generate constructor
+        models_code += f"  {model_name}({{\n"
+        for prop_name, prop_def in properties.items():
+            is_required = prop_name in required
+            if is_required and 'null' not in str(prop_def.get('type', '')):
+                models_code += f"    required this.{prop_name},\n"
+            else:
+                models_code += f"    this.{prop_name},\n"
+        models_code += "  });\n\n"
+        
+        # Generate fromJson factory
+        models_code += f"  factory {model_name}.fromJson(Map<String, dynamic> json) {{\n"
+        models_code += f"    return {model_name}(\n"
+        
+        for prop_name, prop_def in properties.items():
+            dart_type = get_dart_type(prop_def)
+            default_value = get_dart_default_value(prop_def)
+            
+            if dart_type.startswith('List<'):
+                models_code += f"      {prop_name}: (json['{prop_name}'] as List<dynamic>? ?? {default_value}),\n"
+            elif dart_type in ['int', 'double']:
+                models_code += f"      {prop_name}: json['{prop_name}']"
+                if 'double' in dart_type and default_value != 'null':
+                    models_code += "?.toDouble()"
+                if default_value != 'null':
+                    models_code += f" ?? {default_value}"
+                models_code += ",\n"
+            else:
+                models_code += f"      {prop_name}: json['{prop_name}']"
+                if default_value != 'null':
+                    models_code += f" ?? {default_value}"
+                models_code += ",\n"
+        
+        models_code += "    );\n"
+        models_code += "  }\n\n"
+        
+        # Generate toJson method
+        models_code += f"  Map<String, dynamic> toJson() {{\n"
+        models_code += "    return {\n"
+        for prop_name, prop_def in properties.items():
+            models_code += f"      '{prop_name}': {prop_name},\n"
+        models_code += "    };\n"
+        models_code += "  }\n"
+        
+        models_code += "}\n\n"
+    
+    return models_code
+
+def get_python_type(prop_def):
+    """Convert JSON Schema type to Python type annotation"""
+    type_def = prop_def.get('type')
+    
+    if isinstance(type_def, list):
+        non_null_types = [t for t in type_def if t != 'null']
+        if len(non_null_types) == 1:
+            base_type = json_type_to_python(non_null_types[0], prop_def)
+            return f"Optional[{base_type}]"
+        else:
+            types = [json_type_to_python(t, prop_def) for t in non_null_types]
+            return f"Optional[Union[{', '.join(types)}]]"
+    else:
+        return json_type_to_python(type_def, prop_def)
+
+def json_type_to_python(json_type, prop_def):
+    """Convert individual JSON type to Python type"""
+    if json_type == 'string':
+        return 'str'
+    elif json_type == 'integer':
+        return 'int'
+    elif json_type == 'number':
+        return 'float'
+    elif json_type == 'boolean':
+        return 'bool'
+    elif json_type == 'array':
+        items = prop_def.get('items', {})
+        if 'oneOf' in items:
+            union_types = []
+            for one_of in items['oneOf']:
+                if '$ref' in one_of:
+                    ref_name = one_of['$ref'].split('/')[-1]
+                    union_types.append(ref_name)
+            return f"List[Union[{', '.join(union_types)}]]"
+        else:
+            item_type = get_python_type(items)
+            return f"List[{item_type}]"
+    else:
+        return 'Any'
+
+def get_default_value(prop_def, is_required):
+    """Get the default value for a property"""
+    if 'default' in prop_def:
+        default = prop_def['default']
+        if isinstance(default, str):
+            return f"'{default}'"
+        elif isinstance(default, bool):
+            return str(default)
+        elif isinstance(default, list):
+            return "[]"
+        else:
+            return str(default)
+    elif not is_required:
+        return "None"
+    else:
+        return None
+
+def get_dart_type(prop_def):
+    """Convert JSON Schema type to Dart type"""
+    type_def = prop_def.get('type')
+    
+    if isinstance(type_def, list):
+        non_null_types = [t for t in type_def if t != 'null']
+        if len(non_null_types) == 1:
+            return json_type_to_dart(non_null_types[0], prop_def)
+        else:
+            return 'dynamic'
+    else:
+        return json_type_to_dart(type_def, prop_def)
+
+def json_type_to_dart(json_type, prop_def):
+    """Convert individual JSON type to Dart type"""
+    if json_type == 'string':
+        return 'String'
+    elif json_type == 'integer':
+        return 'int'
+    elif json_type == 'number':
+        return 'double'
+    elif json_type == 'boolean':
+        return 'bool'
+    elif json_type == 'array':
+        items = prop_def.get('items', {})
+        if 'oneOf' in items:
+            return 'List<dynamic>'
+        else:
+            item_type = get_dart_type(items)
+            return f"List<{item_type}>"
+    else:
+        return 'dynamic'
+
+def get_dart_default_value(prop_def):
+    """Get the default value for a Dart property"""
+    if 'default' in prop_def:
+        default = prop_def['default']
+        if isinstance(default, str):
+            return f"'{default}'"
+        elif isinstance(default, bool):
+            return str(default).lower()
+        elif isinstance(default, list):
+            return "[]"
+        else:
+            return str(default)
+    else:
+        return 'null'
+
+def generate_models():
+    """Main function to generate all models"""
+    print("🔄 Generating models from JSON Schema...")
+    print("=" * 50)
+    
+    # Get current directory
+    current_dir = Path(__file__).parent
+    
+    # Generate Python models in backend
+    print("📦 Generating Python models...")
+    python_models = generate_python_models()
+    backend_dir = current_dir / "backend"
+    backend_dir.mkdir(exist_ok=True)
+    
+    python_output_path = backend_dir / "models.py"
+    with open(python_output_path, 'w') as f:
+        f.write(python_models)
+    print(f"✅ Python models generated at: {python_output_path}")
+    
+    # Generate Dart models in frontend
+    print("🎯 Generating Dart models...")
+    dart_models = generate_dart_models()
+    frontend_dir = current_dir / "frontend" / "lib" / "models"
+    frontend_dir.mkdir(parents=True, exist_ok=True)
+    
+    dart_output_path = frontend_dir / "types.dart"
+    with open(dart_output_path, 'w') as f:
+        f.write(dart_models)
+    print(f"✅ Dart models generated at: {dart_output_path}")
+    
+    print("\n🎉 All models generated successfully!")
+    print("=" * 50)
+    print("📝 Your models are now synchronized between Python and Dart!")
+
+if __name__ == "__main__":
+    generate_models()

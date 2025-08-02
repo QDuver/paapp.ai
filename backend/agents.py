@@ -31,6 +31,9 @@ Over time, the training should have progressive overload.
 ## Day 7: Upper-Body Hypertrophy + Core
 ## Day 6: Long Run
 
+If I missed a day, the training for the current day should be the one I missed.
+For example, I did Day 1 on June 1st, I didn't do anything on June 2nd, so the training for June 3rd should be Day 2.
+
 # INPUTS
 
 ## HISTORICAL_DATA
