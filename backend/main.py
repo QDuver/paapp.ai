@@ -4,7 +4,7 @@ from clients.firestore import Firestore
 from clients.vertex import Vertex
 import json
 from datetime import date
-from models import Day
+from models import ExerciseDay
 from agents import agent
 import requests
 vertex = Vertex()
@@ -14,9 +14,9 @@ fs = Firestore()
 def process_output(output):
     output_data = json.loads(output)
     if isinstance(output_data, list) and len(output_data) > 0:
-        return Day(**output_data[0])
+        return ExerciseDay(**output_data[0])
     else:
-        return Day(**output_data)
+        return ExerciseDay(**output_data)
 
 
 def init_day(extra_comments="None"):
@@ -25,7 +25,8 @@ def init_day(extra_comments="None"):
     WAKEUP_TIME = "09:00"
     AVAILABLE_EXERCISE_TIME = 60
     AT_HOME = False
-    today_init = Day(
+    today_init = ExerciseDay(
+        date=date.today().strftime("%Y-%m-%d"),
         sleep_quality=SLEEP_QUALITY,
         wakeup_time=WAKEUP_TIME,
         available_exercise_time=AVAILABLE_EXERCISE_TIME,
@@ -58,7 +59,7 @@ def init_day(extra_comments="None"):
     
 def modify_day():
     today = fs.get(collection='routine', doc_id=date.today().strftime("%Y-%m-%d"))
-    today = Day(**today)
+    today = ExerciseDay(**today)
     
     prompt = f'''
     CURRENT_DAY --

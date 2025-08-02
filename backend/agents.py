@@ -1,6 +1,7 @@
 import json
 
-from models import Day
+from models import ExerciseDay
+
 
 
 agent = f"""
@@ -60,5 +61,5 @@ For example, if I have 60 minutes available, return 8 exercices (60 / 7 = 8.57, 
 ## Return only today's program, not the full historics.
 
 ## OUTPUT MODEL
-${json.dumps(Day.model_json_schema(), indent=2)}
+${json.dumps(ExerciseDay.model_json_schema(), indent=2)}
 """
