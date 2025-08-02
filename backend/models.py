@@ -30,10 +30,5 @@ class ExerciseDay(BaseModel):
     wakeup_time: Optional[str]  # Wake up time
     sleep_quality: Optional[int] = None  # Sleep quality scale from 1 to 10
     available_exercise_time: Optional[int] = None  # Available exercise time in minutes
-    exercises: List[Union[Exercise, RunningDistance, RunningIntervals]] = []
+    exercises: Optional[List[Union[Exercise, RunningDistance, RunningIntervals]]] = None
     at_home: bool = True  # Whether the person is at home
-
-
-# Legacy aliases for backward compatibility
-Day = ExerciseDay
-WorkOut = Exercise
