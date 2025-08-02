@@ -21,6 +21,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/exercises")
+def exercises_endpoint():
+    return fs.query(collection='routine')
+
 @app.get("/exercises/{exercise_date}")
 def exercises_by_date_endpoint(exercise_date: str):
     return fs.get(collection='routine', doc_id=exercise_date)

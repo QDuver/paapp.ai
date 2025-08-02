@@ -88,4 +88,5 @@ if __name__ == "__main__":
     # # print(exercisesx3)
     # day['exercises'] = exercisesx3
     # fs.insert(collection='routine', data=day, doc_id='2025-07-30')
-    # requests.post("http://localhost:8000/update-db/routine/2025-07-31", json={"path": ["exercises", 0, "rest"], "value": 90})
+    # exercises = requests.get("http://localhost:8000/exercises")
+    # print(exercises.json())
