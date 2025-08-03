@@ -1,8 +1,8 @@
 openapi: 3.0.0
 info:
-  title: Workout API
+  title: App For You API
   version: 1.0.0
-  description: API for managing workout exercises and routines
+  description: API
 
 components:
   schemas:
@@ -27,12 +27,18 @@ components:
     ExerciseDay:
       type: object
       required:
-        - date
-        - exercises
+        - day
       properties:
-        date:
+        day:
           type: string
-          format: date
+        at_home:
+          type: boolean
+          default: false
+        wakeup_time:
+          type: string
+        available_exercise_time:
+          type: integer
+          description: Total available time for exercise in minutes
         exercises:
           type: array
           items:

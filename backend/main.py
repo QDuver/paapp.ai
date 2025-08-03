@@ -1,12 +1,17 @@
 
 
-from models.models.exercise_day import ExerciseDay
 from clients.firestore import Firestore
 from clients.vertex import Vertex
 import json
 from datetime import date
 from agents import agent
 import requests
+
+from models.models.exercise_day import ExerciseDay
+
+
+
+
 vertex = Vertex()
 fs = Firestore()
 
@@ -21,21 +26,21 @@ def process_output(output):
 
 def init_day(extra_comments="None"):
     
-    SLEEP_QUALITY = 5
     WAKEUP_TIME = "09:00"
     AVAILABLE_EXERCISE_TIME = 60
     AT_HOME = False
-    today_init = ExerciseDay(
-        date=date.today().strftime("%Y-%m-%d"),
-        sleep_quality=SLEEP_QUALITY,
+    exerciseDay = ExerciseDay(
+        day=date.today().strftime("%Y-%m-%d"),
         wakeup_time=WAKEUP_TIME,
         available_exercise_time=AVAILABLE_EXERCISE_TIME,
         at_home=AT_HOME,
     )
+    
+    print(exerciseDay)
 
-    fs.delete(collection='routine', doc_id=today_init.date)
+    fs.delete(collection='routine', doc_id=exerciseDay.day)
     historics = fs.query(collection='routine', limit=10)
-    historics = [x for x in historics if x['date'] < date.today().strftime("%Y-%m-%d")]
+    historics = [x for x in historics if x['day'] < date.today().strftime("%Y-%m-%d")]
     print(historics)
 
     prompt = f'''
@@ -44,7 +49,7 @@ def init_day(extra_comments="None"):
     --------------
     
     CURRENT_DAY --
-    {json.dumps(today_init.model_dump(), indent=2)}
+    {json.dumps(exerciseDay.model_dump(), indent=2)}
     --------------
     
     EXTRA COMMENTS --
@@ -54,40 +59,8 @@ def init_day(extra_comments="None"):
     print(prompt)
     output = vertex.call_agent(agent=agent, prompt=prompt)
     today = process_output(output)
-    fs.insert(collection='routine', data=today.model_dump(), doc_id=today.date)
-    
-    
-def modify_day():
-    today = fs.get(collection='routine', doc_id=date.today().strftime("%Y-%m-%d"))
-    today = ExerciseDay(**today)
-    
-    prompt = f'''
-    CURRENT_DAY --
-    {json.dumps(today.model_dump(), indent=2)}
-    --------------
-    
-    EXTRA COMMENTS --
-    For today's day, I don't have 8 exercices, despite having 60 minutes available.
-    Also please add Pull Downs, Shrugs and some Leg exercice.
-    --------------
-    '''
-    print(prompt)
-    output = vertex.call_agent(agent=open("backend/agents.md").read(), prompt=prompt)
-    today = process_output(output)
-    
-    fs.insert(collection='routine', data=today.model_dump(), doc_id=today.date)
-    
+    fs.insert(collection='routine', data=today.model_dump(), doc_id=today.day)
     
 if __name__ == "__main__":
     init_day()
-    # day = fs.get(collection='routine', doc_id='2025-07-30')
-    # fs.insert(collection='routine', data=day, doc_id='2025-07-31')
-    # fs.update(collection='routine', doc_id='2025-07-31', path=['exercises', 0, 'rest'], value=60)
-    # exercisesx3 = []
-    # for exercise in day['exercises']:
-    #     exercisesx3.extend([exercise] * 3)
-    # # print(exercisesx3)
-    # day['exercises'] = exercisesx3
-    # fs.insert(collection='routine', data=day, doc_id='2025-07-30')
     # exercises = requests.get("http://localhost:8000/exercises")
-    # print(exercises.json())
