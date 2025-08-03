@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 **atHome** | **bool** |  | [optional] [default to false]
 **wakeupTime** | **String** |  | [optional] 
 **availableExerciseTime** | **int** | Total available time for exercise in minutes | [optional] 
-**exercises** | [**List<Exercise>**](Exercise.md) |  | [optional] [default to const []]
+**exercises** | [**List<Exercise>**](Exercise.md) |  | [default to const []]
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

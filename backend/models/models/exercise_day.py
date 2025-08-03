@@ -31,7 +31,7 @@ class ExerciseDay(BaseModel):
     at_home: Optional[StrictBool] = False
     wakeup_time: Optional[StrictStr] = None
     available_exercise_time: Optional[StrictInt] = Field(default=None, description="Total available time for exercise in minutes")
-    exercises: Optional[List[Exercise]] = None
+    exercises: List[Exercise]
     __properties: ClassVar[List[str]] = ["day", "at_home", "wakeup_time", "available_exercise_time", "exercises"]
 
     model_config = ConfigDict(

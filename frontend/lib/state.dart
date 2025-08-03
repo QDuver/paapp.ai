@@ -32,6 +32,9 @@ class AppState extends ChangeNotifier {
     setState(() {
       exercises = ExerciseDay.listFromJson(result);
       isLoading = false;
+      exerciseDay = exercises?.firstWhere(
+            (exercise) => exercise.day == formattedCurrentDate,
+        );
     });
   }
 

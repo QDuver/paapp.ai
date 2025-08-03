@@ -8,17 +8,19 @@ call npx @openapitools/openapi-generator-cli generate ^
     --skip-validate-spec ^
     --ignore-file-override=.openapi-generator-ignore
 
-echo Moving api_helper.dart and api.dart to model folder...
-if exist "frontend\lib\api_helper.dart" move "frontend\lib\api_helper.dart" "frontend\lib\model\"
-if exist "frontend\lib\api.dart" move "frontend\lib\api.dart" "frontend\lib\model\"
+@REM pause
 
-call npx @openapitools/openapi-generator-cli generate ^
-    -i openapi.yaml ^
-    -g python ^
-    -o backend/ ^
-    --global-property=models ^
-    --additional-properties=packageName=models,packageVersion=1.0.0,generateSourceCodeOnly=true,generateApis=false,generateApiTests=false,generateApiDocumentation=false,generateModelTests=false,generateModelDocumentation=false,enablePostProcessFile=true ^
-    --skip-validate-spec ^
-    --ignore-file-override=.openapi-generator-ignore
+@REM echo Moving api_helper.dart and api.dart to model folder...
+@REM if exist "frontend\lib\api_helper.dart" move "frontend\lib\api_helper.dart" "frontend\lib\model\"
+@REM if exist "frontend\lib\api.dart" move "frontend\lib\api.dart" "frontend\lib\model\"
 
-pause
+@REM call npx @openapitools/openapi-generator-cli generate ^
+@REM     -i openapi.yaml ^
+@REM     -g python ^
+@REM     -o backend/ ^
+@REM     --global-property=models ^
+@REM     --additional-properties=packageName=models,packageVersion=1.0.0,generateSourceCodeOnly=true,generateApis=false,generateApiTests=false,generateApiDocumentation=false,generateModelTests=false,generateModelDocumentation=false,enablePostProcessFile=true ^
+@REM     --skip-validate-spec ^
+@REM     --ignore-file-override=.openapi-generator-ignore
+
+@REM pause
