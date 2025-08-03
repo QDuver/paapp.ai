@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/models/types.dart';
+import 'package:frontend/apiService.dart';
 import 'package:provider/provider.dart';
 import 'screens/settings.dart';
 import 'screens/exercice.dart';

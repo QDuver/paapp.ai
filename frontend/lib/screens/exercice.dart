@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/models/types.dart';
+import 'package:frontend/apiService.dart';
 import 'package:provider/provider.dart';
 import '../theme/theme_state.dart';
 import '../api.dart';
@@ -156,9 +156,9 @@ class _ExercicePageState extends State<ExercicePage> {
                       spacing: 8,
                       runSpacing: 4,
                       children: [
-                        if (exercise.weight_kg != null)
+                        if (exercise.weightKg != null)
                           Text(
-                            '${exercise.weight_kg} kg',
+                            '${exercise.weightKg} kg',
                             style: state.themeData.textTheme.bodyMedium,
                           ),
                         if (exercise.repetitions != null)
@@ -166,9 +166,9 @@ class _ExercicePageState extends State<ExercicePage> {
                             '${exercise.repetitions} reps',
                             style: state.themeData.textTheme.bodyMedium,
                           ),
-                        if (exercise.duration_sec != null)
+                        if (exercise.durationSec != null)
                           Text(
-                            '${exercise.duration_sec} sec',
+                            '${exercise.durationSec} sec',
                             style: state.themeData.textTheme.bodyMedium,
                           ),
                       ],
@@ -204,11 +204,11 @@ class _ExercicePageState extends State<ExercicePage> {
   void _showEditExerciseDialog(
       BuildContext context, ThemeState state, Exercise exercise) {
     final weightController =
-        TextEditingController(text: exercise.weight_kg?.toString() ?? '');
+        TextEditingController(text: exercise.weightKg?.toString() ?? '');
     final repsController =
         TextEditingController(text: exercise.repetitions?.toString() ?? '');
     final durationController =
-        TextEditingController(text: exercise.duration_sec?.toString() ?? '');
+        TextEditingController(text: exercise.durationSec?.toString() ?? '');
 
     showDialog(
       context: context,
@@ -221,7 +221,7 @@ class _ExercicePageState extends State<ExercicePage> {
               children: [
                 SizedBox(height: 24),
                 // Weight input - only show if exercise has weight
-                if (exercise.weight_kg != null) ...[
+                if (exercise.weightKg != null) ...[
                   TextField(
                     controller: weightController,
                     keyboardType:
@@ -274,7 +274,7 @@ class _ExercicePageState extends State<ExercicePage> {
                 ],
 
                 // Duration input - only show if exercise has duration
-                if (exercise.duration_sec != null) ...[
+                if (exercise.durationSec != null) ...[
                   TextField(
                     controller: durationController,
                     keyboardType: TextInputType.number,
@@ -348,17 +348,17 @@ class _ExercicePageState extends State<ExercicePage> {
     try {
       setState(() {
         // Update weight - only if exercise originally had weight
-        if (exercise.weight_kg != null) {
+        if (exercise.weightKg != null) {
           if (weightText.isNotEmpty) {
             final newWeight = double.tryParse(weightText);
-            if (newWeight != null && newWeight != exercise.weight_kg) {
-              exercise.weight_kg = newWeight;
+            if (newWeight != null && newWeight != exercise.weightKg) {
+              exercise.weightKg = newWeight;
               // Call API to update weight
-              updateExercice(docId, exerciseIndex, 'weight_kg', newWeight);
+              updateExercice(docId.toString(), exerciseIndex, 'weightKg', newWeight);
             }
           } else {
-            exercise.weight_kg = null;
-            updateExercice(docId, exerciseIndex, 'weight_kg', null);
+            exercise.weightKg = null;
+            updateExercice(docId.toString(), exerciseIndex, 'weightKg', null);
           }
         }
 
@@ -369,26 +369,26 @@ class _ExercicePageState extends State<ExercicePage> {
             if (newReps != null && newReps != exercise.repetitions) {
               exercise.repetitions = newReps;
               // Call API to update repetitions
-              updateExercice(docId, exerciseIndex, 'repetitions', newReps);
+              updateExercice(docId.toString(), exerciseIndex, 'repetitions', newReps);
             }
           } else {
             exercise.repetitions = null;
-            updateExercice(docId, exerciseIndex, 'repetitions', null);
+            updateExercice(docId.toString(), exerciseIndex, 'repetitions', null);
           }
         }
 
         // Update duration - only if exercise originally had duration
-        if (exercise.duration_sec != null) {
+        if (exercise.durationSec != null) {
           if (durationText.isNotEmpty) {
             final newDuration = int.tryParse(durationText);
-            if (newDuration != null && newDuration != exercise.duration_sec) {
-              exercise.duration_sec = newDuration;
+            if (newDuration != null && newDuration != exercise.durationSec) {
+              exercise.durationSec = newDuration;
               // Call API to update duration
-              updateExercice(docId, exerciseIndex, 'duration_sec', newDuration);
+              updateExercice(docId.toString(), exerciseIndex, 'durationSec', newDuration);
             }
           } else {
-            exercise.duration_sec = null;
-            updateExercice(docId, exerciseIndex, 'duration_sec', null);
+            exercise.durationSec = null;
+            updateExercice(docId.toString(), exerciseIndex, 'durationSec', null);
           }
         }
       });

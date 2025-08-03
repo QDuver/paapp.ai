@@ -1,10 +1,10 @@
 
 
+from models.models.exercise_day import ExerciseDay
 from clients.firestore import Firestore
 from clients.vertex import Vertex
 import json
 from datetime import date
-from models import ExerciseDay
 from agents import agent
 import requests
 vertex = Vertex()
