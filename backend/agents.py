@@ -1,6 +1,8 @@
 import json
 
-from models import ExerciseDay
+from models.models.exercise_day import ExerciseDay
+
+
 
 
 

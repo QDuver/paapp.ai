@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/apiService.dart';
 import 'package:provider/provider.dart';
 import '../theme/theme_state.dart';
-import '../api.dart';
+import '../model/api.dart';
 
 class ExercicePage extends StatefulWidget {
   final ExerciseDay? exerciseDay;
-  final bool isLoading;
 
   const ExercicePage({
     super.key,
     this.exerciseDay,
-    this.isLoading = false,
   });
 
   @override
@@ -22,18 +19,18 @@ class _ExercicePageState extends State<ExercicePage> {
   @override
   Widget build(BuildContext context) {
     final state = Provider.of<ThemeState>(context);
-    return _buildExercisePage(state, widget.exerciseDay, widget.isLoading);
+    return _buildExercisePage(state, widget.exerciseDay);
   }
 
-  Widget _buildExercisePage(
-      ThemeState state, ExerciseDay? exerciseDay, bool isLoading) {
+  Widget _buildExercisePage(ThemeState state, ExerciseDay? exerciseDay) {
     return Container(
       color: state.themeData.primaryColor,
       child: Padding(
         padding: EdgeInsets.all(16),
         child: Card(
           elevation: 8,
-          shadowColor: state.themeData.colorScheme.secondary.withOpacity(0.3),
+          shadowColor:
+              state.themeData.colorScheme.secondary.withValues(alpha: 0.3),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -45,31 +42,21 @@ class _ExercicePageState extends State<ExercicePage> {
                 end: Alignment.bottomRight,
                 colors: [
                   state.themeData.cardColor,
-                  state.themeData.cardColor.withOpacity(0.9),
+                  state.themeData.cardColor.withValues(alpha: 0.9),
                 ],
               ),
             ),
             child: Column(
               children: [
-                if (isLoading)
-                  Expanded(
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: state.themeData.colorScheme.secondary,
-                      ),
-                    ),
-                  )
-                else if (exerciseDay != null &&
-                    exerciseDay.exercises != null &&
-                    exerciseDay.exercises!.isNotEmpty)
+                if (exerciseDay != null && exerciseDay.exercises.isNotEmpty)
                   Expanded(
                     child: ListView.builder(
                       physics: BouncingScrollPhysics(),
                       padding:
                           EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      itemCount: exerciseDay.exercises!.length,
+                      itemCount: exerciseDay.exercises.length,
                       itemBuilder: (context, index) {
-                        final exercise = exerciseDay.exercises![index];
+                        final exercise = exerciseDay.exercises[index];
                         return _buildExerciseCard(context, state, exercise);
                       },
                     ),
@@ -84,7 +71,7 @@ class _ExercicePageState extends State<ExercicePage> {
                             Icons.fitness_center_outlined,
                             size: 80,
                             color: state.themeData.colorScheme.secondary
-                                .withOpacity(0.3),
+                                .withValues(alpha: 0.3),
                           ),
                           SizedBox(height: 16),
                           Text(
@@ -92,7 +79,7 @@ class _ExercicePageState extends State<ExercicePage> {
                             style:
                                 state.themeData.textTheme.bodyLarge?.copyWith(
                               color: state.themeData.textTheme.bodyLarge?.color
-                                  ?.withOpacity(0.7),
+                                  ?.withValues(alpha: 0.7),
                             ),
                           ),
                         ],
@@ -128,7 +115,8 @@ class _ExercicePageState extends State<ExercicePage> {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: state.themeData.colorScheme.secondary.withOpacity(0.1),
+                  color: state.themeData.colorScheme.secondary
+                      .withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: Icon(
@@ -181,9 +169,10 @@ class _ExercicePageState extends State<ExercicePage> {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
+                  color: Colors.green.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.green.withOpacity(0.3)),
+                  border:
+                      Border.all(color: Colors.green.withValues(alpha: 0.3)),
                 ),
                 child: Text(
                   'Rest: ${exercise.rest ?? 0} sec',
@@ -234,7 +223,7 @@ class _ExercicePageState extends State<ExercicePage> {
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(
                           color: state.themeData.colorScheme.secondary
-                              .withOpacity(0.3),
+                              .withValues(alpha: 0.3),
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
@@ -260,7 +249,7 @@ class _ExercicePageState extends State<ExercicePage> {
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(
                           color: state.themeData.colorScheme.secondary
-                              .withOpacity(0.3),
+                              .withValues(alpha: 0.3),
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
@@ -286,7 +275,7 @@ class _ExercicePageState extends State<ExercicePage> {
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(
                           color: state.themeData.colorScheme.secondary
-                              .withOpacity(0.3),
+                              .withValues(alpha: 0.3),
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
@@ -311,12 +300,9 @@ class _ExercicePageState extends State<ExercicePage> {
             ),
             ElevatedButton(
               onPressed: () {
-                _updateExercise(
-                  exercise,
-                  weightController.text,
-                  repsController.text,
-                  durationController.text,
-                );
+                () {
+                  print('Saving exercise changes');
+                };
                 Navigator.of(dialogContext).pop();
               },
               style: ElevatedButton.styleFrom(
@@ -331,76 +317,5 @@ class _ExercicePageState extends State<ExercicePage> {
         );
       },
     );
-  }
-
-  void _updateExercise(Exercise exercise, String weightText, String repsText,
-      String durationText) async {
-    if (widget.exerciseDay == null || widget.exerciseDay!.exercises == null)
-      return;
-
-    // Find the index of this exercise in the exercises list
-    final exerciseIndex = widget.exerciseDay!.exercises!.indexOf(exercise);
-    if (exerciseIndex == -1) return;
-
-    // Use the date as document ID
-    final docId = widget.exerciseDay!.date;
-
-    try {
-      setState(() {
-        // Update weight - only if exercise originally had weight
-        if (exercise.weightKg != null) {
-          if (weightText.isNotEmpty) {
-            final newWeight = double.tryParse(weightText);
-            if (newWeight != null && newWeight != exercise.weightKg) {
-              exercise.weightKg = newWeight;
-              // Call API to update weight
-              updateExercice(docId.toString(), exerciseIndex, 'weightKg', newWeight);
-            }
-          } else {
-            exercise.weightKg = null;
-            updateExercice(docId.toString(), exerciseIndex, 'weightKg', null);
-          }
-        }
-
-        // Update repetitions - only if exercise originally had repetitions
-        if (exercise.repetitions != null) {
-          if (repsText.isNotEmpty) {
-            final newReps = int.tryParse(repsText);
-            if (newReps != null && newReps != exercise.repetitions) {
-              exercise.repetitions = newReps;
-              // Call API to update repetitions
-              updateExercice(docId.toString(), exerciseIndex, 'repetitions', newReps);
-            }
-          } else {
-            exercise.repetitions = null;
-            updateExercice(docId.toString(), exerciseIndex, 'repetitions', null);
-          }
-        }
-
-        // Update duration - only if exercise originally had duration
-        if (exercise.durationSec != null) {
-          if (durationText.isNotEmpty) {
-            final newDuration = int.tryParse(durationText);
-            if (newDuration != null && newDuration != exercise.durationSec) {
-              exercise.durationSec = newDuration;
-              // Call API to update duration
-              updateExercice(docId.toString(), exerciseIndex, 'durationSec', newDuration);
-            }
-          } else {
-            exercise.durationSec = null;
-            updateExercice(docId.toString(), exerciseIndex, 'durationSec', null);
-          }
-        }
-      });
-    } catch (e) {
-      print('Error updating exercise: $e');
-      // You could show a SnackBar here to inform the user of the error
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to update exercise: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
   }
 }
