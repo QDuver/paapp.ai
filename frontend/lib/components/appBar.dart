@@ -7,19 +7,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final int selectedIndex;
   final Function(int) onNavigateDate;
   final VoidCallback onMenuPressed;
-  final ThemeState themeState;
 
   const CustomAppBar({
     Key? key,
     required this.selectedIndex,
     required this.onNavigateDate,
     required this.onMenuPressed,
-    required this.themeState,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final appState = context.read<AppState>();
+    final themeState = context.read<ThemeState>();
 
     return AppBar(
       leading: IconButton(

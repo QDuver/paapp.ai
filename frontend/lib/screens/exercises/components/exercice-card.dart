@@ -1,111 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/state.dart';
+import 'package:frontend/theme/theme_state.dart';
 import 'package:provider/provider.dart';
-import '../theme/theme_state.dart';
-import '../model/api.dart';
 
-class ExercicePage extends StatefulWidget {
-  final ExerciseDay? exerciseDay;
-
-  const ExercicePage({
-    super.key,
-    this.exerciseDay,
-  });
-
-  @override
-  _ExercicePageState createState() => _ExercicePageState();
-}
-
-class _ExercicePageState extends State<ExercicePage> {
+class ExerciseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final state = Provider.of<ThemeState>(context);
-    return _buildExercisePage(state, widget.exerciseDay);
-  }
+    final themeState = context.read<ThemeState>();
+    final appState = context.read<AppState>();
+    final exerciseDay = appState.exerciseDay;
 
-  Widget _buildExercisePage(ThemeState state, ExerciseDay? exerciseDay) {
-    return Container(
-      color: state.themeData.primaryColor,
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Card(
-          elevation: 8,
-          shadowColor:
-              state.themeData.colorScheme.secondary.withValues(alpha: 0.3),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  state.themeData.cardColor,
-                  state.themeData.cardColor.withValues(alpha: 0.9),
-                ],
-              ),
-            ),
-            child: Column(
-              children: [
-                if (exerciseDay != null && exerciseDay.exercises.isNotEmpty)
-                  Expanded(
-                    child: ListView.builder(
-                      physics: BouncingScrollPhysics(),
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      itemCount: exerciseDay.exercises.length,
-                      itemBuilder: (context, index) {
-                        final exercise = exerciseDay.exercises[index];
-                        return _buildExerciseCard(context, state, exercise);
-                      },
-                    ),
-                  )
-                else
-                  Expanded(
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.fitness_center_outlined,
-                            size: 80,
-                            color: state.themeData.colorScheme.secondary
-                                .withValues(alpha: 0.3),
-                          ),
-                          SizedBox(height: 16),
-                          Text(
-                            'No exercises for this date',
-                            style:
-                                state.themeData.textTheme.bodyLarge?.copyWith(
-                              color: state.themeData.textTheme.bodyLarge?.color
-                                  ?.withValues(alpha: 0.7),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
+    return Expanded(
+      child: ListView.builder(
+        physics: BouncingScrollPhysics(),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        itemCount: exerciseDay.exercises.length,
+        itemBuilder: (context, index) {
+          final exercise = exerciseDay.exercises[index];
+          return _buildExerciseCard(context, themeState, exercise);
+        },
       ),
     );
   }
+}
 
   Widget _buildExerciseCard(
-      BuildContext context, ThemeState state, Exercise exercise) {
+      BuildContext context, ThemeState themeState, Exercise exercise) {
     return Card(
       margin: EdgeInsets.only(bottom: 16),
-      color: state.themeData.cardColor,
+      color: themeState.themeData.cardColor,
       elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () => _showEditExerciseDialog(context, state, exercise),
+        onTap: () => _showEditExerciseDialog(context, themeState, exercise),
         child: Padding(
           padding: EdgeInsets.all(16),
           child: Row(
@@ -115,13 +45,13 @@ class _ExercicePageState extends State<ExercicePage> {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: state.themeData.colorScheme.secondary
+                  color: themeState.themeData.colorScheme.secondary
                       .withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: Icon(
                   Icons.fitness_center,
-                  color: state.themeData.colorScheme.secondary,
+                  color: themeState.themeData.colorScheme.secondary,
                   size: 30,
                 ),
               ),
@@ -135,7 +65,7 @@ class _ExercicePageState extends State<ExercicePage> {
                   children: [
                     Text(
                       exercise.name,
-                      style: state.themeData.textTheme.bodySmall?.copyWith(
+                      style: themeState.themeData.textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -147,17 +77,17 @@ class _ExercicePageState extends State<ExercicePage> {
                         if (exercise.weightKg != null)
                           Text(
                             '${exercise.weightKg} kg',
-                            style: state.themeData.textTheme.bodyMedium,
+                            style: themeState.themeData.textTheme.bodyMedium,
                           ),
                         if (exercise.repetitions != null)
                           Text(
                             '${exercise.repetitions} reps',
-                            style: state.themeData.textTheme.bodyMedium,
+                            style: themeState.themeData.textTheme.bodyMedium,
                           ),
                         if (exercise.durationSec != null)
                           Text(
                             '${exercise.durationSec} sec',
-                            style: state.themeData.textTheme.bodyMedium,
+                            style: themeState.themeData.textTheme.bodyMedium,
                           ),
                       ],
                     ),
@@ -191,7 +121,7 @@ class _ExercicePageState extends State<ExercicePage> {
   }
 
   void _showEditExerciseDialog(
-      BuildContext context, ThemeState state, Exercise exercise) {
+      BuildContext context, ThemeState themeState, Exercise exercise) {
     final weightController =
         TextEditingController(text: exercise.weightKg?.toString() ?? '');
     final repsController =
@@ -203,7 +133,7 @@ class _ExercicePageState extends State<ExercicePage> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          backgroundColor: state.themeData.cardColor,
+          backgroundColor: themeState.themeData.cardColor,
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -215,20 +145,20 @@ class _ExercicePageState extends State<ExercicePage> {
                     controller: weightController,
                     keyboardType:
                         TextInputType.numberWithOptions(decimal: true),
-                    style: state.themeData.textTheme.bodyMedium,
+                    style: themeState.themeData.textTheme.bodyMedium,
                     decoration: InputDecoration(
                       labelText: 'Weight (kg)',
-                      labelStyle: state.themeData.textTheme.bodyMedium,
+                      labelStyle: themeState.themeData.textTheme.bodyMedium,
                       border: OutlineInputBorder(),
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(
-                          color: state.themeData.colorScheme.secondary
+                          color: themeState.themeData.colorScheme.secondary
                               .withValues(alpha: 0.3),
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderSide: BorderSide(
-                          color: state.themeData.colorScheme.secondary,
+                          color: themeState.themeData.colorScheme.secondary,
                         ),
                       ),
                     ),
@@ -241,20 +171,20 @@ class _ExercicePageState extends State<ExercicePage> {
                   TextField(
                     controller: repsController,
                     keyboardType: TextInputType.number,
-                    style: state.themeData.textTheme.bodyMedium,
+                    style: themeState.themeData.textTheme.bodyMedium,
                     decoration: InputDecoration(
                       labelText: 'Repetitions',
-                      labelStyle: state.themeData.textTheme.bodyMedium,
+                      labelStyle: themeState.themeData.textTheme.bodyMedium,
                       border: OutlineInputBorder(),
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(
-                          color: state.themeData.colorScheme.secondary
+                          color: themeState.themeData.colorScheme.secondary
                               .withValues(alpha: 0.3),
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderSide: BorderSide(
-                          color: state.themeData.colorScheme.secondary,
+                          color: themeState.themeData.colorScheme.secondary,
                         ),
                       ),
                     ),
@@ -267,20 +197,20 @@ class _ExercicePageState extends State<ExercicePage> {
                   TextField(
                     controller: durationController,
                     keyboardType: TextInputType.number,
-                    style: state.themeData.textTheme.bodyMedium,
+                    style: themeState.themeData.textTheme.bodyMedium,
                     decoration: InputDecoration(
                       labelText: 'Duration (seconds)',
-                      labelStyle: state.themeData.textTheme.bodyMedium,
+                      labelStyle: themeState.themeData.textTheme.bodyMedium,
                       border: OutlineInputBorder(),
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(
-                          color: state.themeData.colorScheme.secondary
+                          color: themeState.themeData.colorScheme.secondary
                               .withValues(alpha: 0.3),
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderSide: BorderSide(
-                          color: state.themeData.colorScheme.secondary,
+                          color: themeState.themeData.colorScheme.secondary,
                         ),
                       ),
                     ),
@@ -295,7 +225,7 @@ class _ExercicePageState extends State<ExercicePage> {
               child: Text(
                 'Cancel',
                 style: TextStyle(
-                    color: state.themeData.textTheme.bodyMedium?.color),
+                    color: themeState.themeData.textTheme.bodyMedium?.color),
               ),
             ),
             ElevatedButton(
@@ -306,7 +236,7 @@ class _ExercicePageState extends State<ExercicePage> {
                 Navigator.of(dialogContext).pop();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: state.themeData.colorScheme.secondary,
+                backgroundColor: themeState.themeData.colorScheme.secondary,
               ),
               child: Text(
                 'Save',
@@ -318,4 +248,3 @@ class _ExercicePageState extends State<ExercicePage> {
       },
     );
   }
-}

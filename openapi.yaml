@@ -28,6 +28,7 @@ components:
       type: object
       required:
         - day
+        - exercises
       properties:
         day:
           type: string
@@ -41,5 +42,7 @@ components:
           description: Total available time for exercise in minutes
         exercises:
           type: array
+          nullable: false
+          minItems: 0
           items:
             $ref: '#/components/schemas/Exercise'

@@ -3,7 +3,7 @@ import 'package:frontend/screens/home.dart';
 import 'package:frontend/screens/nutrition.dart';
 import 'package:provider/provider.dart';
 import 'screens/settings.dart';
-import 'screens/exercice.dart';
+import 'screens/exercises/exercice.dart';
 import 'theme/theme_state.dart';
 import 'state.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
@@ -68,7 +68,6 @@ class _MyHomePageState extends State<MyHomePage> {
         onMenuPressed: () {
           _scaffoldKey.currentState?.openDrawer();
         },
-        themeState: themeState,
       ),
       drawer: Drawer(
         child: SettingsPage(),
@@ -92,9 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
       case 0:
         return HomePage();
       case 1:
-        return ExercicePage(
-          exerciseDay: appState.exerciseDay,
-        );
+        return ExercicePage();
       case 2:
         return NutritionPage();
       default:

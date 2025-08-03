@@ -153,6 +153,7 @@ class ExerciseDay {
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
     'day',
+    'exercises',
   };
 }
 
