@@ -1,0 +1,39 @@
+openapi: 3.0.0
+info:
+  title: Workout API
+  version: 1.0.0
+  description: API for managing workout exercises and routines
+
+components:
+  schemas:
+    Exercise:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        weight_kg:
+          type: number
+          format: float
+        repetitions:
+          type: integer
+        duration_sec:
+          type: integer
+        rest:
+          type: integer
+          default: 90
+
+    ExerciseDay:
+      type: object
+      required:
+        - date
+        - exercises
+      properties:
+        date:
+          type: string
+          format: date
+        exercises:
+          type: array
+          items:
+            $ref: '#/components/schemas/Exercise'
