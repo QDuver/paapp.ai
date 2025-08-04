@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'model/api.dart';
+import 'api.dart';
 import 'apiService.dart';
 
 /// Global app state that manages all application variables
@@ -13,7 +13,15 @@ class AppState extends ChangeNotifier {
       DateFormat('yyyy-MM-dd').format(currentDate);
 
   List<ExerciseDay>? exercises;
-  ExerciseDay? exerciseDay;
+  ExerciseDay? get exerciseDay {
+    final matchingExercises = exercises?.where(
+      (exercise) => exercise.day == formattedCurrentDate,
+    );
+    return matchingExercises?.isNotEmpty == true
+        ? matchingExercises!.first
+        : null;
+  }
+
   int selectedNavigation = 1;
   List<Map<String, dynamic>> navigation = [
     {'name': 'Home', 'icon': Icons.home},
@@ -32,23 +40,13 @@ class AppState extends ChangeNotifier {
     setState(() {
       exercises = ExerciseDay.listFromJson(result);
       isLoading = false;
-      exerciseDay = exercises?.firstWhere(
-            (exercise) => exercise.day == formattedCurrentDate,
-        );
     });
   }
 
   void setState(void Function() updater) {
+    print('Updating app state');
+    print(updater);
     updater();
     notifyListeners();
-  }
-
-  // Navigate date helper methods
-  void navigateDate(int direction) {
-    setState(() => currentDate = currentDate.add(Duration(days: direction)));
-  }
-
-  void goToToday() {
-    setState(() => currentDate = DateTime.now());
   }
 }

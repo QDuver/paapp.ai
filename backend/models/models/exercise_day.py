@@ -19,6 +19,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
 from models.models.exercise import Exercise
 from typing import Optional, Set
 from typing_extensions import Self
@@ -31,7 +32,7 @@ class ExerciseDay(BaseModel):
     at_home: Optional[StrictBool] = False
     wakeup_time: Optional[StrictStr] = None
     available_exercise_time: Optional[StrictInt] = Field(default=None, description="Total available time for exercise in minutes")
-    exercises: List[Exercise]
+    exercises: Annotated[List[Exercise], Field(min_length=0)]
     __properties: ClassVar[List[str]] = ["day", "at_home", "wakeup_time", "available_exercise_time", "exercises"]
 
     model_config = ConfigDict(

@@ -19,10 +19,12 @@ import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 
-part 'apiHelper.dart';
+part 'api_helper.dart';
 
-part 'exercise.dart';
-part 'exercise_day.dart';
+
+part 'model/exercise.dart';
+part 'model/exercise_day.dart';
+
 
 /// An [ApiClient] instance that uses the default values obtained from
 /// the OpenAPI specification file.
@@ -35,5 +37,4 @@ final _regList = RegExp(r'^List<(.*)>$');
 final _regSet = RegExp(r'^Set<(.*)>$');
 final _regMap = RegExp(r'^Map<String,(.*)>$');
 
-bool _isEpochMarker(String? pattern) =>
-    pattern == _dateEpochMarker || pattern == '/$_dateEpochMarker/';
+bool _isEpochMarker(String? pattern) => pattern == _dateEpochMarker || pattern == '/$_dateEpochMarker/';

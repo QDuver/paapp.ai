@@ -2,13 +2,18 @@ echo Generating models only...
 call npx @openapitools/openapi-generator-cli generate ^
     -i openapi.yaml ^
     -g dart ^
-    -o frontend/ ^
-    --global-property models ^
-    --additional-properties=pubName=workout_api_models,pubVersion=1.0.0,pubLibrary=workout_api_models.api,generateApis=false,generateApiTests=false,generateApiDocumentation=false ^
+    -o openapi-generated/ ^
+    --additional-properties=pubName=workout_api_models,pubVersion=1.0.0,pubLibrary=workout_api_models.api,generateApiTests=false,generateApiDocumentation=false ^
     --skip-validate-spec ^
     --ignore-file-override=.openapi-generator-ignore
 
-@REM pause
+for /r openapi-generated\lib\models %%f in (*.dart) do (
+    copy "%%f" "frontend\lib\model\"
+)
+copy "openapi-generated\lib\api_helper.dart" "frontend\lib\api_helper.dart"
+copy "openapi-generated\lib\api.dart" "frontend\lib\api.dart"
+copy "openapi-generated\lib\api_client.dart" "frontend\lib\api_client.dart"
+
 
 @REM echo Moving api_helper.dart and api.dart to model folder...
 @REM if exist "frontend\lib\api_helper.dart" move "frontend\lib\api_helper.dart" "frontend\lib\model\"

@@ -9,7 +9,9 @@ import 'state.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'components/appBar.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -64,7 +66,6 @@ class _MyHomePageState extends State<MyHomePage> {
       key: _scaffoldKey,
       appBar: CustomAppBar(
         selectedIndex: appState.selectedNavigation,
-        onNavigateDate: appState.navigateDate,
         onMenuPressed: () {
           _scaffoldKey.currentState?.openDrawer();
         },

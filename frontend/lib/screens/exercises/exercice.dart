@@ -3,12 +3,9 @@ import 'package:frontend/screens/exercises/components/exercice-card.dart';
 import 'package:frontend/state.dart';
 import 'package:frontend/theme/theme_state.dart';
 import 'package:provider/provider.dart';
-import '../../model/api.dart';
-import 'no-exercises.dart';
+import 'components/no-exercises.dart';
 
 class ExercicePage extends StatefulWidget {
-
-
   @override
   _ExercicePageState createState() => _ExercicePageState();
 }
@@ -19,7 +16,6 @@ class _ExercicePageState extends State<ExercicePage> {
     final themeState = Provider.of<ThemeState>(context);
     final appState = context.watch<AppState>();
     final exerciseDay = appState.exerciseDay;
-
 
     return Container(
       color: themeState.themeData.primaryColor,
@@ -46,8 +42,59 @@ class _ExercicePageState extends State<ExercicePage> {
             ),
             child: Column(
               children: [
+                // Date navigation header
+                if (exerciseDay != null)
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            appState.setState(() {
+                              appState.currentDate = appState.currentDate.subtract(Duration(days: 1));
+                            });
+                          },
+                          icon: Icon(
+                            Icons.chevron_left,
+                            color: themeState.themeData.colorScheme.secondary,
+                            size: 32,
+                          ),
+                        ),
+                        Text(
+                          exerciseDay.day,
+                          style: themeState.themeData.textTheme.headlineSmall
+                              ?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: themeState.themeData.colorScheme.secondary,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            appState.setState(() {
+                              appState.currentDate = appState.currentDate.add(Duration(days: 1));
+                            });
+                          },
+                          icon: Icon(
+                            Icons.chevron_right,
+                            color: themeState.themeData.colorScheme.secondary,
+                            size: 32,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 if (exerciseDay != null && exerciseDay.exercises.isNotEmpty)
-                  ExerciseCard()
+                  Expanded(
+                      child: ListView.builder(
+                    physics: BouncingScrollPhysics(),
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    itemCount: exerciseDay.exercises.length,
+                    itemBuilder: (context, index) {
+                      final exercise = exerciseDay.exercises[index];
+                      return ExerciseCard(exercise: exercise);
+                    },
+                  ))
                 else
                   NoExercisesWidget(),
               ],
@@ -57,7 +104,4 @@ class _ExercicePageState extends State<ExercicePage> {
       ),
     );
   }
-
-
 }
-
