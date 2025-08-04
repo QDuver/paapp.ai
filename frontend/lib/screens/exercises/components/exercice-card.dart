@@ -1,31 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/state.dart';
+import 'package:frontend/api.dart';
 import 'package:frontend/theme/theme_state.dart';
 import 'package:provider/provider.dart';
 
 class ExerciseCard extends StatelessWidget {
+  final Exercise exercise;
+
+  const ExerciseCard({Key? key, required this.exercise}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final themeState = context.read<ThemeState>();
-    final appState = context.read<AppState>();
-    final exerciseDay = appState.exerciseDay;
 
-    return Expanded(
-      child: ListView.builder(
-        physics: BouncingScrollPhysics(),
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        itemCount: exerciseDay.exercises.length,
-        itemBuilder: (context, index) {
-          final exercise = exerciseDay.exercises[index];
-          return _buildExerciseCard(context, themeState, exercise);
-        },
-      ),
-    );
-  }
-}
-
-  Widget _buildExerciseCard(
-      BuildContext context, ThemeState themeState, Exercise exercise) {
     return Card(
       margin: EdgeInsets.only(bottom: 16),
       color: themeState.themeData.cardColor,
@@ -105,7 +91,7 @@ class ExerciseCard extends StatelessWidget {
                       Border.all(color: Colors.green.withValues(alpha: 0.3)),
                 ),
                 child: Text(
-                  'Rest: ${exercise.rest ?? 0} sec',
+                  'Rest: ${exercise.rest} sec',
                   style: TextStyle(
                     color: Colors.green,
                     fontSize: 12,
@@ -248,3 +234,4 @@ class ExerciseCard extends StatelessWidget {
       },
     );
   }
+}
