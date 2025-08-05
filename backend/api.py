@@ -36,6 +36,10 @@ class UpdateFsRequest(BaseModel):
 @app.post("/update-db/{collection}/{doc_id}")
 def update_db_endpoint(collection: str, doc_id: str, request: UpdateFsRequest):
     fs.update(collection=collection, doc_id=doc_id, path=request.path, value=request.value)
+    
+@app.post("/insert-to-db/{collection}")
+def insert_to_db_endpoint(collection: str, request: UpdateFsRequest):
+    fs.insert(collection=collection, data=request.value, doc_id=None)
 
 @app.post("/init-day")
 def init_day_endpoint(request: InitDayRequest):
