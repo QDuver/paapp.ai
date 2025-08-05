@@ -1,9 +1,0 @@
-# Ignore API client and exception files
-lib/api_exception.dart
-lib/auth/
-**/test/**
-**/docs/**
-models/test/**
-models/docs/**
-pubspec.yaml
-auth/**
