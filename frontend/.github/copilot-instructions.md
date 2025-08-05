@@ -1,0 +1,1 @@
+Prioritize reusability and simplicity
