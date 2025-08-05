@@ -3,7 +3,7 @@ import 'package:frontend/screens/home.dart';
 import 'package:frontend/screens/nutrition.dart';
 import 'package:provider/provider.dart';
 import 'screens/settings.dart';
-import 'screens/exercises/exercice.dart';
+import 'screens/exercises/exercises.dart';
 import 'theme/theme_state.dart';
 import 'state.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
