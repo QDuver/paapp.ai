@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/api.dart';
+import 'package:frontend/model/exercise.dart';
 import 'package:frontend/theme/theme_state.dart';
 import 'package:provider/provider.dart';
 

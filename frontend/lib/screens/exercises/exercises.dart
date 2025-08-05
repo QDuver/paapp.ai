@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/exercises/components/exercise-card.dart';
+import 'package:frontend/screens/exercises/components/exerciseCard.dart';
 import 'package:frontend/state.dart';
 import 'package:frontend/theme/theme_state.dart';
 import 'package:provider/provider.dart';
-import 'components/no-exercises.dart';
+import 'components/noExercises.dart';
 
 class ExercicePage extends StatefulWidget {
   @override
