@@ -1,13 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/model/exercise.dart';
 import 'package:frontend/theme/theme_state.dart';
+import 'package:frontend/screens/exercises/components/exerciseDialogBox.dart';
 import 'package:provider/provider.dart';
-import 'exerciseDialog.dart';
 
-class ExerciseCard extends StatelessWidget {
+class ExerciseCard extends StatefulWidget {
   final Exercise exercise;
+  final int? index;
+  final Function(Exercise)? onExerciseUpdated;
+  final Function()? onExerciseDeleted;
 
-  const ExerciseCard({Key? key, required this.exercise}) : super(key: key);
+  const ExerciseCard({
+    Key? key, 
+    required this.exercise, 
+    required this.index,
+    this.onExerciseUpdated,
+    this.onExerciseDeleted,
+  }) : super(key: key);
+
+  @override
+  State<ExerciseCard> createState() => _ExerciseCardState();
+}
+
+class _ExerciseCardState extends State<ExerciseCard> {
+  bool _isExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -20,151 +36,170 @@ class ExerciseCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () => _showEditExerciseDialog(context, themeState, exercise),
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: Row(
-            children: [
-              // Exercise icon
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: themeState.themeData.colorScheme.secondary
-                      .withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Icon(
-                  Icons.fitness_center,
-                  color: themeState.themeData.colorScheme.secondary,
-                  size: 30,
-                ),
-              ),
-
-              SizedBox(width: 16),
-
-              // Exercise details
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      exercise.name,
-                      style: themeState.themeData.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 4,
+      child: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: Row(
+              children: [
+                // Exercise icon - tappable area for dialog
+                Expanded(
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return ExerciseDialogBox(
+                            exercise: widget.exercise,
+                            onExerciseUpdated: widget.onExerciseUpdated,
+                            onExerciseDeleted: widget.onExerciseDeleted,
+                          );
+                        },
+                      );
+                    },
+                    child: Row(
                       children: [
-                        if (exercise.weightKg != null)
-                          Text(
-                            '${exercise.weightKg} kg',
-                            style: themeState.themeData.textTheme.bodyMedium,
+                        // Exercise icon
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: themeState.themeData.colorScheme.secondary
+                                .withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(30),
                           ),
-                        if (exercise.repetitions != null)
-                          Text(
-                            '${exercise.repetitions} reps',
-                            style: themeState.themeData.textTheme.bodyMedium,
+                          child: Icon(
+                            Icons.fitness_center,
+                            color: themeState.themeData.colorScheme.secondary,
+                            size: 30,
                           ),
-                        if (exercise.durationSec != null)
-                          Text(
-                            '${exercise.durationSec} sec',
-                            style: themeState.themeData.textTheme.bodyMedium,
+                        ),
+
+                        SizedBox(width: 16),
+
+                        // Exercise details
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${widget.exercise.name} - ${widget.exercise.index}',
+                                style: themeState.themeData.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              if (widget.exercise.sets != null && widget.exercise.sets!.isNotEmpty)
+                                Text(
+                                  '${widget.exercise.sets!.length} sets',
+                                  style: themeState.themeData.textTheme.bodySmall?.copyWith(
+                                    color: themeState.themeData.textTheme.bodySmall?.color?.withValues(alpha: 0.7),
+                                  ),
+                                ),
+                            ],
                           ),
+                        ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-
-              // Rest badge
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border:
-                      Border.all(color: Colors.green.withValues(alpha: 0.3)),
-                ),
-                child: Text(
-                  'Rest: ${exercise.rest} sec',
-                  style: TextStyle(
-                    color: Colors.green,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
                   ),
                 ),
-              ),
-            ],
+
+                // Expand/collapse icon - separate tappable area
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _isExpanded = !_isExpanded;
+                    });
+                  },
+                  icon: Icon(
+                    _isExpanded ? Icons.expand_less : Icons.expand_more,
+                    color: themeState.themeData.colorScheme.secondary,
+                  ),
+                  tooltip: _isExpanded ? 'Collapse' : 'Expand',
+                ),
+              ],
+            ),
           ),
-        ),
+          
+          // Expandable sets section
+          if (_isExpanded && widget.exercise.sets != null && widget.exercise.sets!.isNotEmpty)
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Divider(
+                    color: themeState.themeData.dividerColor.withValues(alpha: 0.3),
+                    height: 1,
+                  ),
+                  SizedBox(height: 12),
+                  Text(
+                    'Sets',
+                    style: themeState.themeData.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: themeState.themeData.colorScheme.secondary,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  ...widget.exercise.sets!.asMap().entries.map((entry) {
+                    int setIndex = entry.key;
+                    ExerciseSet set = entry.value;
+                    return _buildSetRow(context, themeState, setIndex + 1, set);
+                  }).toList(),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }
 
-  void _showEditExerciseDialog(
-      BuildContext context, ThemeState themeState, Exercise exercise) {
-    // Create fields based on exercise properties
-    final fields = <ExerciseField>[];
-
-    // Add weight field if exercise has weight
-    if (exercise.weightKg != null) {
-      fields.add(ExerciseField(
-        title: 'Weight (kg)',
-        value: exercise.weightKg?.toString() ?? '',
-        keyboardType: TextInputType.numberWithOptions(decimal: true),
-        onChanged: (value) {
-          final weight = double.tryParse(value);
-          if (weight != null) {
-            exercise.weightKg = weight;
-          }
-        },
-      ));
+  Widget _buildSetRow(BuildContext context, ThemeState themeState, int setNumber, ExerciseSet set) {
+    List<String> setDetails = [];
+    
+    if (set.repetitions != null) {
+      setDetails.add('${set.repetitions} reps');
+    }
+    
+    if (set.weightKg != null) {
+      setDetails.add('${set.weightKg} kg');
+    }
+    if (set.rest != null && set.rest! > 0) {
+      setDetails.add('Rest: ${set.rest}s');
     }
 
-    // Add repetitions field if exercise has repetitions
-    if (exercise.repetitions != null) {
-      fields.add(ExerciseField(
-        title: 'Repetitions',
-        value: exercise.repetitions?.toString() ?? '',
-        keyboardType: TextInputType.number,
-        onChanged: (value) {
-          final reps = int.tryParse(value);
-          if (reps != null) {
-            exercise.repetitions = reps;
-          }
-        },
-      ));
-    }
-
-    // Add duration field if exercise has duration
-    if (exercise.durationSec != null) {
-      fields.add(ExerciseField(
-        title: 'Duration (seconds)',
-        value: exercise.durationSec?.toString() ?? '',
-        keyboardType: TextInputType.number,
-        onChanged: (value) {
-          final duration = int.tryParse(value);
-          if (duration != null) {
-            exercise.durationSec = duration;
-          }
-        },
-      ));
-    }
-
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return ExerciseDialog(
-          exercise: exercise,
-          fields: fields,
-        );
-      },
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: themeState.themeData.colorScheme.secondary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Center(
+              child: Text(
+                '$setNumber',
+                style: themeState.themeData.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: themeState.themeData.colorScheme.secondary,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              setDetails.isNotEmpty ? setDetails.join(' • ') : 'No details',
+              style: themeState.themeData.textTheme.bodySmall,
+            ),
+          ),
+        ],
+      ),
     );
   }
+
 }

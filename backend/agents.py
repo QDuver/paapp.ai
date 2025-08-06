@@ -1,9 +1,6 @@
 import json
 
-from models.models.exercise_day import ExerciseDay
-
-
-
+from models import ExerciseDay
 
 
 agent = f"""
@@ -26,13 +23,10 @@ Over time, the training should have progressive overload.
 
 # IDEAL WEEKLY MIX
 
-## Day 1: Upper-Body Hypertrophy + Core
-## Day 2: Tempo Run
-## Day 3: Lower-Body Strength + Plyo
-## Day 4: Easy run + Core & Mobility
-## Day 5: Interval Run
-## Day 7: Upper-Body Hypertrophy + Core
-## Day 6: Long Run
+## Day 1: Upper-Body Strength + Core
+## Day 2: Lower Body Strength + Upper-Body Hypertrophy
+## Day 3: Back and Core
+## Repeat...
 
 If I missed a day, the training for the current day should be the one I missed.
 For example, I did Day 1 on June 1st, I didn't do anything on June 2nd, so the training for June 3rd should be Day 2.
