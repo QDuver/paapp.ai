@@ -6,9 +6,9 @@ import os
 
 
 class Firestore:
-    def __init__(self):
-        self.client = firestore.Client(database='routine')
-        
+    def __init__(self, database):
+        self.client = firestore.Client(database=database)
+
     def insert(self, collection, data, doc_id=None):
         try:
             collection_ref = self.client.collection(collection)

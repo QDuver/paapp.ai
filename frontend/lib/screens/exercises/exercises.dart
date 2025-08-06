@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/exercises/components/exerciseCard.dart';
-import 'package:frontend/screens/exercises/components/addExerciseDialog.dart';
 import 'package:frontend/state.dart';
 import 'package:frontend/theme/theme_state.dart';
+import 'package:frontend/model/exercise.dart';
 import 'package:provider/provider.dart';
 import 'components/noExercises.dart';
 
@@ -13,25 +13,27 @@ class ExercicePage extends StatefulWidget {
 
 class _ExercicePageState extends State<ExercicePage> {
   void _showAddExerciseDialog() {
-    final themeState = Provider.of<ThemeState>(context, listen: false);
+    // final themeState = Provider.of<ThemeState>(context, listen: false);
+  }
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AddExerciseDialog(
-          onAddExercise: (String name, double weight, int reps) {
-            // For now, just show a snackbar
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                    'Exercise "$name" would be added: ${weight}kg x $reps reps'),
-                backgroundColor: themeState.themeData.colorScheme.secondary,
-              ),
-            );
-          },
-        );
-      },
-    );
+  void _updateExercise(int index, Exercise updatedExercise) {
+    final appState = context.read<AppState>();
+    if (appState.exerciseDay != null) {
+      appState.setState(() {
+        appState.exerciseDay!.exercises[index] = updatedExercise;
+      });
+      // Note: In a real app, you would also update this on the server
+    }
+  }
+
+  void _deleteExercise(int index) {
+    final appState = context.read<AppState>();
+    if (appState.exerciseDay != null) {
+      appState.setState(() {
+        appState.exerciseDay!.exercises.removeAt(index);
+      });
+      // Note: In a real app, you would also delete this on the server
+    }
   }
 
   @override
@@ -118,7 +120,12 @@ class _ExercicePageState extends State<ExercicePage> {
                       itemCount: exerciseDay.exercises.length,
                       itemBuilder: (context, index) {
                         final exercise = exerciseDay.exercises[index];
-                        return ExerciseCard(exercise: exercise);
+                        return ExerciseCard(
+                          exercise: exercise, 
+                          index: index,
+                          onExerciseUpdated: (updatedExercise) => _updateExercise(index, updatedExercise),
+                          onExerciseDeleted: () => _deleteExercise(index),
+                        );
                       },
                     ))
                   else

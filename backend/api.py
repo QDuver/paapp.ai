@@ -1,17 +1,15 @@
-from datetime import date
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 from clients.firestore import Firestore
-from main import init_day, modify_day
 from typing import Any, List
 
 class InitDayRequest(BaseModel):
     extra_comments: Optional[str] = "None"
 
 app = FastAPI()
-fs = Firestore()
+fs = Firestore(database='quentin-duverge')
 origins = ["*"]
 app.add_middleware(
     CORSMiddleware,
@@ -23,11 +21,11 @@ app.add_middleware(
 
 @app.get("/exercises")
 def exercises_endpoint():
-    return fs.query(collection='routine')
+    return fs.query(collection='exercises')
 
 @app.get("/exercises/{exercise_date}")
 def exercises_by_date_endpoint(exercise_date: str):
-    return fs.get(collection='routine', doc_id=exercise_date)
+    return fs.get(collection='exercises', doc_id=exercise_date)
 
 class UpdateFsRequest(BaseModel):
     path: List[str | int]
@@ -41,10 +39,6 @@ def update_db_endpoint(collection: str, doc_id: str, request: UpdateFsRequest):
 def insert_to_db_endpoint(collection: str, request: UpdateFsRequest):
     fs.insert(collection=collection, data=request.value, doc_id=None)
 
-@app.post("/init-day")
-def init_day_endpoint(request: InitDayRequest):
-    return init_day(request.extra_comments)
-
-@app.get("/modify-day")
-def modify_day_endpoint():
-    return modify_day()
+# @app.post("/init-day")
+# def init_day_endpoint(request: InitDayRequest):
+#     return init_day(request.extra_comments)

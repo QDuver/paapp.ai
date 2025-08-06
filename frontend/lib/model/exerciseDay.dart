@@ -1,4 +1,5 @@
 import 'package:frontend/model/exercise.dart';
+import 'package:frontend/apiService.dart';
 
 class ExerciseDay {
   String day;
@@ -21,15 +22,30 @@ class ExerciseDay {
       wakeupTime: json['wakeupTime'] as String?,
       availableExerciseTime: json['availableExerciseTime'] as int?,
       exercises: (json['exercises'] as List<dynamic>?)
-              ?.map((e) => Exercise.fromJson(e as Map<String, dynamic>))
+              ?.asMap()
+              .entries
+              .map((entry) => Exercise.fromJson(entry.value as Map<String, dynamic>, entry.key))
               .toList() ??
           [],
     );
   }
 
   static List<ExerciseDay> fromJsonList(dynamic result) {
-    return result
+    return (result as List<dynamic>)
         .map((item) => ExerciseDay.fromJson(item as Map<String, dynamic>))
         .toList();
+  }
+
+  Future<void> updateExerciseAtIndex(int index, Exercise updatedExercise) async {
+    await ApiService.request(
+      'update-db/exercises/$day',
+      'POST',
+      payload: {
+        'path': ['exercises', index],
+        'value': updatedExercise.toJson(),
+      },
+    );
+    
+    exercises[index] = updatedExercise;
   }
 }

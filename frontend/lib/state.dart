@@ -14,9 +14,11 @@ class AppState extends ChangeNotifier {
   ExerciseDay? get exerciseDay {
     if (exercises == null || exercises!.isEmpty) return null;
 
-    return exercises!.firstWhere(
+    final index = exercises!.indexWhere(
       (exercise) => exercise.day == formattedCurrentDate,
     );
+    
+    return index != -1 ? exercises![index] : null;
   }
 
   int selectedNavigation = 1;
@@ -32,7 +34,7 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> _loadExercises() async {
-    final result = await ApiService.get('exercises');
+    final result = await ApiService.request('exercises', 'GET');
     setState(() {
       exercises = ExerciseDay.fromJsonList(result);
       isLoading = false;
