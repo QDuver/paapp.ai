@@ -38,7 +38,7 @@ class Firestore:
             print(f"Error retrieving document: {str(e)}")
             return None
 
-    def query(self, collection="routine", limit=100):
+    def query(self, collection, limit=100):
         try:
             collection_ref = self.client.collection(collection)
             docs = collection_ref.limit(limit).stream()

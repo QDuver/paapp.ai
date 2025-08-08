@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
+from clients.db import Database
 from clients.firestore import Firestore
 from typing import Any, List
 
@@ -21,23 +22,10 @@ app.add_middleware(
 
 @app.get("/exercises")
 def exercises_endpoint():
-    return fs.query(collection='exercises')
+    db = Database(db_path="quentinDuverge/database.db")
+    result = db.query('SELECT * FROM exercise_sets JOIN exercises ON exercise_sets.exercise_id = exercises.id JOIN exercise_days ON exercises.exercise_day_id = exercise_days.id')
+    return result['data']
 
-@app.get("/exercises/{exercise_date}")
-def exercises_by_date_endpoint(exercise_date: str):
-    return fs.get(collection='exercises', doc_id=exercise_date)
-
-class UpdateFsRequest(BaseModel):
-    path: List[str | int]
-    value: Any
-
-@app.post("/update-db/{collection}/{doc_id}")
-def update_db_endpoint(collection: str, doc_id: str, request: UpdateFsRequest):
-    fs.update(collection=collection, doc_id=doc_id, path=request.path, value=request.value)
-    
-@app.post("/insert-to-db/{collection}")
-def insert_to_db_endpoint(collection: str, request: UpdateFsRequest):
-    fs.insert(collection=collection, data=request.value, doc_id=None)
 
 # @app.post("/init-day")
 # def init_day_endpoint(request: InitDayRequest):
