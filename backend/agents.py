@@ -1,6 +1,6 @@
 import json
 
-from models import ExerciseDay
+from quentinDuverge.models import ExerciseDay
 
 
 agent = f"""

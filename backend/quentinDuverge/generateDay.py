@@ -6,11 +6,10 @@ import requests
 from agents import agent
 from clients.firestore import Firestore
 from clients.vertex import Vertex
-from models import ExerciseDay
+from quentinDuverge.models import ExerciseDay
 
 vertex = Vertex()
-fs = Firestore(database='quentin-duverge') 
-
+fs = Firestore('quentin-duverge')
 
 def process_output(output):
     output_data = json.loads(output)
@@ -21,7 +20,7 @@ def process_output(output):
 
 
 def main(extra_comments="None"):
-    
+
     WAKEUP_TIME = "09:00"
     AVAILABLE_EXERCISE_TIME = 60
     AT_HOME = False
@@ -31,12 +30,11 @@ def main(extra_comments="None"):
         available_exercise_time=AVAILABLE_EXERCISE_TIME,
         at_home=AT_HOME,
     )
-    
-    print(exerciseDay)
 
-    fs.delete(collection='exercises', doc_id=exerciseDay.day)
-    historics = fs.query(collection='exercises', limit=10)
-    historics = [x for x in historics if x['day'] < date.today().strftime("%Y-%m-%d")]
+    print(exerciseDay)
+    
+    historics = fs.query('exercises')
+    fs.delete('exercises', exerciseDay.day)
     print(historics)
 
     prompt = f'''
@@ -55,5 +53,5 @@ def main(extra_comments="None"):
     print(prompt)
     output = vertex.call_agent(agent=agent, prompt=prompt)
     today = process_output(output)
-    fs.insert(collection='exercises', data=today.model_dump(), doc_id=today.day)
-    
+    print(today)
+    fs.insert('exercises', data=today.model_dump(), doc_id=today.day)

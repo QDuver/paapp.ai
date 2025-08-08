@@ -12,10 +12,10 @@ class Exercise(BaseModel):
     name: str
     sets: List[ExerciseSet] = []
 
-
 class ExerciseDay(BaseModel):
     day: str
     at_home: Optional[bool] = False
     wakeup_time: Optional[str] = None
     available_exercise_time: Optional[int]
     exercises: Optional[List[Exercise]] = []
+    
