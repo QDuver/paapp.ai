@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/theme_state.dart';
+import '../state.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final int selectedIndex;
@@ -15,6 +16,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final themeState = context.read<ThemeState>();
+    final appState = context.watch<AppState>();
+    
+    // Show date navigation only on exercises page (index 1)
+    final isExercisesPage = selectedIndex == 1;
 
     return AppBar(
       leading: IconButton(
@@ -24,8 +29,51 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         onPressed: onMenuPressed,
       ),
+      title: isExercisesPage ? _buildDateNavigation(context, themeState, appState) : null,
+      centerTitle: true,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+    );
+  }
 
-      backgroundColor: themeState.themeData.primaryColor,
+  Widget _buildDateNavigation(BuildContext context, ThemeState themeState, AppState appState) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          onPressed: () {
+            appState.setState(() {
+              appState.currentDate = appState.currentDate.subtract(Duration(days: 1));
+            });
+          },
+          icon: Icon(
+            Icons.chevron_left,
+            color: themeState.themeData.textTheme.headlineSmall?.color,
+            size: 32,
+          ),
+        ),
+        Flexible(
+          child: Text(
+            appState.formattedCurrentDate,
+            style: themeState.themeData.textTheme.headlineSmall?.copyWith(
+              color: themeState.themeData.colorScheme.secondary,
+            ),
+          ),
+        ),
+        IconButton(
+          onPressed: () {
+            appState.setState(() {
+              appState.currentDate = appState.currentDate.add(Duration(days: 1));
+            });
+          },
+          icon: Icon(
+            Icons.chevron_right,
+            color: themeState.themeData.textTheme.headlineSmall?.color,
+            size: 32,
+          ),
+        ),
+      ],
     );
   }
 

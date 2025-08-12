@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/model/exercise.dart';
 import 'package:frontend/theme/theme_state.dart';
-import 'package:frontend/screens/exercises/components/exerciseDialogBox.dart';
 import 'package:provider/provider.dart';
+import 'package:frontend/screens/exercises/components/exerciseEdit.dart';
 
 class ExerciseCard extends StatefulWidget {
   final Exercise exercise;
@@ -23,7 +23,14 @@ class ExerciseCard extends StatefulWidget {
 }
 
 class _ExerciseCardState extends State<ExerciseCard> {
-  bool _isExpanded = false;
+  bool _isExpanded = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Collapse if exercise is already completed
+    _isExpanded = !widget.exercise.isCompleted;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,21 +53,15 @@ class _ExerciseCardState extends State<ExerciseCard> {
                 Expanded(
                   child: InkWell(
                     borderRadius: BorderRadius.circular(12),
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return ExerciseDialogBox(
-                            exercise: widget.exercise,
-                            onExerciseUpdated: widget.onExerciseUpdated,
-                            onExerciseDeleted: widget.onExerciseDeleted,
-                          );
-                        },
-                      );
-                    },
+                    onTap: () => showExerciseEditDialog(
+                      context,
+                      themeState,
+                      widget.exercise,
+                      initialName: widget.exercise.name,
+                    ),
                     child: Row(
                       children: [
-                        // Exercise icon
+                        // Exercise completion checkbox
                         Container(
                           width: 60,
                           height: 60,
@@ -69,33 +70,57 @@ class _ExerciseCardState extends State<ExerciseCard> {
                                 .withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(30),
                           ),
-                          child: Icon(
-                            Icons.fitness_center,
-                            color: themeState.themeData.colorScheme.secondary,
-                            size: 30,
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(30),
+                              onTap: () {
+                                setState(() {
+                                  widget.exercise.isCompleted = !widget.exercise.isCompleted;
+                                  // Collapse when completed, expand when uncompleted
+                                  _isExpanded = !widget.exercise.isCompleted;
+                                });
+                                // Notify parent if callback is provided
+                                widget.onExerciseUpdated?.call(widget.exercise);
+                              },
+                              child: Center(
+                                child: Container(
+                                  width: 24,
+                                  height: 24,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: widget.exercise.isCompleted
+                                          ? themeState.themeData.colorScheme.secondary
+                                          : themeState.themeData.colorScheme.secondary.withValues(alpha: 0.5),
+                                      width: 2,
+                                    ),
+                                    color: widget.exercise.isCompleted
+                                        ? themeState.themeData.colorScheme.secondary
+                                        : Colors.transparent,
+                                  ),
+                                  child: widget.exercise.isCompleted
+                                      ? Icon(
+                                          Icons.check,
+                                          color: themeState.themeData.colorScheme.onSecondary,
+                                          size: 16,
+                                        )
+                                      : null,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
 
                         SizedBox(width: 16),
-
-                        // Exercise details
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${widget.exercise.name} - ${widget.exercise.index}',
-                                style: themeState.themeData.textTheme.bodyMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                '${widget.exercise.name}',
+                                style: themeState.themeData.textTheme.bodyLarge,
                               ),
-                              if (widget.exercise.sets != null && widget.exercise.sets!.isNotEmpty)
-                                Text(
-                                  '${widget.exercise.sets!.length} sets',
-                                  style: themeState.themeData.textTheme.bodySmall?.copyWith(
-                                    color: themeState.themeData.textTheme.bodySmall?.color?.withValues(alpha: 0.7),
-                                  ),
-                                ),
                             ],
                           ),
                         ),
@@ -117,6 +142,15 @@ class _ExerciseCardState extends State<ExerciseCard> {
                   ),
                   tooltip: _isExpanded ? 'Collapse' : 'Expand',
                 ),
+                
+                // Reorder handle
+                ReorderableDragStartListener(
+                  index: widget.index ?? 0,
+                  child: Icon(
+                    Icons.drag_handle,
+                    color: themeState.themeData.colorScheme.secondary.withValues(alpha: 0.6),
+                  ),
+                ),
               ],
             ),
           ),
@@ -133,15 +167,7 @@ class _ExerciseCardState extends State<ExerciseCard> {
                     color: themeState.themeData.dividerColor.withValues(alpha: 0.3),
                     height: 1,
                   ),
-                  SizedBox(height: 12),
-                  Text(
-                    'Sets',
-                    style: themeState.themeData.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: themeState.themeData.colorScheme.secondary,
-                    ),
-                  ),
-                  SizedBox(height: 8),
+                  SizedBox(height: 20),
                   ...widget.exercise.sets!.asMap().entries.map((entry) {
                     int setIndex = entry.key;
                     ExerciseSet set = entry.value;
@@ -156,49 +182,57 @@ class _ExerciseCardState extends State<ExerciseCard> {
   }
 
   Widget _buildSetRow(BuildContext context, ThemeState themeState, int setNumber, ExerciseSet set) {
+    // Build details dynamically from all non-null fields of the set
     List<String> setDetails = [];
-    
-    if (set.repetitions != null) {
-      setDetails.add('${set.repetitions} reps');
-    }
-    
-    if (set.weightKg != null) {
-      setDetails.add('${set.weightKg} kg');
-    }
-    if (set.rest != null && set.rest! > 0) {
-      setDetails.add('Rest: ${set.rest}s');
-    }
+    final Map<String, dynamic> setMap = set.toJson();
+    setMap.forEach((key, value) {
+      if(key == 'rest'){
+        return;
+      }
+      if (value != null) {
+        final prettyKey = key.replaceAll('_', ' ').replaceFirstMapped(
+          RegExp(r'^[a-z]'),
+          (m) => m.group(0)!.toUpperCase(),
+        );
+        setDetails.add('$prettyKey: $value');
+      }
+    });
 
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Container(
-            width: 24,
-            height: 24,
-            decoration: BoxDecoration(
-              color: themeState.themeData.colorScheme.secondary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Center(
-              child: Text(
-                '$setNumber',
-                style: themeState.themeData.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: themeState.themeData.colorScheme.secondary,
-                ),
+    return Column(
+      children: [
+        if (setNumber > 1)
+          Divider(
+            color: themeState.themeData.dividerColor.withValues(alpha: 0.2),
+            height: 16,
+            thickness: 0.5,
+          ),
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(width: 12),
+              Expanded(
+                child: setDetails.isNotEmpty
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: setDetails.map((detail) => Padding(
+                          padding: EdgeInsets.symmetric(vertical: 2),
+                          child: Text(
+                            detail,
+                            style: themeState.themeData.textTheme.bodySmall,
+                          ),
+                        )).toList(),
+                      )
+                    : Text(
+                        'No details',
+                        style: themeState.themeData.textTheme.bodySmall,
+                      ),
               ),
-            ),
+            ],
           ),
-          SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              setDetails.isNotEmpty ? setDetails.join(' • ') : 'No details',
-              style: themeState.themeData.textTheme.bodySmall,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

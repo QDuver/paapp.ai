@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<AppState>(create: (_) => AppState()),
       ],
       child: MaterialApp(
-        title: 'App For You',
+        title: 'aiapps',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
             primarySwatch: Colors.blue, canvasColor: Colors.transparent),
@@ -53,6 +53,11 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     final themeState = Provider.of<ThemeState>(context);
     final appState = Provider.of<AppState>(context);
+    
+    // Set context for ApiService error messages
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      appState.setContext(context);
+    });
 
     final navBarItems = appState.navigation.map((section) {
       return SalomonBottomBarItem(
@@ -64,25 +69,44 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       key: _scaffoldKey,
-      appBar: CustomAppBar(
-        selectedIndex: appState.selectedNavigation,
-        onMenuPressed: () {
-          _scaffoldKey.currentState?.openDrawer();
-        },
+      body: Container(
+        color: themeState.themeData.primaryColor,
+        child: Column(
+          children: [
+            CustomAppBar(
+              selectedIndex: appState.selectedNavigation,
+              onMenuPressed: () {
+                _scaffoldKey.currentState?.openDrawer();
+              },
+            ),
+            if (appState.isLoading)
+              LinearProgressIndicator(
+                backgroundColor: themeState.themeData.primaryColor.withOpacity(0.3),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  themeState.themeData.colorScheme.secondary,
+                ),
+              ),
+            Expanded(
+              child: _getBodyWidget(appState.selectedNavigation, themeState, appState),
+            ),
+          ],
+        ),
       ),
       drawer: Drawer(
         child: SettingsPage(),
       ),
-      body: _getBodyWidget(appState.selectedNavigation, themeState, appState),
-      bottomNavigationBar: SalomonBottomBar(
-        backgroundColor: themeState.themeData.primaryColor,
-        currentIndex: appState.selectedNavigation,
-        selectedItemColor: const Color(0xff6200ee),
-        unselectedItemColor: const Color(0xff757575),
-        onTap: (index) {
-          appState.setState(() => appState.selectedNavigation = index);
-        },
-        items: navBarItems,
+      bottomNavigationBar: Container(
+        color: themeState.themeData.primaryColor,
+        child: SalomonBottomBar(
+          backgroundColor: Colors.transparent,
+          currentIndex: appState.selectedNavigation,
+          selectedItemColor: const Color(0xff6200ee),
+          unselectedItemColor: const Color(0xff757575),
+          onTap: (index) {
+            appState.setState(() => appState.selectedNavigation = index);
+          },
+          items: navBarItems,
+        ),
       ),
     );
   }

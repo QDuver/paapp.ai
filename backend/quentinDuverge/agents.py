@@ -1,9 +1,11 @@
-import json
+process_comments_agent = """
+Process the given text and only keep what's relevant to generate the training program for the day.
+Keep as much information as possible, but only keep the training-related information.
+Keep the full sentences when possible.
+"""
 
-from quentinDuverge.models import ExerciseDay
 
-
-agent = f"""
+exercise_agent = """
 I am a 36 y.o male, 1m86, 80kg. I ran a marathon in April 2025 in 4h12min.
 You are a training assistant, providing me with a daily training program based on my goals and historical data.
 The training should show some variety from day to day, be consistent with my goals, and consider rest requirements for each muscle group / cardio.
@@ -56,6 +58,4 @@ For example, if I have 60 minutes available, return 8 exercices (60 / 7 = 8.57, 
 
 ## Return only today's program, not the full historics.
 
-## OUTPUT MODEL
-${json.dumps(ExerciseDay.model_json_schema(), indent=2)}
 """

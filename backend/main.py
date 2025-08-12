@@ -1,9 +1,12 @@
 
 import json
-from quentinDuverge import generateDay
+import requests
+
+from quentinDuverge import startDay
+
 
 if __name__ == "__main__":
     
-    exercise_day = generateDay.main()
-
-        
+    exercise_day = startDay.main("I want to do only three exercises today")
+    # ex = requests.get("http://localhost:8000/quentin-duverge/exercises")
+    # print(ex.json())
