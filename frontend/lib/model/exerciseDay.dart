@@ -24,10 +24,22 @@ class ExerciseDay {
       exercises: (json['exercises'] as List<dynamic>?)
               ?.asMap()
               .entries
-              .map((entry) => Exercise.fromJson(entry.value as Map<String, dynamic>, entry.key))
+              .map((entry) => Exercise.fromJson(
+                  entry.value as Map<String, dynamic>, entry.key))
               .toList() ??
           [],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'day': day,
+      'atHome': atHome,
+      if (wakeupTime != null) 'wakeupTime': wakeupTime,
+      if (availableExerciseTime != null)
+        'availableExerciseTime': availableExerciseTime,
+      'exercises': exercises.map((e) => e.toJson()).toList(),
+    };
   }
 
   static List<ExerciseDay> fromJsonList(dynamic result) {
@@ -36,7 +48,8 @@ class ExerciseDay {
         .toList();
   }
 
-  Future<void> updateExerciseAtIndex(int index, Exercise updatedExercise) async {
+  Future<void> updateExerciseAtIndex(
+      int index, Exercise updatedExercise) async {
     await ApiService.request(
       'update-db/exercises/$day',
       'POST',
@@ -45,7 +58,16 @@ class ExerciseDay {
         'value': updatedExercise.toJson(),
       },
     );
-    
+
     exercises[index] = updatedExercise;
+  }
+
+  Future<void> updateDb() async {
+    print(this.toJson());
+    await ApiService.request(
+      'quentin-duverge/exercises/$day',
+      'POST',
+      payload: this.toJson(),
+    );
   }
 }
