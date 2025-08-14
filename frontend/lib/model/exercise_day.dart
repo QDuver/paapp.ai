@@ -1,5 +1,5 @@
 import 'package:frontend/model/exercise.dart';
-import 'package:frontend/apiService.dart';
+import 'package:frontend/api.dart';
 
 class ExerciseDay {
   String day;
@@ -48,22 +48,7 @@ class ExerciseDay {
         .toList();
   }
 
-  Future<void> updateExerciseAtIndex(
-      int index, Exercise updatedExercise) async {
-    await ApiService.request(
-      'update-db/exercises/$day',
-      'POST',
-      payload: {
-        'path': ['exercises', index],
-        'value': updatedExercise.toJson(),
-      },
-    );
-
-    exercises[index] = updatedExercise;
-  }
-
   Future<void> updateDb() async {
-    print(this.toJson());
     await ApiService.request(
       'quentin-duverge/exercises/$day',
       'POST',

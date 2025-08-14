@@ -2,19 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:frontend/screens/home.dart';
 import 'package:frontend/screens/nutrition.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'screens/settings.dart';
 import 'screens/exercises/exercises.dart';
+import 'screens/login.dart';
 import 'theme/theme_state.dart';
+import 'auth.dart';
 import 'state.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
-import 'components/appBar.dart';
+import 'components/app_bar.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  print('INIT APP');
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
 
   @override
   Widget build(BuildContext context) {
@@ -22,14 +32,69 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider<ThemeState>(create: (_) => ThemeState()),
         ChangeNotifierProvider<AppState>(create: (_) => AppState()),
+        ChangeNotifierProxyProvider<AppState, AuthService>(
+          create: (context) => AuthService(context.read<AppState>()),
+          update: (context, appState, authService) => authService ?? AuthService(appState),
+        ),
       ],
       child: MaterialApp(
         title: 'aiapps',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
             primarySwatch: Colors.blue, canvasColor: Colors.transparent),
-        home: MyHomePage(),
+        home: AuthWrapper(),
       ),
+    );
+  }
+}
+
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<AppState, AuthService>(
+      builder: (context, appState, authService, child) {
+        // Show loading screen while checking authentication
+        if (appState.isAuthChecking) {
+          return Scaffold(
+            backgroundColor: Colors.blue,
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.fitness_center,
+                    size: 80,
+                    color: Colors.white,
+                  ),
+                  SizedBox(height: 24),
+                  Text(
+                    'Life Automation',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  SizedBox(height: 24),
+                  CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+        
+        // Show main app if user is authenticated
+        if (appState.isLoggedIn) {
+          return MyHomePage();
+        }
+        
+        // Show login screen if user is not authenticated
+        return const LoginScreen();
+      },
     );
   }
 }
@@ -53,6 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     final themeState = Provider.of<ThemeState>(context);
     final appState = Provider.of<AppState>(context);
+
     
     // Set context for ApiService error messages
     WidgetsBinding.instance.addPostFrameCallback((_) {

@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/model/exerciseDay.dart';
+import 'package:flutter/foundation.dart';
+import 'package:frontend/model/exercise_day.dart';
 import 'package:intl/intl.dart';
-import 'apiService.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'api.dart';
 
 class AppState extends ChangeNotifier implements AppStateInterface {
   bool _isLoading = false;
-  BuildContext? _context;
+  bool isAuthChecking = !kDebugMode; // Skip auth checking in debug mode
+  BuildContext? context;
+  User? currentUser;
   
   @override
   bool get isLoading => _isLoading;
@@ -13,14 +17,33 @@ class AppState extends ChangeNotifier implements AppStateInterface {
   @override
   set isLoading(bool value) {
     _isLoading = value;
+    notifyListeners();
   }
-  
-  @override
-  BuildContext? get context => _context;
   
   void setContext(BuildContext context) {
-    _context = context;
+    this.context = context;
   }
+  
+  // User authentication state
+  bool get isLoggedIn => kDebugMode || currentUser != null; // Always logged in during debug
+  
+  void setCurrentUser(User? user) {
+    currentUser = user;
+    isAuthChecking = false; // Auth check is complete
+    print('Current user set: ${user?.displayName ?? 'No user'}, isAuthChecking: $isAuthChecking');
+    
+    // Load exercises after successful authentication or in debug mode
+    if (user != null || kDebugMode) {
+      loadExercises();
+    }
+    
+    notifyListeners();
+  }
+  
+  // User helper methods
+  String? get userDisplayName => kDebugMode ? 'Debug User' : currentUser?.displayName;
+  String? get userEmail => kDebugMode ? 'debug@example.com' : currentUser?.email;
+  String? get userPhotoURL => currentUser?.photoURL;
   
   int selectedNavigation = 0;
   DateTime currentDate = DateTime.now();
@@ -46,10 +69,11 @@ class AppState extends ChangeNotifier implements AppStateInterface {
   ];
 
   AppState() {
-    _loadExercises();
+    print('AppState constructor called, isAuthChecking: $isAuthChecking');
+    // _loadExercises();
   }
 
-  Future<void> _loadExercises() async {
+  Future<void> loadExercises() async {
     final result = await ApiService.request(
       'quentin-duverge/exercises', 
       'GET',
@@ -76,7 +100,7 @@ class AppState extends ChangeNotifier implements AppStateInterface {
     
     if (result != null) {
       // Reload exercises after starting the day
-      await _loadExercises();
+      await loadExercises();
     }
   }
 
@@ -95,6 +119,13 @@ class AppState extends ChangeNotifier implements AppStateInterface {
     });
 
     await currentExerciseDay.updateDb();
+  }
+
+  Future<void> updateExerciseCompletion() async {
+    final currentExerciseDay = exerciseDay;
+    if (currentExerciseDay != null) {
+      await currentExerciseDay.updateDb();
+    }
   }
 
   void setState(void Function() updater) {
