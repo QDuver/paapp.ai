@@ -3,13 +3,14 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 // Forward declaration to avoid circular imports
 abstract class AppStateInterface {
   bool get isLoading;
   set isLoading(bool value);
   void setState(void Function() updater);
-  BuildContext? get context;
+  BuildContext? context;
 }
 
 String get baseUrl {
@@ -45,9 +46,7 @@ class ApiService {
     Map<String, dynamic>? payload,
     AppStateInterface? appState,
   }) async {
-  print('baseUrl: $baseUrl');
-  
-    // Set loading to true when request starts
+
     if (appState != null) {
       appState.setState(() => appState.isLoading = true);
     }
@@ -57,6 +56,13 @@ class ApiService {
       final headers = {
         'Content-Type': 'application/json',
       };
+
+      // Add Firebase Auth token if user is authenticated
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final idToken = await user.getIdToken();
+        headers['Authorization'] = 'Bearer $idToken';
+      }
 
       http.Response response;
       
@@ -109,14 +115,10 @@ class ApiService {
         }
         return null; // For successful requests with empty body
       } else {
-        print('API Error: ${response.statusCode} - ${response.body}');
-        
-        // Set loading to false on API error
         if (appState != null) {
           appState.setState(() => appState.isLoading = false);
         }
         
-        // Show error message
         _showMessage(appState, 'API Error: ${response.statusCode}', isError: true);
         
         return null;

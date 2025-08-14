@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/exercises/components/exerciseCard.dart';
-import 'package:frontend/screens/exercises/components/exerciseEdit.dart';
+import 'package:frontend/screens/exercises/components/card.dart';
+import 'package:frontend/screens/exercises/components/edit.dart';
 import 'package:frontend/state.dart';
 import 'package:frontend/theme/theme_state.dart';
 import 'package:provider/provider.dart';
-import 'components/noExercises.dart';
+import 'components/empty.dart';
 
 class ExercicePage extends StatefulWidget {
   @override
@@ -45,6 +45,9 @@ class _ExercicePageState extends State<ExercicePage> {
                       key: ValueKey(exercise.name + index.toString()),
                       exercise: exercise,
                       index: index,
+                      onExerciseUpdated: (exercise) async {
+                        await appState.updateExerciseCompletion();
+                      },
                     );
                   },
                 ),

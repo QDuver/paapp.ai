@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/model/exercise.dart';
 import 'package:frontend/theme/theme_state.dart';
 import 'package:provider/provider.dart';
-import 'package:frontend/screens/exercises/components/exerciseEdit.dart';
+import 'package:frontend/screens/exercises/components/edit.dart';
 
 class ExerciseCard extends StatefulWidget {
   final Exercise exercise;
@@ -157,23 +157,35 @@ class _ExerciseCardState extends State<ExerciseCard> {
           
           // Expandable sets section
           if (_isExpanded && widget.exercise.sets != null && widget.exercise.sets!.isNotEmpty)
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Divider(
-                    color: themeState.themeData.dividerColor.withValues(alpha: 0.3),
-                    height: 1,
-                  ),
-                  SizedBox(height: 20),
-                  ...widget.exercise.sets!.asMap().entries.map((entry) {
-                    int setIndex = entry.key;
-                    ExerciseSet set = entry.value;
-                    return _buildSetRow(context, themeState, setIndex + 1, set);
-                  }).toList(),
-                ],
+            InkWell(
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(12),
+                bottomRight: Radius.circular(12),
+              ),
+              onTap: () => showExerciseEditDialog(
+                context,
+                themeState,
+                widget.exercise,
+                initialName: widget.exercise.name,
+              ),
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Divider(
+                      color: themeState.themeData.dividerColor.withValues(alpha: 0.3),
+                      height: 1,
+                    ),
+                    SizedBox(height: 20),
+                    ...widget.exercise.sets!.asMap().entries.map((entry) {
+                      int setIndex = entry.key;
+                      ExerciseSet set = entry.value;
+                      return _buildSetRow(context, themeState, setIndex + 1, set);
+                    }).toList(),
+                  ],
+                ),
               ),
             ),
         ],

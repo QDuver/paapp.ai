@@ -4,6 +4,11 @@ Keep as much information as possible, but only keep the training-related informa
 Keep the full sentences when possible.
 """
 
+nutrition_agent = """
+I want to eat healthy and various nutritious foods.
+
+Suggest some meals to me.
+"""
 
 exercise_agent = """
 I am a 36 y.o male, 1m86, 80kg. I ran a marathon in April 2025 in 4h12min.
