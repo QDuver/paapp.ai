@@ -15,9 +15,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _signInWithGoogle() async {
     final appState = Provider.of<AppState>(context, listen: false);
     final authService = Provider.of<AuthService>(context, listen: false);
-    print('authService.isLoggedIn: ${authService.isLoggedIn}');
     if (authService.isLoggedIn) {
-      print('User is already logged in, skipping sign-in');
       return;
     }
     

@@ -30,7 +30,6 @@ class AppState extends ChangeNotifier implements AppStateInterface {
   void setCurrentUser(User? user) {
     currentUser = user;
     isAuthChecking = false; // Auth check is complete
-    print('Current user set: ${user?.displayName ?? 'No user'}, isAuthChecking: $isAuthChecking');
     
     // Load exercises after successful authentication or in debug mode
     if (user != null || kDebugMode) {
@@ -40,12 +39,7 @@ class AppState extends ChangeNotifier implements AppStateInterface {
     notifyListeners();
   }
   
-  // User helper methods
-  String? get userDisplayName => kDebugMode ? 'Debug User' : currentUser?.displayName;
-  String? get userEmail => kDebugMode ? 'debug@example.com' : currentUser?.email;
-  String? get userPhotoURL => currentUser?.photoURL;
-  
-  int selectedNavigation = 0;
+  int selectedNavigation = 1;
   DateTime currentDate = DateTime.now();
   String get formattedCurrentDate =>
       DateFormat('yyyy-MM-dd').format(currentDate);
@@ -69,8 +63,6 @@ class AppState extends ChangeNotifier implements AppStateInterface {
   ];
 
   AppState() {
-    print('AppState constructor called, isAuthChecking: $isAuthChecking');
-    // _loadExercises();
   }
 
   Future<void> loadExercises() async {
@@ -121,12 +113,6 @@ class AppState extends ChangeNotifier implements AppStateInterface {
     await currentExerciseDay.updateDb();
   }
 
-  Future<void> updateExerciseCompletion() async {
-    final currentExerciseDay = exerciseDay;
-    if (currentExerciseDay != null) {
-      await currentExerciseDay.updateDb();
-    }
-  }
 
   void setState(void Function() updater) {
     updater();

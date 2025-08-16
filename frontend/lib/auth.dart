@@ -15,7 +15,6 @@ class AuthService extends ChangeNotifier {
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
   AuthService(this._appState) {
-    print('AuthService initialized');
     if (kIsWeb) {
       _googleSignIn = GoogleSignIn(
         clientId:
@@ -28,13 +27,9 @@ class AuthService extends ChangeNotifier {
       );
     }
 
-    print('auth.currentUser ${_auth.currentUser}');
-
-    // Initialize auth state - this will set _isAuthChecking to false
     _appState.setCurrentUser(_auth.currentUser);
     
     _auth.authStateChanges().listen((User? user) {
-      print('Auth state changed. User: ${user?.displayName ?? 'null'}');
       _appState.setCurrentUser(user);
     });
   }
@@ -43,7 +38,6 @@ class AuthService extends ChangeNotifier {
     try {
       // Check if user is already signed in
       if (_auth.currentUser != null) {
-        print('User is already signed in: ${_auth.currentUser?.displayName}');
         return null;
       }
 
@@ -68,7 +62,6 @@ class AuthService extends ChangeNotifier {
 
       return userCredential;
     } catch (e) {
-      print('Error signing in with Google: $e');
       rethrow;
     }
   }
@@ -83,7 +76,6 @@ class AuthService extends ChangeNotifier {
 
       // User state is automatically updated via authStateChanges listener
     } catch (e) {
-      print('Error signing out: $e');
       rethrow;
     }
   }

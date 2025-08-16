@@ -7,6 +7,7 @@ class ExerciseDay {
   String? wakeupTime;
   int? availableExerciseTime;
   List<Exercise> exercises;
+  
   ExerciseDay({
     required this.day,
     this.atHome = false,
@@ -24,10 +25,32 @@ class ExerciseDay {
       exercises: (json['exercises'] as List<dynamic>?)
               ?.asMap()
               .entries
-              .map((entry) => Exercise.fromJson(
+              .map((entry) => _exerciseFromJson(
                   entry.value as Map<String, dynamic>, entry.key))
               .toList() ??
           [],
+    );
+  }
+
+  static Exercise _exerciseFromJson(Map<String, dynamic> json, int index) {
+    return Exercise(
+      index: index,
+      name: json['name'] as String,
+      isCompleted: json['isCompleted'] as bool? ?? false,
+      sets: json['sets'] != null
+          ? (json['sets'] as List<dynamic>)
+              .map((e) => _exerciseSetFromJson(e as Map<String, dynamic>))
+              .toList()
+          : null,
+    );
+  }
+
+  static ExerciseSet _exerciseSetFromJson(Map<String, dynamic> json) {
+    return ExerciseSet(
+      weightKg: (json['weightKg'] as num?)?.toDouble(),
+      repetitions: json['repetitions'] as int?,
+      durationSec: json['duration'] as int?,
+      rest: json['rest'] as int? ?? 90,
     );
   }
 
@@ -38,7 +61,24 @@ class ExerciseDay {
       if (wakeupTime != null) 'wakeupTime': wakeupTime,
       if (availableExerciseTime != null)
         'availableExerciseTime': availableExerciseTime,
-      'exercises': exercises.map((e) => e.toJson()).toList(),
+      'exercises': exercises.map((e) => _exerciseToJson(e)).toList(),
+    };
+  }
+
+  static Map<String, dynamic> _exerciseToJson(Exercise exercise) {
+    return {
+      'name': exercise.name,
+      'isCompleted': exercise.isCompleted,
+      if (exercise.sets != null) 'sets': exercise.sets!.map((e) => _exerciseSetToJson(e)).toList(),
+    };
+  }
+
+  static Map<String, dynamic> _exerciseSetToJson(ExerciseSet set) {
+    return {
+      if (set.weightKg != null) 'weightKg': set.weightKg,
+      if (set.repetitions != null) 'repetitions': set.repetitions,
+      if (set.durationSec != null) 'duration': set.durationSec,
+      'rest': set.rest,
     };
   }
 

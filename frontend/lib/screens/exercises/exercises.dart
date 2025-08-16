@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/exercises/components/card.dart';
-import 'package:frontend/screens/exercises/components/edit.dart';
+import 'package:frontend/components/card/simple_card.dart';
+import 'package:frontend/components/card/simple_dialog.dart';
+import 'package:frontend/components/card/reflection_helper.dart';
+import 'package:frontend/model/exercise.dart';
 import 'package:frontend/state.dart';
 import 'package:frontend/theme/theme_state.dart';
 import 'package:provider/provider.dart';
@@ -12,11 +14,6 @@ class ExercicePage extends StatefulWidget {
 }
 
 class _ExercicePageState extends State<ExercicePage> {
-  void _showAddExerciseDialog() {
-    final themeState = Provider.of<ThemeState>(context, listen: false);
-    showExerciseAddDialog(context, themeState);
-  }
-
   @override
   Widget build(BuildContext context) {
     final themeState = Provider.of<ThemeState>(context);
@@ -29,24 +26,35 @@ class _ExercicePageState extends State<ExercicePage> {
           children: [
             if (exerciseDay != null && exerciseDay.exercises.isNotEmpty)
               Expanded(
-                child: ReorderableListView.builder(
+                child: ListView.builder(
                   physics: BouncingScrollPhysics(),
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: EdgeInsets.symmetric(horizontal: 0, vertical: 8),
                   itemCount: exerciseDay.exercises.length,
-                  onReorder: (oldIndex, newIndex) {
-                    if (newIndex > oldIndex) {
-                      newIndex -= 1;
-                    }
-                    appState.reorderExercise(oldIndex, newIndex);
-                  },
                   itemBuilder: (context, index) {
                     final exercise = exerciseDay.exercises[index];
-                    return ExerciseCard(
-                      key: ValueKey(exercise.name + index.toString()),
-                      exercise: exercise,
-                      index: index,
-                      onExerciseUpdated: (exercise) async {
-                        await appState.updateExerciseCompletion();
+                    return SimpleCard(
+                      item: exercise,
+                      onSave: (updatedItem) async {
+                        // Update the exercise in the list
+                        appState.setState(() {
+                          exerciseDay.exercises[index] = updatedItem as Exercise;
+                        });
+                        
+                        // Persist changes to database
+                        await exerciseDay.updateDb();
+                      },
+                      onDelete: () async {
+                        // Remove the exercise from the list
+                        appState.setState(() {
+                          exerciseDay.exercises.removeAt(index);
+                          // Re-index remaining exercises
+                          for (int i = 0; i < exerciseDay.exercises.length; i++) {
+                            exerciseDay.exercises[i].index = i;
+                          }
+                        });
+                        
+                        // Persist changes to database
+                        await exerciseDay.updateDb();
                       },
                     );
                   },
@@ -60,7 +68,45 @@ class _ExercicePageState extends State<ExercicePage> {
           bottom: 16,
           right: 16,
           child: FloatingActionButton(
-            onPressed: _showAddExerciseDialog,
+            onPressed: () async {
+              if (exerciseDay == null) return;
+
+              // Create fields for a new exercise
+              final fields = [
+                FieldInfo(
+                  name: 'name',
+                  label: 'Exercise Name',
+                  value: '',
+                  required: true,
+                  type: String,
+                  hint: 'Enter exercise name',
+                ),
+              ];
+
+              // Show dialog to get exercise name
+              final result = await CustomEditDialog.show(
+                context,
+                fields: fields,
+              );
+
+              if (result != null && result['name']?.toString().trim().isNotEmpty == true) {
+                // Create new exercise with the next index
+                final newExercise = Exercise(
+                  index: exerciseDay.exercises.length,
+                  name: result['name'].toString().trim(),
+                  sets: [],
+                  isCompleted: false,
+                );
+
+                // Add to the list and update state
+                appState.setState(() {
+                  exerciseDay.exercises.add(newExercise);
+                });
+
+                // Persist changes to database
+                await exerciseDay.updateDb();
+              }
+            },
             backgroundColor: themeState.themeData.colorScheme.secondary,
             child: Icon(
               Icons.add,

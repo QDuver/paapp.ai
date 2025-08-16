@@ -1,24 +1,24 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/home.dart';
 import 'package:frontend/screens/nutrition.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
+
+import 'auth.dart';
+import 'components/app_bar.dart';
 import 'firebase_options.dart';
-import 'screens/settings.dart';
 import 'screens/exercises/exercises.dart';
 import 'screens/login.dart';
-import 'theme/theme_state.dart';
-import 'auth.dart';
+import 'screens/settings.dart';
 import 'state.dart';
-import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
-import 'components/app_bar.dart';
+import 'theme/theme_state.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  print('INIT APP');
   runApp(MyApp());
 }
 
@@ -87,26 +87,24 @@ class AuthWrapper extends StatelessWidget {
           );
         }
         
-        // Show main app if user is authenticated
         if (appState.isLoggedIn) {
-          return MyHomePage();
+          return Nav();
         }
         
-        // Show login screen if user is not authenticated
         return const LoginScreen();
       },
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+class Nav extends StatefulWidget {
+  const Nav({super.key});
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _NavState createState() => _NavState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _NavState extends State<Nav> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override

@@ -53,4 +53,4 @@ def delete(db: str, collection: str, document: str, path: Optional[str] = None):
 
 @app.post("/start-day")
 def start_day(request: InitDayRequest):
-    return startDay.main(request.notes)
+    return startDay.exercises(request.notes)

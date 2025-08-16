@@ -5,9 +5,8 @@ Keep the full sentences when possible.
 """
 
 nutrition_agent = """
-I want to eat healthy and various nutritious foods.
-
-Suggest some meals to me.
+Consider the historical data of my meals to suggest the upcoming ones. It should show diversity in ingredients, nutriments, and be healthy.
+My overall goal is not to lose weight but to gain muscle and lose belly fat.
 """
 
 exercise_agent = """
