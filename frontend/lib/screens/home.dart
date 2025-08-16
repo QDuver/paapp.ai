@@ -26,16 +26,19 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
+ Container(
               width: 200,
               height: 200,
               child: ElevatedButton(
-                onPressed: appState.isLoading ? null : () async {
-                  final notes = _notesController.text.trim();
-                  await appState.startDay(notes: notes.isNotEmpty ? notes : null);
-                  // Clear the input after successful submission
-                  _notesController.clear();
-                },
+                onPressed: appState.isLoading
+                    ? null
+                    : () async {
+                        final notes = _notesController.text.trim();
+                        await appState.startDay(
+                            notes: notes.isNotEmpty ? notes : null);
+                        // Clear the input after successful submission
+                        _notesController.clear();
+                      },
                 style: ElevatedButton.styleFrom(
                   shape: CircleBorder(),
                   backgroundColor: Theme.of(context).colorScheme.secondary,
@@ -66,7 +69,11 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            // Extra Comments Input Field
+           
+            Container(
+              margin: const EdgeInsets.only(bottom: 16.0, top: 16.0),
+              width: double.infinity,
+            ),
             Container(
               margin: const EdgeInsets.only(top: 48.0),
               decoration: BoxDecoration(
@@ -74,7 +81,8 @@ class _HomePageState extends State<HomePage> {
                 color: Theme.of(context).colorScheme.surface,
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                    color:
+                        Theme.of(context).colorScheme.primary.withOpacity(0.1),
                     blurRadius: 8,
                     offset: Offset(0, 4),
                   ),
@@ -107,20 +115,30 @@ class _HomePageState extends State<HomePage> {
                     TextField(
                       controller: _notesController,
                       decoration: InputDecoration(
-                        hintText: 'I feel lazy so give me a light exercise program, I have some leftover carrots I want to use in my meal, etc...',
+                        hintText:
+                            'I feel lazy so give me a light exercise program, I have some leftover carrots I want to use in my meal, etc...',
                         hintStyle: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant
+                              .withOpacity(0.6),
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.0),
                           borderSide: BorderSide(
-                            color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withOpacity(0.3),
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.0),
                           borderSide: BorderSide(
-                            color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withOpacity(0.3),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -131,10 +149,17 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                         filled: true,
-                        fillColor: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        fillColor: Theme.of(context)
+                            .colorScheme
+                            .surfaceVariant
+                            .withOpacity(0.3),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                         counterStyle: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant
+                              .withOpacity(0.6),
                           fontSize: 12,
                         ),
                       ),

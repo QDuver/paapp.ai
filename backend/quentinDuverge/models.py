@@ -1,6 +1,15 @@
 
-from typing import List, Optional
-from pydantic import BaseModel
+from typing import List, Optional, Literal
+from pydantic import BaseModel, Field
+
+
+class Meal(BaseModel):
+    day: str = None
+    name: str = None
+    ingredients: List[str] = None
+    instructions: str = None
+    calories: int = None
+    meal_type: Literal["breakfast", "lunch", "dinner"] = None
 
 class ProcessedComment(BaseModel):
     training: Optional[str] = None

@@ -124,9 +124,6 @@ class ApiService {
         return null;
       }
     } catch (e) {
-      print('Network Error: $e');
-      
-      // Set loading to false on network error
       if (appState != null) {
         appState.setState(() => appState.isLoading = false);
       }
