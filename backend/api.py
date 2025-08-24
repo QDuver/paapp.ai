@@ -1,10 +1,14 @@
+import json
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 from google.cloud import firestore
 
-from quentinDuverge import startDay
+from quentinDuverge import meals, exercises
+from quentinDuverge.routines import Routine, Routines
+from quentinDuverge.exercises import Exercises
+from quentinDuverge.meals import Meals
 
 
 class InitDayRequest(BaseModel):
@@ -20,6 +24,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/{db}/days/{day}")
+def get_routine(day: str):
+    routines = Routines.build_from_db(day=day)
+    print(routines.model_dump())
+    return routines.model_dump()
 
 @app.get("/{db}/{collection}")
 def get_collection(db: str, collection: str):
@@ -53,4 +63,4 @@ def delete(db: str, collection: str, document: str, path: Optional[str] = None):
 
 @app.post("/start-day")
 def start_day(request: InitDayRequest):
-    return startDay.exercises(request.notes)
+    return exercises.main(request.notes)

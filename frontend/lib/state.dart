@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:frontend/model/exercise_day.dart';
+import 'package:frontend/model/routine.dart';
+import 'package:frontend/model/day.dart';
+import 'package:frontend/model/exercise.dart';
+import 'package:frontend/model/meal.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'api.dart';
 
 class AppState extends ChangeNotifier implements AppStateInterface {
   bool _isLoading = false;
-  bool isAuthChecking = !kDebugMode; // Skip auth checking in debug mode
+  // bool isAuthChecking = !kDebugMode; // Skip auth checking in debug mode
+  bool isAuthChecking = false; // Always skip auth checking
   BuildContext? context;
   User? currentUser;
   
@@ -25,17 +29,12 @@ class AppState extends ChangeNotifier implements AppStateInterface {
   }
   
   // User authentication state
-  bool get isLoggedIn => kDebugMode || currentUser != null; // Always logged in during debug
+  bool get isLoggedIn => true; // Always logged in (skip authentication)
   
   void setCurrentUser(User? user) {
     currentUser = user;
     isAuthChecking = false; // Auth check is complete
-    
-    // Load exercises after successful authentication or in debug mode
-    if (user != null || kDebugMode) {
-      loadExercises();
-    }
-    
+    loadDays();
     notifyListeners();
   }
   
@@ -44,16 +43,70 @@ class AppState extends ChangeNotifier implements AppStateInterface {
   String get formattedCurrentDate =>
       DateFormat('yyyy-MM-dd').format(currentDate);
 
-  List<ExerciseDay>? exerciseDays;
+  Day? dayData;
 
-  ExerciseDay? get exerciseDay {
-    if (exerciseDays == null || exerciseDays!.isEmpty) return null;
+  Day? get day => dayData;
 
-    final index = exerciseDays!.indexWhere(
-      (exercise) => exercise.day == formattedCurrentDate,
-    );
+  // Helper getters for different routine types
+  List<Routine> get allRoutines => day?.allRoutines ?? [];
+  List<Routine> get exerciseRoutines => day?.exerciseRoutines ?? [];
+  List<Routine> get mealRoutines => day?.mealRoutines ?? [];
+  List<Routine> get otherRoutines => day?.otherRoutines ?? [];
 
-    return index != -1 ? exerciseDays![index] : null;
+  // Helper getters to extract individual exercises and meals from routines
+  List<Exercise> get individualExercises {
+    List<Exercise> exercises = [];
+    int exerciseIndex = 0;
+    
+    for (Routine routine in exerciseRoutines) {
+      if (routine.objects is List) {
+        for (var exerciseData in routine.objects as List) {
+          if (exerciseData is Map<String, dynamic>) {
+            exercises.add(Exercise.fromJson(exerciseData, exerciseIndex));
+            exerciseIndex++;
+          }
+        }
+      }
+    }
+    return exercises;
+  }
+
+  List<Meal> get individualMeals {
+    List<Meal> meals = [];
+    
+    for (Routine routine in mealRoutines) {
+      if (routine.objects is Map<String, dynamic>) {
+        meals.add(Meal.fromJson(routine.objects as Map<String, dynamic>));
+      }
+    }
+    return meals;
+  }
+
+  // Methods to update individual exercises and meals back to their parent routines
+  Future<void> updateIndividualExercises(List<Exercise> updatedExercises) async {
+    // Update the exercises back into their parent routines
+    for (Routine routine in exerciseRoutines) {
+      if (routine.objects is List) {
+        List<Map<String, dynamic>> exerciseObjects = [];
+        for (Exercise exercise in updatedExercises) {
+          exerciseObjects.add(exercise.toJson());
+        }
+        routine.objects = exerciseObjects;
+        await routine.updateDb();
+      }
+    }
+  }
+
+  Future<void> updateIndividualMeals(List<Meal> updatedMeals) async {
+    // Update the meals back into their parent routines
+    int mealIndex = 0;
+    for (Routine routine in mealRoutines) {
+      if (routine.objects is Map<String, dynamic> && mealIndex < updatedMeals.length) {
+        routine.objects = updatedMeals[mealIndex].toJson();
+        await routine.updateDb();
+        mealIndex++;
+      }
+    }
   }
 
   List<Map<String, dynamic>> navigation = [
@@ -63,17 +116,18 @@ class AppState extends ChangeNotifier implements AppStateInterface {
   ];
 
   AppState() {
+    loadDays();
   }
 
-  Future<void> loadExercises() async {
+  Future<void> loadDays() async {
     final result = await ApiService.request(
-      'quentin-duverge/exercises', 
+      'quentin-duverge/days/$formattedCurrentDate', 
       'GET',
       appState: this,
     );
     setState(() {
       if (result != null) {
-        exerciseDays = ExerciseDay.fromJsonList(result);
+        dayData = Day.fromJson(result);
       }
     });
   }
@@ -91,26 +145,25 @@ class AppState extends ChangeNotifier implements AppStateInterface {
     );
     
     if (result != null) {
-      // Reload exercises after starting the day
-      await loadExercises();
+      // Reload days after starting the day
+      await loadDays();
     }
   }
 
-  Future<void> reorderExercise(int oldIndex, int newIndex) async {
-    final currentExerciseDay = exerciseDay;
-    if (currentExerciseDay == null || currentExerciseDay.exercises.isEmpty)
+  Future<void> reorderRoutine(int oldIndex, int newIndex) async {
+    final currentDay = day;
+    if (currentDay == null || currentDay.routines.isEmpty)
       return;
 
     setState(() {
-      final exercise = currentExerciseDay.exercises.removeAt(oldIndex);
-      currentExerciseDay.exercises.insert(newIndex, exercise);
-
-      for (int i = 0; i < currentExerciseDay.exercises.length; i++) {
-        currentExerciseDay.exercises[i].index = i;
-      }
+      final routine = currentDay.routines.removeAt(oldIndex);
+      currentDay.routines.insert(newIndex, routine);
     });
 
-    await currentExerciseDay.updateDb();
+    // Update each routine in the database
+    for (var routine in currentDay.routines) {
+      await routine.updateDb();
+    }
   }
 
 

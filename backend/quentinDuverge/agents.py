@@ -1,10 +1,4 @@
-process_comments_agent = """
-Process the given text and only keep what's relevant to generate the training program for the day.
-Keep as much information as possible, but only keep the training-related information.
-Keep the full sentences when possible.
-"""
-
-nutrition_agent = """
+meals_agent = """
 Consider the historical data of my meals to suggest the upcoming ones. It should show diversity in ingredients, nutriments, and be healthy.
 My overall goal is not to lose weight but to gain muscle and lose belly fat.
 """
@@ -43,7 +37,7 @@ For example, I did Day 1 on June 1st, I didn't do anything on June 2nd, so the t
 
 This is a list of my past training data, including the date, exercises, sets, reps, and weights used.
 
-## CURRENT_DAY
+## CONDITIONS
 
 This is a model containing information about my current day, including sleep quality, wakeup time, available exercise time, and whether I am at home or not.
 If I am at home, don't include any exercices that require machines or gym equipment.
@@ -53,6 +47,9 @@ If I am at home, don't include any exercices that require machines or gym equipm
 The time I have available for exercise today, in minutes. 
 When working out, one exercice is about 7 minutes, so return as many exercices as possible in that time.
 For example, if I have 60 minutes available, return 8 exercices (60 / 7 = 8.57, rounded down to 8).
+
+## USER_NOTES
+This is extra notes provided by the user that can influence the training program.
 
 # OUTPUT REQUIREMENTS
 
