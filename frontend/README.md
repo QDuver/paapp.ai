@@ -53,7 +53,7 @@ Class | Method | HTTP request | Description
 ## Documentation For Models
 
  - [Exercise](doc//Exercise.md)
- - [ExerciseDay](doc//ExerciseDay.md)
+ - [Day](doc//Day.md)
 
 
 ## Documentation For Authorization

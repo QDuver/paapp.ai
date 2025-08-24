@@ -231,7 +231,11 @@ class _SimpleCardState extends State<SimpleCard> {
                               final tempSubItem = widget.item.createNewSubItem();
                               if (tempSubItem != null) {
                                 final fields = tempSubItem.getEditableFields();
-                                final result = await custom_dialog.CustomEditDialog.show(context, fields: fields);
+                                final result = await custom_dialog.CustomEditDialog.show(
+                                  context, 
+                                  fields: fields,
+                                  isCreating: true, // Show all fields when creating a new sub-item
+                                );
                                 
                                 if (result != null) {
                                   // Only add the sub-item if user saved the dialog

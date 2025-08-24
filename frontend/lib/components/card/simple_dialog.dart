@@ -6,11 +6,20 @@ class CustomEditDialog {
     BuildContext context, {
     required List<FieldInfo> fields,
     VoidCallback? onDelete,
+    bool isCreating = false,
   }) async {
     final controllers = <String, TextEditingController>{};
     
+    // Filter fields based on whether we're creating or editing
+    final fieldsToShow = isCreating 
+        ? fields // Show all fields when creating
+        : fields.where((field) => 
+            field.required || // Always show required fields
+            (field.value != null && field.value.toString().trim().isNotEmpty) // Show non-null, non-empty fields
+          ).toList();
+    
     // Initialize controllers for each field
-    for (final field in fields) {
+    for (final field in fieldsToShow) {
       controllers[field.name] = TextEditingController(
         text: field.value?.toString() ?? '',
       );
@@ -22,7 +31,7 @@ class CustomEditDialog {
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: fields.map((field) {
+            children: fieldsToShow.map((field) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
                 child: TextField(
@@ -88,7 +97,7 @@ class CustomEditDialog {
                 ElevatedButton(
                   onPressed: () {
                     final result = <String, dynamic>{};
-                    for (final field in fields) {
+                    for (final field in fieldsToShow) {
                       final value = controllers[field.name]!.text;
                       result[field.name] = value;
                     }
@@ -114,7 +123,7 @@ class CustomEditDialog {
                 ElevatedButton(
                   onPressed: () {
                     final result = <String, dynamic>{};
-                    for (final field in fields) {
+                    for (final field in fieldsToShow) {
                       final value = controllers[field.name]!.text;
                       result[field.name] = value;
                     }

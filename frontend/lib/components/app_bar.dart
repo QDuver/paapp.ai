@@ -18,9 +18,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     final themeState = context.read<ThemeState>();
     final appState = context.watch<AppState>();
     
-    // Show date navigation only on exercises page (index 1)
-    final isExercisesPage = selectedIndex == 1;
-
     return AppBar(
       leading: IconButton(
         icon: Icon(
@@ -29,7 +26,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         onPressed: onMenuPressed,
       ),
-      title: isExercisesPage ? _buildDateNavigation(context, themeState, appState) : null,
+      title: _buildDateNavigation(context, themeState, appState),
       centerTitle: true,
       backgroundColor: Colors.transparent,
       elevation: 0,

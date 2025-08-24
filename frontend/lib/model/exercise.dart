@@ -14,12 +14,40 @@ class ExerciseSet implements CardItem {
   @Editable(label: "Rest (sec)")
   int rest;
 
+  // Reference to parent exercise and index for propagating changes
+  Exercise? _parentExercise;
+  int? _setIndex;
+
   ExerciseSet({
     this.weightKg,
     this.repetitions,
     this.durationSec,
     this.rest = 90,
   });
+
+  factory ExerciseSet.fromJson(Map<String, dynamic> json) {
+    return ExerciseSet(
+      weightKg: (json['weightKg'] as num?)?.toDouble(),
+      repetitions: json['repetitions'] as int?,
+      durationSec: json['duration'] as int?,
+      rest: json['rest'] as int? ?? 90,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      if (weightKg != null) 'weightKg': weightKg,
+      if (repetitions != null) 'repetitions': repetitions,
+      if (durationSec != null) 'duration': durationSec,
+      'rest': rest,
+    };
+  }
+
+  // Method to set parent context
+  void _setParentContext(Exercise parent, int index) {
+    _parentExercise = parent;
+    _setIndex = index;
+  }
 
   @override
   String getDisplayName() {
@@ -87,17 +115,41 @@ class ExerciseSet implements CardItem {
 
   @override
   void updateFields(Map<String, dynamic> values) {
+    // Store original values to track what changed
+    Map<String, dynamic> changedFields = {};
+    
     if (values.containsKey('weightKg')) {
-      weightKg = _parseDouble(values['weightKg']);
+      double? newValue = _parseDouble(values['weightKg']);
+      if (newValue != weightKg) {
+        weightKg = newValue;
+        changedFields['weightKg'] = newValue;
+      }
     }
     if (values.containsKey('repetitions')) {
-      repetitions = _parseInt(values['repetitions']);
+      int? newValue = _parseInt(values['repetitions']);
+      if (newValue != repetitions) {
+        repetitions = newValue;
+        changedFields['repetitions'] = newValue;
+      }
     }
     if (values.containsKey('durationSec')) {
-      durationSec = _parseInt(values['durationSec']);
+      int? newValue = _parseInt(values['durationSec']);
+      if (newValue != durationSec) {
+        durationSec = newValue;
+        changedFields['durationSec'] = newValue;
+      }
     }
     if (values.containsKey('rest')) {
-      rest = _parseInt(values['rest']) ?? 90;
+      int newValue = _parseInt(values['rest']) ?? 90;
+      if (newValue != rest) {
+        rest = newValue;
+        changedFields['rest'] = newValue;
+      }
+    }
+
+    // Propagate changes to subsequent sets
+    if (changedFields.isNotEmpty && _parentExercise != null && _setIndex != null) {
+      _parentExercise!._propagateSetChanges(_setIndex!, changedFields);
     }
   }
 
@@ -136,7 +188,31 @@ class Exercise implements CardItem {
     required this.name,
     this.sets,
     this.isCompleted = false,
-  });
+  }) {
+    // Initialize parent context for existing sets
+    _updateSetIndexes();
+  }
+
+  factory Exercise.fromJson(Map<String, dynamic> json, int index) {
+    return Exercise(
+      index: index,
+      name: json['name'] as String,
+      isCompleted: json['isCompleted'] as bool? ?? false,
+      sets: json['sets'] != null
+          ? (json['sets'] as List<dynamic>)
+              .map((e) => ExerciseSet.fromJson(e as Map<String, dynamic>))
+              .toList()
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'isCompleted': isCompleted,
+      if (sets != null) 'sets': sets!.map((e) => e.toJson()).toList(),
+    };
+  }
 
   @override
   String getDisplayName() => name;
@@ -150,7 +226,10 @@ class Exercise implements CardItem {
   }
 
   @override
-  List<dynamic> getSubItems() => sets ?? [];
+  List<dynamic> getSubItems() {
+    _updateSetIndexes(); // Ensure parent context is set
+    return sets ?? [];
+  }
 
   @override
   bool canAddSubItems() => true; // Exercises can add new sets
@@ -158,7 +237,9 @@ class Exercise implements CardItem {
   @override
   void addSubItem() {
     sets ??= [];
-    sets!.add(ExerciseSet());
+    ExerciseSet newSet = ExerciseSet();
+    sets!.add(newSet);
+    _updateSetIndexes();
   }
 
   @override
@@ -168,6 +249,29 @@ class Exercise implements CardItem {
   void removeSubItem(int index) {
     if (sets != null && index >= 0 && index < sets!.length) {
       sets!.removeAt(index);
+      _updateSetIndexes();
+    }
+  }
+
+  // Update parent context for all sets
+  void _updateSetIndexes() {
+    if (sets != null) {
+      for (int i = 0; i < sets!.length; i++) {
+        sets![i]._setParentContext(this, i);
+      }
+    }
+  }
+
+  // Propagate changes to subsequent sets
+  void _propagateSetChanges(int fromIndex, Map<String, dynamic> changedFields) {
+    if (sets == null || fromIndex >= sets!.length - 1) return;
+    
+    // Apply changes to all subsequent sets
+    for (int i = fromIndex + 1; i < sets!.length; i++) {
+      ExerciseSet targetSet = sets![i];
+      
+      // Apply each changed field to the target set using its updateFields method
+      targetSet.updateFields(changedFields);
     }
   }
 
