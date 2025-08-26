@@ -90,6 +90,7 @@ class Meal implements CardItem {
   @override
   void removeSubItem(int index) {} // Meal details are managed through the edit dialog
 
+
   @override
   List<FieldInfo> getEditableFields() {
     return [
