@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/components/card/simple_card.dart';
 import 'package:frontend/components/card/simple_dialog.dart';
 import 'package:frontend/components/card/reflection_helper.dart';
+import 'package:frontend/state.dart';
 import 'package:frontend/theme/theme_state.dart';
 import 'package:provider/provider.dart';
 
@@ -95,14 +96,14 @@ class _CardListState<T extends CardItem> extends State<CardList<T>> {
                       Icon(
                         _emptyIcon,
                         size: 64,
-                        color: themeState.themeData.colorScheme.outline,
+                        color: themeState.themeData.colorScheme.secondary,
                       ),
                       const SizedBox(height: 16),
                       Text(
                         _emptyTitle,
                         style:
                             themeState.themeData.textTheme.bodyMedium?.copyWith(
-                          color: themeState.themeData.colorScheme.outline,
+                          color: themeState.themeData.colorScheme.secondary,
                         ),
                       ),
                     ],
@@ -114,13 +115,29 @@ class _CardListState<T extends CardItem> extends State<CardList<T>> {
         Positioned(
           bottom: 16,
           right: 16,
-          child: FloatingActionButton(
-            onPressed: _addNewItem,
-            backgroundColor: themeState.themeData.colorScheme.secondary,
-            child: Icon(
-              Icons.add,
-              color: themeState.themeData.cardColor,
-            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FloatingActionButton(
+                onPressed: _generateWithAI,
+                backgroundColor: themeState.themeData.colorScheme.tertiary,
+                heroTag: "generateAI",
+                child: Icon(
+                  Icons.auto_awesome,
+                  color: themeState.themeData.cardColor,
+                ),
+              ),
+              const SizedBox(height: 12),
+              FloatingActionButton(
+                onPressed: _addNewItem,
+                backgroundColor: themeState.themeData.colorScheme.secondary,
+                heroTag: "addNew",
+                child: Icon(
+                  Icons.add,
+                  color: themeState.themeData.cardColor,
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -181,5 +198,11 @@ class _CardListState<T extends CardItem> extends State<CardList<T>> {
 
       widget.onItemsChanged(widget.items);
     }
+  }
+
+  void _generateWithAI() async {
+    final appState = Provider.of<AppState>(context, listen: false);
+    String itemType = T.toString();
+    await appState.generateWithAI(itemType);
   }
 }

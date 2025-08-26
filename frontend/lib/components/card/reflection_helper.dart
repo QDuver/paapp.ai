@@ -31,4 +31,5 @@ abstract class CardItem {
   void addSubItem();
   CardItem? createNewSubItem(); // Create a template for a new sub-item
   void removeSubItem(int index); // Remove a sub-item at the given index
+  
 }

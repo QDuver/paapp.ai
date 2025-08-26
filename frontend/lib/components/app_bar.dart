@@ -26,7 +26,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         onPressed: onMenuPressed,
       ),
-      title: _buildDateNavigation(context, themeState, appState),
+      // title: _buildDateNavigation(context, themeState, appState),
       centerTitle: true,
       backgroundColor: Colors.transparent,
       elevation: 0,

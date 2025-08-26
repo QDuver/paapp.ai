@@ -37,9 +37,26 @@ class Routines(BaseModel):
     @staticmethod
     def build_from_db(day: str = today):
         
-        routines = Routines( **fs.collection(FSDB).document(day).get().to_dict())
-        exercises = Exercises(**fs.collection('exercises').document(day).get().to_dict()).exercises
-        meals = Meals(**fs.collection('meals').document(day).get().to_dict()).meals
+        # Get routines document, return empty Routines if not found
+        routines_data = fs.collection(FSDB).document(day).get().to_dict()
+        if routines_data is None:
+            routines = Routines.build()
+        else:
+            routines = Routines(**routines_data)
+        
+        # Get exercises document, return empty list if not found
+        exercises_data = fs.collection('exercises').document(day).get().to_dict()
+        if exercises_data is None:
+            exercises = []
+        else:
+            exercises = Exercises(**exercises_data).exercises
+        
+        # Get meals document, return empty list if not found
+        meals_data = fs.collection('meals').document(day).get().to_dict()
+        if meals_data is None:
+            meals = []
+        else:
+            meals = Meals(**meals_data).meals
         
         meal_index = 0
         
@@ -53,21 +70,12 @@ class Routines(BaseModel):
         return routines
 
     @staticmethod
-    def build_base():
+    def build():
         routineBase = Routines(day=today, wakeupTime=datetime.datetime.now().strftime(
             '%H:%M'), routines=[Routine(**data) for data in ROUTINE_TEMPLATE])
         routineBase.save()
         return routineBase
 
-
-    def build_exercises(self):
-        routineExercises = [ r for r in self.routines if r.routineType == 'exercises']
-        [Exercises(day=self.day, availableTimeMin=30).build() for _ in routineExercises]
-
-    def build_meals(self):
-        routineMeals = [ r for r in self.routines if r.routineType == 'meal']
-        [Meals(day=self.day).build() for _ in routineMeals]
-        
     def save(self):
         fs.collection(FSDB).document(self.day).set(self.model_dump(exclude_none=True))
 

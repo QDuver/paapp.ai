@@ -39,7 +39,7 @@ class _SimpleCardState extends State<SimpleCard> {
     final showExpandButton = hasSubItems || canAddSubItems;
 
     return Card(
-      margin: const EdgeInsets.all(24.0),
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
       elevation: 4,
       color: themeState.themeData.cardColor,
       shape: RoundedRectangleBorder(

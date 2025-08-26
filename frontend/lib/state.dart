@@ -34,7 +34,7 @@ class AppState extends ChangeNotifier implements AppStateInterface {
   void setCurrentUser(User? user) {
     currentUser = user;
     isAuthChecking = false; // Auth check is complete
-    loadDays();
+    loadRoutines();
     notifyListeners();
   }
   
@@ -116,12 +116,12 @@ class AppState extends ChangeNotifier implements AppStateInterface {
   ];
 
   AppState() {
-    loadDays();
+    loadRoutines();
   }
 
-  Future<void> loadDays() async {
+  Future<void> loadRoutines() async {
     final result = await ApiService.request(
-      'quentin-duverge/days/$formattedCurrentDate', 
+      'quentin-duverge/routines/$formattedCurrentDate', 
       'GET',
       appState: this,
     );
@@ -130,6 +130,82 @@ class AppState extends ChangeNotifier implements AppStateInterface {
         dayData = Day.fromJson(result);
       }
     });
+  }
+
+  // Method to update routines data (used after AI generation)
+  void updateRoutines(List<Routine> newRoutines) {
+    setState(() {
+      if (dayData != null) {
+        dayData!.routines = newRoutines;
+      }
+    });
+  }
+
+  // Generic method to clear items before AI generation
+  Future<void> clearItemsBeforeGeneration(String itemType) async {
+    switch (itemType.toLowerCase()) {
+      case 'exercise':
+        // Clear all exercises by setting empty objects in exercise routines
+        for (Routine routine in exerciseRoutines) {
+          routine.objects = [];
+          await routine.updateDb();
+        }
+        break;
+      case 'meal':
+        // Clear all meals by setting empty objects in meal routines
+        for (Routine routine in mealRoutines) {
+          routine.objects = {};
+          await routine.updateDb();
+        }
+        break;
+      default:
+        return; // Unknown item type, do nothing
+    }
+    
+    // Notify listeners to update UI
+    notifyListeners();
+  }
+
+  // Generic AI generation method
+  Future<void> generateWithAI(String itemType) async {
+    // First clear existing items
+    await clearItemsBeforeGeneration(itemType);
+    
+    String endpoint;
+    
+    // Determine the API endpoint based on item type
+    switch (itemType.toLowerCase()) {
+      case 'exercise':
+        endpoint = 'quentin-duverge/exercises/$formattedCurrentDate';
+        break;
+      case 'meal':
+        endpoint = 'quentin-duverge/meals/$formattedCurrentDate';
+        break;
+      default:
+        return; // Unknown item type, do nothing
+    }
+    
+    final result = await ApiService.request(
+      endpoint,
+      'POST',
+      payload: {}, // Empty payload for now, can be extended later
+      appState: this,
+    );
+    
+    if (result != null) {
+      // The API returns the full routines of the day
+      List<Routine> newRoutines;
+      if (result is Map<String, dynamic> && result.containsKey('routines')) {
+        newRoutines = Routine.fromJsonList(result['routines']);
+      } else if (result is List) {
+        newRoutines = Routine.fromJsonList(result);
+      } else {
+        return; // Invalid response format
+      }
+      
+      // Update the routines
+      updateRoutines(newRoutines);
+    }
   }
 
   Future<void> startDay({String? notes}) async {
@@ -146,7 +222,7 @@ class AppState extends ChangeNotifier implements AppStateInterface {
     
     if (result != null) {
       // Reload days after starting the day
-      await loadDays();
+      await loadRoutines();
     }
   }
 
