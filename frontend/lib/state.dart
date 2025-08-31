@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/model/exercise.dart';
+import 'package:frontend/model/meal.dart';
 import 'package:frontend/model/routine.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -32,7 +33,7 @@ class AppState extends ChangeNotifier implements AppStateInterface {
     notifyListeners();
   }
 
-  int selectedNavigation = 1;
+  int selectedNavigation = 2;
   List<Map<String, dynamic>> navigation = [
     {'name': 'Routine', 'icon': Icons.accessibility_new},
     {'name': 'Exercises', 'icon': Icons.fitness_center},
@@ -42,6 +43,7 @@ class AppState extends ChangeNotifier implements AppStateInterface {
 
   Routines routines = Routines();
   Exercises exercises = Exercises();
+  Meals meals = Meals();
 
   AppState() {
     ApiService.loadAll(this, setState);

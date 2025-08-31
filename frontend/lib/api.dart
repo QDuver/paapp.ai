@@ -1,5 +1,6 @@
 import 'package:frontend/model/abstracts.dart';
 import 'package:frontend/model/exercise.dart';
+import 'package:frontend/model/meal.dart';
 import 'package:frontend/model/routine.dart';
 import 'package:frontend/state.dart';
 import 'package:http/http.dart' as http;
@@ -150,7 +151,7 @@ class ApiService {
     }
   }
 
-  static Future updateDocument(AppState state, MetaAbstract obj) async {
+  static Future updateDocument(AppState state, ListAbstract obj) async {
     await ApiService.request(
       'quentin-duverge/${obj.collection}/${obj.id}',
       'POST',
@@ -167,12 +168,10 @@ class ApiService {
       appState: state,
     );
 
-    final routines = Routines.fromJson(result['routines']);
-    final exercises = Exercises.fromJson(result['exercises']);
-
     setState(() {
-      state.routines = routines;
-      state.exercises = exercises;
+      state.routines = Routines.fromJson(result['routines']);
+      state.exercises = Exercises.fromJson(result['exercises']);;
+      state.meals = Meals.fromJson(result['meals']);
     });
   }
 }

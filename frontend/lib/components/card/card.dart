@@ -7,7 +7,7 @@ import 'package:frontend/theme/theme_state.dart';
 import 'package:provider/provider.dart';
 
 class CustomCard extends StatelessWidget {
-  final MetaAbstract obj;
+  final ListAbstract obj;
   final CardAbstract item;
 
   const CustomCard({required this.obj, required this.item});
@@ -69,6 +69,7 @@ class CustomCard extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       // Completion toggle
                       GestureDetector(
@@ -109,6 +110,34 @@ class CustomCard extends StatelessWidget {
                           style: themeState.themeData.textTheme.bodyLarge,
                         ),
                       ),
+                      if (item.tags.isNotEmpty) ...[
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: item.tags.map((tag) => Container(
+                            margin: EdgeInsets.only(left: 6),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: themeState.themeData.colorScheme.secondary.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: themeState.themeData.colorScheme.secondary.withOpacity(0.3),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              tag,
+                              style: themeState.themeData.textTheme.bodySmall?.copyWith(
+                                color: themeState.themeData.colorScheme.secondary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          )).toList(),
+                        ),
+                        SizedBox(width: 12),
+                      ],
                       if (item.canAddItems)
                         GestureDetector(
                           onTap: () {

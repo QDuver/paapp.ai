@@ -14,7 +14,8 @@ if __name__ == "__main__":
 
     # routines = Routines.build()
     # routines = Routines.query()
-    exercises = Exercises.build()
+    # exercises = Exercises.build()
+    Meals.build()
     # print(json.dumps(exercises.model_dump(), indent=2))
 
     # ex = requests.get("http://localhost:8000/quentin-duverge/routines/2025-08-30")

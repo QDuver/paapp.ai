@@ -7,20 +7,18 @@ import 'package:provider/provider.dart';
 class CustomEditDialog {
   static Future<Map<String, dynamic>?> show<T>(
     BuildContext context, {
-    required EditableItem item,
+    required EditableItemAbstract item,
     required T parent,
-    required MetaAbstract obj,
+    required ListAbstract obj,
     bool isCreate = false,
   }) async {
-    final fields = item.getEditableFields();
+    final fieldDescriptors = item.getEditableFields();
     final controllers = <String, TextEditingController>{};
     final appState = context.read<AppState>();
 
-    final fieldsToShow = fields;
-
-    for (final field in fieldsToShow) {
+    for (final field in fieldDescriptors) {
       controllers[field.name] = TextEditingController(
-        text: field.value?.toString() ?? '',
+        text: field.getter()?.toString() ?? '',
       );
     }
 
@@ -30,16 +28,15 @@ class CustomEditDialog {
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: fieldsToShow.map((field) {
+            children: fieldDescriptors.map((field) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
                 child: TextField(
                   controller: controllers[field.name],
                   decoration: InputDecoration(
                     labelText: field.label,
-                    hintText: field.hint,
                   ),
-                  keyboardType: _getKeyboardType(field.type),
+                  keyboardType: _getKeyboardTypeForField(field.type),
                 ),
               );
             }).toList(),
@@ -78,7 +75,7 @@ class CustomEditDialog {
               ElevatedButton(
                 onPressed: () {
                   final result = <String, dynamic>{};
-                  for (final field in fieldsToShow) {
+                  for (final field in fieldDescriptors) {
                     final value = controllers[field.name]!.text;
                     result[field.name] = value;
                   }
@@ -109,8 +106,8 @@ class CustomEditDialog {
     }
   }
 
-  static TextInputType _getKeyboardType(Type type) {
-    if (type == int || type == double) {
+  static TextInputType _getKeyboardTypeForField(Type fieldType) {
+    if (fieldType == int || fieldType == double) {
       return TextInputType.number;
     }
     return TextInputType.text;

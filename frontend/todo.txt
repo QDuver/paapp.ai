@@ -1,5 +1,10 @@
+- navigation / icons
+- Pictures of meals
+- Collapse when completed
+- Autosuggest exercise names
 - Propagation of set
 - Routine type to dropdown
-- Weight input should not accept nnon-numeric
+- Weight input should not accept non-numeric
 - Don't trigger loading for isCompleted
-- Autosuggest exercice names
+- in API, validate json against model before saving
+- Implement tests
