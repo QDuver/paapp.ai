@@ -1,6 +1,7 @@
-- navigation / icons
+- Start Day
+- Calendar Icon + Swipability
+- Build from FE
 - Pictures of meals
-- Collapse when completed
 - Autosuggest exercise names
 - Propagation of set
 - Routine type to dropdown
@@ -8,3 +9,5 @@
 - Don't trigger loading for isCompleted
 - in API, validate json against model before saving
 - Implement tests
+- User Settings
+- Custom prompts

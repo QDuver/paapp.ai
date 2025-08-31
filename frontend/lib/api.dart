@@ -1,7 +1,7 @@
-import 'package:frontend/model/abstracts.dart';
-import 'package:frontend/model/exercise.dart';
-import 'package:frontend/model/meal.dart';
-import 'package:frontend/model/routine.dart';
+import 'package:frontend/model/list.abstract.dart';
+import 'package:frontend/model/list.exercise.dart';
+import 'package:frontend/model/list.meal.dart';
+import 'package:frontend/model/list.routine.dart';
 import 'package:frontend/state.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -173,5 +173,14 @@ class ApiService {
       state.exercises = Exercises.fromJson(result['exercises']);;
       state.meals = Meals.fromJson(result['meals']);
     });
+  }
+
+  static Future buildItems(AppState state, String collection, String day) async {
+    return ApiService.request(
+      'quentin-duverge/build-items/$collection/$day',
+      'POST',
+      payload: {},
+      appState: state,
+    );
   }
 }

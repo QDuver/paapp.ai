@@ -1,9 +1,11 @@
 
 import datetime
-from typing import List, Optional
+from typing import List, Optional, ClassVar
 from pydantic import BaseModel
+
 from quentinDuverge.agents import exercise_agent
-from clients.shared import get_agent_smart, get_firestore_client, get_agent_lite
+from clients.shared import get_agent_smart, get_firestore_client
+from quentinDuverge.abstracts import FirestoreModel
 
 from utils import process_output
 
@@ -29,27 +31,16 @@ class ExercisesList(BaseModel):
     items: List[Exercise]
 
 
-class Exercises(BaseModel):     
-    collection: str = collection
-    id: str = today
+class Exercises(FirestoreModel):
     atHome: Optional[bool] = False
     availableTimeMin: Optional[int] = None
     notes: Optional[str] = None
     items: List[Exercise] = []
-    
-    
-    @staticmethod
-    def query(id: str = today):
-        data = fs.collection(collection).document(id).get().to_dict()
-        if data is None:
-            return Exercises(id=id)
-        return Exercises(**data)
 
-    @staticmethod
-    def build(id: str = today, atHome: Optional[bool] = False, availableTimeMin: Optional[int] = None, notes: Optional[str] = None):
 
+    def buildItems(self, atHome: Optional[bool] = False, availableTimeMin: Optional[int] = None, notes: Optional[str] = None):
         prompt = agent.prompt({
-            'HISTORICAL_TRAINING_DATA': fs.historics(collection, id),
+            'HISTORICAL_TRAINING_DATA': fs.historics(collection, self.id),
             'CONDITIONS': f'Available time in minutes : {availableTimeMin}, At home: {atHome}',
             'USER_NOTES': notes
         })
@@ -58,7 +49,7 @@ class Exercises(BaseModel):
         exercises_ = process_output(output, model=ExercisesList)
         print(exercises_.model_dump())
         exercises = Exercises(
-            id=id,
+            id=self.id,
             atHome=atHome,
             availableTimeMin=availableTimeMin,
             notes=notes,
@@ -66,8 +57,5 @@ class Exercises(BaseModel):
         )
         exercises.save()
         return exercises
-
-    def save(self):
-        fs.collection(collection).document(self.id).set(self.model_dump(exclude_none=True))
 
 

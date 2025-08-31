@@ -1,45 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:frontend/model/abstracts.dart';
+import 'package:frontend/model/card.abstract.dart';
+import 'package:frontend/model/subcard.abstract.dart';
+import 'package:frontend/model/list.routine.dart';
+import 'package:frontend/model/utils.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-part 'routine.g.dart';
-
-@JsonEnum()
-enum RoutineType { other, exercises, meal }
-
-@JsonSerializable(explicitToJson: true)
-class Routines implements ListAbstract<Routine> {
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  IconData icon = Icons.inbox_outlined;
-
-  @override
-  String collection = '';
-
-  @override
-  String id = '';
-
-  @override
-  List<Routine> items = const <Routine>[];
-
-  String? wakeupTime;
-
-  Routines();
-
-  factory Routines.fromJson(Map<String, dynamic> json) => _$RoutinesFromJson(json);
-  Map<String, dynamic> toJson() => _$RoutinesToJson(this);
-  
-  @override
-  Routine createNewItem() {
-    return Routine()..name = '';
-  }
-
-}
+part 'card.routine.g.dart';
 
 @JsonSerializable()
 class Routine extends CardAbstract {
-  String name = '';
-  
   @JsonKey(defaultValue: false, includeFromJson: false, includeToJson: false)
   bool isExpanded = false;
   
@@ -62,8 +30,6 @@ class Routine extends CardAbstract {
   factory Routine.fromJson(Map<String, dynamic> json) => _$RoutineFromJson(json);
   Map<String, dynamic> toJson() => _$RoutineToJson(this);
 
-
-
   @override
   List<FieldDescriptor> getEditableFields() {
     return [
@@ -73,5 +39,4 @@ class Routine extends CardAbstract {
       FieldDescriptor('isCompleted', 'Completed', () => isCompleted, (v) => isCompleted = v, bool),
     ];
   }
-
 }

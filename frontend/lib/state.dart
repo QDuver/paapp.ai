@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/model/exercise.dart';
-import 'package:frontend/model/meal.dart';
-import 'package:frontend/model/routine.dart';
+import 'package:frontend/model/list.abstract.dart';
+import 'package:frontend/model/list.exercise.dart';
+import 'package:frontend/model/list.meal.dart';
+import 'package:frontend/model/list.routine.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'api.dart';
@@ -33,11 +34,9 @@ class AppState extends ChangeNotifier implements AppStateInterface {
     notifyListeners();
   }
 
-  int selectedNavigation = 2;
-  List<Map<String, dynamic>> navigation = [
-    {'name': 'Routine', 'icon': Icons.accessibility_new},
-    {'name': 'Exercises', 'icon': Icons.fitness_center},
-    {'name': 'Nutrition', 'icon': Icons.restaurant},
+  int selectedNavigation = 0;
+  List<ListAbstract> navigation = [
+    Routines(), Exercises(), Meals()
   ];
   String get currentDate => DateFormat('yyyy-MM-dd').format(DateTime.now());
 
