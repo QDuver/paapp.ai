@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/components/card/abstracts.dart';
+import 'package:frontend/model/abstracts.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'exercise.g.dart';
@@ -35,6 +35,11 @@ class Exercises implements MetaAbstract<Exercise> {
   factory Exercises.fromJson(Map<String, dynamic> json) =>
       _$ExercisesFromJson(json);
   Map<String, dynamic> toJson() => _$ExercisesToJson(this);
+  
+  @override
+  Exercise createNewItem() {
+    return Exercise(name: '');
+  }
 }
 
 @JsonSerializable()
@@ -65,7 +70,7 @@ class ExerciseSet extends SubCardAbstract {
       _$ExerciseSetFromJson(json);
   Map<String, dynamic> toJson() => _$ExerciseSetToJson(this);
 
-  String getDisplayName() {
+  String get name {
     List<String> parts = [];
     if (weightKg != null) parts.add('${weightKg}kg');
     if (repetitions != null) parts.add('${repetitions} reps');
@@ -98,10 +103,10 @@ class ExerciseSet extends SubCardAbstract {
   }
 
   void updateFields(Map<String, dynamic> values) {
-    weightKg = double.tryParse(values['weightKg']);
-    repetitions = int.tryParse(values['repetitions']);
-    durationSec = int.tryParse(values['durationSec']);
-    rest = int.tryParse(values['rest']) ?? 90;
+    updateFieldsHelper<String>(values, 'weightKg', (value) => weightKg = double.tryParse(value));
+    updateFieldsHelper<String>(values, 'repetitions', (value) => repetitions = int.tryParse(value));
+    updateFieldsHelper<String>(values, 'durationSec', (value) => durationSec = int.tryParse(value));
+    updateFieldsHelper<String>(values, 'rest', (value) => rest = int.tryParse(value) ?? 90);
   }
 }
 
@@ -145,5 +150,10 @@ class Exercise extends CardAbstract {
       'isCompleted',
       (value) => isCompleted = value,
     );
+  }
+
+  @override
+  EditableItem createNewItem() {
+    return ExerciseSet();
   }
 }

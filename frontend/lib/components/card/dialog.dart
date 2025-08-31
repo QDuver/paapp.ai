@@ -1,33 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/components/card/abstracts.dart';
+import 'package:frontend/model/abstracts.dart';
+import 'package:frontend/components/dialogs/delete.dart';
 import 'package:frontend/state.dart';
 import 'package:provider/provider.dart';
 
 class CustomEditDialog {
-  static Future<Map<String, dynamic>?> show(
+  static Future<Map<String, dynamic>?> show<T>(
     BuildContext context, {
-    required CardAbstract item,
+    required EditableItem item,
+    required T parent,
     required MetaAbstract obj,
-    bool isCreating = false,
+    bool isCreate = false,
   }) async {
     final fields = item.getEditableFields();
     final controllers = <String, TextEditingController>{};
     final appState = context.read<AppState>();
 
-    final fieldsToShow = isCreating
-        ? fields // Show all fields when creating
-        : fields
-            .where((field) =>
-                    field.required || // Always show required fields
-                    (field.value != null &&
-                        field.value
-                            .toString()
-                            .trim()
-                            .isNotEmpty) // Show non-null, non-empty fields
-                )
-            .toList();
+    final fieldsToShow = fields;
 
-    // Initialize controllers for each field
     for (final field in fieldsToShow) {
       controllers[field.name] = TextEditingController(
         text: field.value?.toString() ?? '',
@@ -56,46 +46,27 @@ class CustomEditDialog {
           ),
         ),
         actions: [
-          // Delete button (only show if onDelete callback is provided)
           Row(
             children: [
-              TextButton.icon(
-                onPressed: () async {
-                  final confirmed = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text('Delete Item'),
-                      content:
-                          Text('Are you sure you want to delete this item?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(false),
-                          child: Text('Cancel'),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(true),
-                          child: Text('Delete'),
-                          style: TextButton.styleFrom(
-                            foregroundColor:
-                                Theme.of(context).colorScheme.error,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
+              if (!isCreate)
+                TextButton.icon(
+                  onPressed: () async {
+                    final confirmed = await DeleteConfirmationDialog.show(
+                      context,
+                    );
 
-                  if (confirmed == true) {
-                    item.delete(appState, obj);
-                    _disposeControllers(controllers);
-                    Navigator.pop(context);
-                  }
-                },
-                icon: Icon(Icons.delete_outline),
-                label: Text('Delete'),
-                style: TextButton.styleFrom(
-                  foregroundColor: Theme.of(context).colorScheme.error,
+                    if (confirmed) {
+                      item.delete(appState, obj, parent);
+                      _disposeControllers(controllers);
+                      Navigator.pop(context);
+                    }
+                  },
+                  icon: Icon(Icons.delete_outline),
+                  label: Text('Delete'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.error,
+                  ),
                 ),
-              ),
               Spacer(),
               TextButton(
                 onPressed: () {
@@ -111,7 +82,12 @@ class CustomEditDialog {
                     final value = controllers[field.name]!.text;
                     result[field.name] = value;
                   }
-                  item.update(appState, obj, result);
+                  
+                  if (isCreate) {
+                    item.create(appState, obj, parent, result);
+                  } else {
+                    item.update(appState, obj, result);
+                  }
                   
                   _disposeControllers(controllers);
                   Navigator.pop(context, result);
@@ -119,14 +95,15 @@ class CustomEditDialog {
                 child: const Text('Save'),
               ),
             ],
-          )
+          ),
         ],
       ),
     );
   }
 
   static void _disposeControllers(
-      Map<String, TextEditingController> controllers) {
+    Map<String, TextEditingController> controllers,
+  ) {
     for (final controller in controllers.values) {
       controller.dispose();
     }

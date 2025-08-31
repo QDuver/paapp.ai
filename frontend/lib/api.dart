@@ -1,4 +1,4 @@
-import 'package:frontend/components/card/abstracts.dart';
+import 'package:frontend/model/abstracts.dart';
 import 'package:frontend/model/exercise.dart';
 import 'package:frontend/model/routine.dart';
 import 'package:frontend/state.dart';

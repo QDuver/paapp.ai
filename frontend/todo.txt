@@ -1,2 +1,5 @@
-- Sub Cards
+- Propagation of set
+- Routine type to dropdown
+- Weight input should not accept nnon-numeric
 - Don't trigger loading for isCompleted
+- Autosuggest exercice names

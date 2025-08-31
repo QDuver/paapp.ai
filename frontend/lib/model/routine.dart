@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/components/card/abstracts.dart';
+import 'package:frontend/model/abstracts.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'routine.g.dart';
@@ -33,6 +33,11 @@ class Routines implements MetaAbstract<Routine> {
 
   factory Routines.fromJson(Map<String, dynamic> json) => _$RoutinesFromJson(json);
   Map<String, dynamic> toJson() => _$RoutinesToJson(this);
+  
+  @override
+  Routine createNewItem() {
+    return Routine(name: '');
+  }
 
 }
 
@@ -60,7 +65,7 @@ class Routine extends CardAbstract {
     this.durationMin = 0,
     this.routineType = RoutineType.other,
     this.ref,
-  });
+  }) : super(canAddItems: false);
 
   factory Routine.fromJson(Map<String, dynamic> json) => _$RoutineFromJson(json);
   Map<String, dynamic> toJson() => _$RoutineToJson(this);

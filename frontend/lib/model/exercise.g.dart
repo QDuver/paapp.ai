@@ -26,19 +26,13 @@ Map<String, dynamic> _$ExercisesToJson(Exercises instance) => <String, dynamic>{
   'notes': instance.notes,
 };
 
-ExerciseSet _$ExerciseSetFromJson(Map<String, dynamic> json) =>
-    ExerciseSet(
-        weightKg: (json['weightKg'] as num?)?.toDouble(),
-        repetitions: (json['repetitions'] as num?)?.toInt(),
-        durationSec: (json['duration'] as num?)?.toInt(),
-        rest: (json['rest'] as num?)?.toInt() ?? 90,
-        isExpanded: json['isExpanded'] as bool? ?? false,
-      )
-      ..subtitle = json['subtitle'] as String?
-      ..description = json['description'] as String?
-      ..tags = (json['tags'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList();
+ExerciseSet _$ExerciseSetFromJson(Map<String, dynamic> json) => ExerciseSet(
+  weightKg: (json['weightKg'] as num?)?.toDouble(),
+  repetitions: (json['repetitions'] as num?)?.toInt(),
+  durationSec: (json['duration'] as num?)?.toInt(),
+  rest: (json['rest'] as num?)?.toInt() ?? 90,
+  isExpanded: json['isExpanded'] as bool? ?? false,
+);
 
 Map<String, dynamic> _$ExerciseSetToJson(ExerciseSet instance) =>
     <String, dynamic>{

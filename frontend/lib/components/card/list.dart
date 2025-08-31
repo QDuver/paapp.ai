@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/components/card/card.dart';
-import 'package:frontend/components/card/abstracts.dart';
+import 'package:frontend/components/card/dialog.dart' as custom_dialog;
+import 'package:frontend/model/abstracts.dart';
 import 'package:frontend/theme/theme_state.dart';
 import 'package:provider/provider.dart';
 
@@ -92,8 +93,18 @@ class _CardListState extends State<CardList> {
     );
   }
 
-  void _addNewItem() {
-    print('_addNewItem');
+  void _addNewItem() async {
+    final newItem = widget.obj.createNewItem();
+    
+    if (newItem != null) {
+      await custom_dialog.CustomEditDialog.show(
+        context,
+        item: newItem,
+        parent: widget.obj,
+        obj: widget.obj,
+        isCreate: true,
+      );
+    }
   }
 
   void _generateWithAI() async {
