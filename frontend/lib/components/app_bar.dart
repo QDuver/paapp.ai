@@ -33,47 +33,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  Widget _buildDateNavigation(BuildContext context, ThemeState themeState, AppState appState) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          onPressed: () {
-            appState.setState(() {
-              appState.currentDate = appState.currentDate.subtract(Duration(days: 1));
-            });
-          },
-          icon: Icon(
-            Icons.chevron_left,
-            color: themeState.themeData.textTheme.headlineSmall?.color,
-            size: 32,
-          ),
-        ),
-        Flexible(
-          child: Text(
-            appState.formattedCurrentDate,
-            style: themeState.themeData.textTheme.headlineSmall?.copyWith(
-              color: themeState.themeData.colorScheme.secondary,
-            ),
-          ),
-        ),
-        IconButton(
-          onPressed: () {
-            appState.setState(() {
-              appState.currentDate = appState.currentDate.add(Duration(days: 1));
-            });
-          },
-          icon: Icon(
-            Icons.chevron_right,
-            color: themeState.themeData.textTheme.headlineSmall?.color,
-            size: 32,
-          ),
-        ),
-      ],
-    );
-  }
-
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

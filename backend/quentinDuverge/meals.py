@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from clients.shared import get_agent_lite, get_firestore_client
 from utils import process_output
 
-FS_COLLECTION = 'meals'
+collection = 'meals'
 agent = get_agent_lite()
 fs = get_firestore_client('quentin-duverge')
 
@@ -24,16 +24,24 @@ class MealsList(BaseModel):
 
 
 class Meals(BaseModel):
-    day: str
-    meals: List[Meal] = []
+    id: str
+    collection: str = collection
+    items: List[Meal] = []
     notes: Optional[str] = None
 
+    @staticmethod
+    def query(day: str):
+        data = fs.collection(FSDB).document(day).get().to_dict()
+        if data is None:
+            return Meals(day=day)
+        return Meals(**data)
+
     def save(self):
-        fs.collection(FS_COLLECTION).document(self.day).set(self.model_dump())
+        fs.collection(FSDB).document(self.day).set(self.model_dump())
 
     def build(self):
         prompt = agent.prompt({
-            'HISTORICAL_MEALS_DATA': fs.historics(FS_COLLECTION, self.day),
+            'HISTORICAL_MEALS_DATA': fs.historics(FSDB, self.day),
             'USER_NOTES': self.notes
         })
         output = agent.call(si=meals_agent, prompt=prompt, schema=MealsList)
