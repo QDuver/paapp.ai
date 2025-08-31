@@ -8,64 +8,56 @@ part 'routine.g.dart';
 enum RoutineType { other, exercises, meal }
 
 @JsonSerializable(explicitToJson: true)
-class Routines implements MetaAbstract<Routine> {
+class Routines implements ListAbstract<Routine> {
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   IconData icon = Icons.inbox_outlined;
 
   @override
-  String collection;
+  String collection = '';
 
   @override
-  String id;
+  String id = '';
 
   @override
-  List<Routine> items;
+  List<Routine> items = const <Routine>[];
 
   String? wakeupTime;
 
-  Routines({
-    this.collection = '',
-    this.id = '',
-    this.items = const <Routine>[],
-    this.wakeupTime,
-  });
+  Routines();
 
   factory Routines.fromJson(Map<String, dynamic> json) => _$RoutinesFromJson(json);
   Map<String, dynamic> toJson() => _$RoutinesToJson(this);
   
   @override
   Routine createNewItem() {
-    return Routine(name: '');
+    return Routine()..name = '';
   }
 
 }
 
 @JsonSerializable()
 class Routine extends CardAbstract {
-  String name;
+  String name = '';
   
-  @JsonKey(defaultValue: false, includeToJson: false)
-  bool isExpanded;
+  @JsonKey(defaultValue: false, includeFromJson: false, includeToJson: false)
+  bool isExpanded = false;
   
   @JsonKey(defaultValue: false)
-  bool isCompleted;
+  bool isCompleted = false;
+  
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  bool canAddItems = false;
   
   int? durationMin;
   
   @JsonKey(defaultValue: RoutineType.other)
-  RoutineType routineType;
+  RoutineType routineType = RoutineType.other;
   
   dynamic ref;
 
-  Routine({
-    required this.name,
-    this.isExpanded = false,
-    this.isCompleted = false,
-    this.durationMin = 0,
-    this.routineType = RoutineType.other,
-    this.ref,
-  }) : super(canAddItems: false);
+  Routine();
 
   factory Routine.fromJson(Map<String, dynamic> json) => _$RoutineFromJson(json);
   Map<String, dynamic> toJson() => _$RoutineToJson(this);
@@ -73,33 +65,12 @@ class Routine extends CardAbstract {
 
 
   @override
-  void updateFields(Map<String, dynamic> values) {
-    updateFieldsHelper<String>(values, 'name', (value) => name = value);
-    updateFieldsHelper<bool>(values, 'isCompleted', (value) => isCompleted = value);
-    updateFieldsHelper<String>(values, 'durationMin', (value) => durationMin = int.tryParse(value));
-    updateFieldsHelper<String>(values, 'routineType', (value) => routineType = RoutineType.values.byName(value));
-  }
-
-  @override
-  List<FieldInfo> getEditableFields() {
+  List<FieldDescriptor> getEditableFields() {
     return [
-      FieldInfo(
-        name: 'name',
-        label: 'Routine Name',
-        value: name,
-        required: true,
-      ),
-      FieldInfo(
-        name: 'durationMin',
-        label: 'Duration (minutes)',
-        value: durationMin,
-        type: int,
-      ),
-      FieldInfo(
-        name: 'routineType',
-        label: 'Type',
-        value: routineType.name,
-      ),
+      FieldDescriptor('name', 'Name', () => name, (v) => name = v, String),
+      FieldDescriptor('durationMin', 'Duration (min)', () => durationMin, (v) => durationMin = v, int),
+      FieldDescriptor('routineType', 'Routine Type', () => routineType.name, (v) => routineType = RoutineType.values.byName(v), String),
+      FieldDescriptor('isCompleted', 'Completed', () => isCompleted, (v) => isCompleted = v, bool),
     ];
   }
 

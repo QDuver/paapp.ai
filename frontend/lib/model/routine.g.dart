@@ -6,16 +6,13 @@ part of 'routine.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Routines _$RoutinesFromJson(Map<String, dynamic> json) => Routines(
-  collection: json['collection'] as String? ?? '',
-  id: json['id'] as String? ?? '',
-  items:
-      (json['items'] as List<dynamic>?)
-          ?.map((e) => Routine.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      const <Routine>[],
-  wakeupTime: json['wakeupTime'] as String?,
-);
+Routines _$RoutinesFromJson(Map<String, dynamic> json) => Routines()
+  ..collection = json['collection'] as String
+  ..id = json['id'] as String
+  ..items = (json['items'] as List<dynamic>)
+      .map((e) => Routine.fromJson(e as Map<String, dynamic>))
+      .toList()
+  ..wakeupTime = json['wakeupTime'] as String?;
 
 Map<String, dynamic> _$RoutinesToJson(Routines instance) => <String, dynamic>{
   'collection': instance.collection,
@@ -24,16 +21,14 @@ Map<String, dynamic> _$RoutinesToJson(Routines instance) => <String, dynamic>{
   'wakeupTime': instance.wakeupTime,
 };
 
-Routine _$RoutineFromJson(Map<String, dynamic> json) => Routine(
-  name: json['name'] as String,
-  isExpanded: json['isExpanded'] as bool? ?? false,
-  isCompleted: json['isCompleted'] as bool? ?? false,
-  durationMin: (json['durationMin'] as num?)?.toInt() ?? 0,
-  routineType:
+Routine _$RoutineFromJson(Map<String, dynamic> json) => Routine()
+  ..name = json['name'] as String
+  ..isCompleted = json['isCompleted'] as bool? ?? false
+  ..durationMin = (json['durationMin'] as num?)?.toInt()
+  ..routineType =
       $enumDecodeNullable(_$RoutineTypeEnumMap, json['routineType']) ??
-      RoutineType.other,
-  ref: json['ref'],
-);
+      RoutineType.other
+  ..ref = json['ref'];
 
 Map<String, dynamic> _$RoutineToJson(Routine instance) => <String, dynamic>{
   'name': instance.name,

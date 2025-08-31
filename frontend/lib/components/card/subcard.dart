@@ -7,7 +7,7 @@ import 'package:frontend/theme/theme_state.dart';
 import 'package:provider/provider.dart';
 
 class SubCard extends StatelessWidget {
-  final MetaAbstract obj;
+  final ListAbstract obj;
   final CardAbstract parentItem;
   final SubCardAbstract subItem;
 

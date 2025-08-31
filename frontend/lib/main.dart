@@ -183,7 +183,7 @@ class _NavState extends State<Nav> {
       case 1:
         return CardList( obj: appState.exercises );
       default:
-        return LoginScreen();
+        return CardList(obj: appState.meals);
     }
   }
 }

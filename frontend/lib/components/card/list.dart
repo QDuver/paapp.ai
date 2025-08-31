@@ -6,7 +6,7 @@ import 'package:frontend/theme/theme_state.dart';
 import 'package:provider/provider.dart';
 
 class CardList extends StatefulWidget {
-  final MetaAbstract obj;
+  final ListAbstract obj;
 
   const CardList({Key? key, required this.obj})
     : super(key: key);

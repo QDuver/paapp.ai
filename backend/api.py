@@ -1,5 +1,5 @@
 import json
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
@@ -9,6 +9,13 @@ from quentinDuverge import meals, exercises
 from quentinDuverge.routines import Routine, Routines
 from quentinDuverge.exercises import Exercises
 from quentinDuverge.meals import Meals
+
+# Mapping of collection names to their corresponding classes
+COLLECTION_CLASS_MAPPING = {
+    'exercises': Exercises,
+    'meals': Meals,
+    'routines': Routines,
+}
 
 
 class InitDayRequest(BaseModel):
@@ -30,8 +37,8 @@ app.add_middleware(
 def get_routine(day: str):
     routines = Routines.query(id=day)
     exercises = Exercises.query(id=day)
-    # meals = Meals.query(id=day).meals
-    return {"routines": routines, "exercises": exercises}
+    meals = Meals.query(id=day)
+    return {"routines": routines, "exercises": exercises, "meals": meals}
 
 @app.get("/{db}/{collection}")
 def get_collection(db: str, collection: str):
@@ -54,6 +61,14 @@ def create(db: str, collection: str, document: dict):
 @app.post("/{db}/{collection}/{document}")
 def overwrite(db: str, collection: str, document: str, request: dict):
     client = firestore.Client(database=db)
+    
+    if collection not in COLLECTION_CLASS_MAPPING:
+        raise HTTPException(status_code=400, detail=f"Collection '{collection}' not found in mapping. Available collections: {list(COLLECTION_CLASS_MAPPING.keys())}")
+    
+    model_class = COLLECTION_CLASS_MAPPING[collection]
+    validated_data = model_class(**request)
+    request = validated_data.model_dump()
+    
     client.collection(collection).document(document).set(request)
 
 
