@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/components/card/abstracts.dart';
+import 'package:frontend/model/abstracts.dart';
 import 'package:frontend/components/card/dialog.dart' as custom_dialog;
 import 'package:frontend/components/card/subcard.dart';
-import 'package:frontend/model/exercise.dart';
 import 'package:frontend/state.dart';
 import 'package:frontend/theme/theme_state.dart';
 import 'package:provider/provider.dart';
@@ -13,13 +12,38 @@ class CustomCard extends StatelessWidget {
 
   const CustomCard({required this.obj, required this.item});
 
+  List<dynamic>? _getItems(CardAbstract item) {
+    try {
+      return (item as dynamic).items;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  bool _isItemExpanded(CardAbstract item) {
+    try {
+      return (item as dynamic).isExpanded ?? false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  List<Widget> _buildSubCards(CardAbstract item) {
+    final itemsCollection = _getItems(item);
+    if (itemsCollection != null && itemsCollection.isNotEmpty) {
+      return itemsCollection
+          .map(
+            (subItem) => SubCard(obj: obj, parentItem: item, subItem: subItem),
+          )
+          .toList();
+    }
+    return [];
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeState = context.read<ThemeState>();
     final appState = context.read<AppState>();
-    final isExercise = item is Exercise;
-    final exercise = isExercise ? item as Exercise : null;
-    final hasSets = exercise?.items?.isNotEmpty == true;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
@@ -37,6 +61,7 @@ class CustomCard extends StatelessWidget {
                   await custom_dialog.CustomEditDialog.show(
                     context,
                     item: item,
+                    parent: obj,
                     obj: obj,
                   );
                 },
@@ -78,28 +103,35 @@ class CustomCard extends StatelessWidget {
                       ),
 
                       SizedBox(width: 16),
-
-                      // Content
                       Expanded(
                         child: Text(
                           item.name,
                           style: themeState.themeData.textTheme.bodyLarge,
                         ),
                       ),
-
-                      // Expand/collapse button for exercises
-                      if (exercise != null)
+                      if (item.canAddItems)
                         GestureDetector(
                           onTap: () {
-                            exercise.isExpanded = !exercise.isExpanded;
-                            appState.setState(() {});
+                            try {
+                              final dynamic dynamicItem = item;
+                              dynamicItem.isExpanded = !dynamicItem.isExpanded;
+                              appState.setState(() {});
+                            } catch (e) {
+                              // Handle cases where item doesn't have isExpanded
+                            }
                           },
                           child: Container(
                             padding: const EdgeInsets.all(4),
                             child: Icon(
-                              exercise.isExpanded 
-                                  ? Icons.expand_less 
-                                  : Icons.expand_more,
+                              () {
+                                try {
+                                  return (item as dynamic).isExpanded
+                                      ? Icons.expand_less
+                                      : Icons.expand_more;
+                                } catch (e) {
+                                  return Icons.expand_more;
+                                }
+                              }(),
                               color: themeState.themeData.colorScheme.onSurface,
                             ),
                           ),
@@ -109,34 +141,41 @@ class CustomCard extends StatelessWidget {
                 ),
               ),
 
-              if (exercise != null && exercise.isExpanded) ...[
-                if (hasSets)
-                  ...exercise.items!.map((set) => SubCard(
-                    obj: obj,
-                    parentItem: item,
-                    subItem: set,
-                    onDelete: () {
-                      exercise.items!.remove(set);
-                      appState.setState(() {});
-                      exercise.update(appState, obj, {});
-                    },
-                  )).toList(),
-                
+              if (item.canAddItems && _isItemExpanded(item)) ...[
+                ..._buildSubCards(item),
+
                 Container(
-                  margin: const EdgeInsets.only(left: 32.0, right: 16.0, top: 4.0, bottom: 8.0),
+                  margin: const EdgeInsets.only(
+                    left: 32.0,
+                    right: 16.0,
+                    top: 4.0,
+                    bottom: 8.0,
+                  ),
                   child: InkWell(
-                    onTap: () {
-                      exercise.items ??= [];
-                      exercise.items!.add(ExerciseSet());
-                      appState.setState(() {});
-                      exercise.update(appState, obj, {});
+                    onTap: () async {
+                      final dynamic dynamicItem = item;
+                      dynamicItem.items ??= [];
+
+                      final lastItem =
+                          item.copyLastItem() ?? item.createNewItem();
+
+                      if (lastItem != null) {
+                        await custom_dialog.CustomEditDialog.show(
+                          context,
+                          item: lastItem,
+                          parent: item,
+                          obj: obj,
+                          isCreate: true,
+                        );
+                      }
                     },
                     child: Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(12.0),
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: themeState.themeData.colorScheme.outline.withOpacity(0.5),
+                          color: themeState.themeData.colorScheme.outline
+                              .withOpacity(0.5),
                           style: BorderStyle.solid,
                         ),
                         borderRadius: BorderRadius.circular(8),
@@ -151,10 +190,14 @@ class CustomCard extends StatelessWidget {
                           ),
                           SizedBox(width: 8),
                           Text(
-                            'Add Set',
-                            style: themeState.themeData.textTheme.bodyMedium?.copyWith(
-                              color: themeState.themeData.colorScheme.secondary,
-                            ),
+                            'Add Item',
+                            style: themeState.themeData.textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: themeState
+                                      .themeData
+                                      .colorScheme
+                                      .secondary,
+                                ),
                           ),
                         ],
                       ),
