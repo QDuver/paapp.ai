@@ -25,15 +25,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.post("/{db}/exercises/{day}")
-def build_exercises(day: str, request:dict):
-    Exercises.build(day=day, **request)
-    return Routines.build_from_db(day=day).model_dump()
 
 @app.get("/{db}/routines/{day}")
 def get_routine(day: str):
-    routines = Routines.build_from_db(day=day)
-    return routines.model_dump()
+    routines = Routines.query(id=day)
+    exercises = Exercises.query(id=day)
+    # meals = Meals.query(id=day).meals
+    return {"routines": routines, "exercises": exercises}
 
 @app.get("/{db}/{collection}")
 def get_collection(db: str, collection: str):
@@ -57,6 +55,12 @@ def create(db: str, collection: str, document: dict):
 def overwrite(db: str, collection: str, document: str, request: dict):
     client = firestore.Client(database=db)
     client.collection(collection).document(document).set(request)
+
+
+@app.post("/{db}/build/{collection}/{day}")
+def build_exercises(day: str, request:dict):
+    Exercises.build(day=day, **request)
+    return Routines.query(day=day).model_dump()
 
 
 @app.delete("/{db}/{collection}/{document}")

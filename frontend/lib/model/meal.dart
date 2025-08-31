@@ -1,6 +1,9 @@
-import 'package:frontend/components/card/annotations.dart';
-import 'package:frontend/components/card/reflection_helper.dart';
+import 'package:frontend/components/card/abstracts.dart';
+import 'package:json_annotation/json_annotation.dart';
 
+part 'meal.g.dart';
+
+@JsonEnum()
 enum MealType { breakfast, lunch, dinner }
 
 // Simple data class for display-only information
@@ -16,23 +19,22 @@ class MealInfo {
 
 
 
-class Meal implements CardItem {
+@JsonSerializable()
+class Meal extends CardAbstract {
 
-  @DisplayName()
-  @Editable(label: "Meal Name", required: true)
   String name;
 
-  @SubItems()
   List<String>? ingredients;
 
-  @Editable(label: "Instructions")
   String? instructions;
 
-  @Editable(label: "Calories")
   int? calories;
 
-  @CompletionField()
+  @JsonKey(defaultValue: false)
   bool isCompleted;
+  
+  @JsonKey(defaultValue: false, includeToJson: false)
+  bool isExpanded;
 
   Meal({
     required this.name,
@@ -40,20 +42,17 @@ class Meal implements CardItem {
     this.instructions,
     this.calories,
     this.isCompleted = false,
+    this.isExpanded = false,
   });
 
-  @override
   String getDisplayName() => name;
 
-  @override
   bool getCompletionStatus() => isCompleted;
 
-  @override
   void setCompletionStatus(bool completed) {
     isCompleted = completed;
   }
 
-  @override
   List<dynamic> getSubItems() {
     List<MealInfo> details = [];
     
@@ -79,19 +78,6 @@ class Meal implements CardItem {
   }
 
   @override
-  bool canAddSubItems() => false; // Meal details are managed through the edit dialog
-
-  @override
-  void addSubItem() {} // Meal details are managed through the edit dialog
-
-  @override
-  CardItem? createNewSubItem() => null; // Meal details are managed through the edit dialog
-
-  @override
-  void removeSubItem(int index) {} // Meal details are managed through the edit dialog
-
-
-  @override
   List<FieldInfo> getEditableFields() {
     return [
       FieldInfo(
@@ -99,20 +85,16 @@ class Meal implements CardItem {
         label: 'Meal Name',
         value: name,
         required: true,
-        type: String,
       ),
       FieldInfo(
         name: 'instructions',
         label: 'Instructions',
         value: instructions,
-        required: false,
-        type: String,
       ),
       FieldInfo(
         name: 'calories',
         label: 'Calories',
         value: calories,
-        required: false,
         type: int,
       ),
     ];
@@ -120,38 +102,15 @@ class Meal implements CardItem {
 
   @override
   void updateFields(Map<String, dynamic> values) {
-    if (values.containsKey('name')) {
-      name = values['name']?.toString() ?? name;
-    }
-    if (values.containsKey('instructions')) {
-      instructions = values['instructions']?.toString();
-    }
-    if (values.containsKey('calories')) {
-      calories = _parseInt(values['calories']);
-    }
+    updateFieldsHelper<String>(values, 'name', (value) => name = value);
+    updateFieldsHelper<bool>(values, 'isCompleted', (value) => isCompleted = value);
+    updateFieldsHelper(values, 'instructions', (value) => instructions = value?.toString());
+    updateFieldsHelper(values, 'calories', (value) => calories = _parseInt(value));
   }
 
-  factory Meal.fromJson(Map<String, dynamic> json) {
-    return Meal(
-      name: json['name'] as String,
-      ingredients: (json['ingredients'] as List<dynamic>?)
-          ?.map((item) => item as String)
-          .toList(),
-      instructions: json['instructions'] as String?,
-      calories: json['calories'] as int?,
-      isCompleted: json['isCompleted'] as bool? ?? false,
-    );
-  }
+  factory Meal.fromJson(Map<String, dynamic> json) => _$MealFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      if (ingredients != null) 'ingredients': ingredients,
-      if (instructions != null) 'instructions': instructions,
-      if (calories != null) 'calories': calories,
-      'isCompleted': isCompleted,
-    };
-  }
+  Map<String, dynamic> toJson() => _$MealToJson(this);
 
   int? _parseInt(dynamic value) {
     if (value == null || value == '') return null;
@@ -160,5 +119,6 @@ class Meal implements CardItem {
     if (value is String) return int.tryParse(value);
     return null;
   }
+
 
 }

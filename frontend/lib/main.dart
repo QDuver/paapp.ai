@@ -1,16 +1,14 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/screens/home.dart';
+import 'package:frontend/model/exercise.dart';
+import 'package:frontend/model/routine.dart';
 import 'package:provider/provider.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 
 import 'auth.dart';
 import 'components/app_bar.dart';
-import 'components/card/card_list.dart';
+import 'components/card/list.dart';
 import 'firebase_options.dart';
-import 'model/routine.dart';
-import 'model/exercise.dart';
-import 'model/meal.dart';
 import 'screens/login.dart';
 import 'screens/settings.dart';
 import 'state.dart';
@@ -178,54 +176,14 @@ class _NavState extends State<Nav> {
   }
 
   Widget _getBodyWidget(int index, ThemeState themeState, AppState appState) {
+
     switch (index) {
       case 0:
-        return CardList<Routine>(
-          items: appState.allRoutines,
-          onItemsChanged: (updatedRoutines) async {
-            appState.setState(() {
-              if (appState.day != null) {
-                appState.day!.routines = updatedRoutines;
-              }
-            });
-            // Update each routine individually
-            for (var routine in updatedRoutines) {
-              await routine.updateDb();
-            }
-          },
-          createNewItem: () => Routine(
-            name: '',
-            isCompleted: false,
-            routineType: RoutineType.other,
-          ),
-        );
+        return CardList( obj: appState.routines );
       case 1:
-        return CardList<Exercise>(
-          items: appState.individualExercises,
-          onItemsChanged: (updatedExercises) async {
-            await appState.updateIndividualExercises(updatedExercises);
-            appState.setState(() {}); // Refresh the UI
-          },
-          createNewItem: () => Exercise(
-            index: appState.individualExercises.length,
-            name: '',
-            isCompleted: false,
-          ),
-        );
-      case 2:
-        return CardList<Meal>(
-          items: appState.individualMeals,
-          onItemsChanged: (updatedMeals) async {
-            await appState.updateIndividualMeals(updatedMeals);
-            appState.setState(() {}); // Refresh the UI
-          },
-          createNewItem: () => Meal(
-            name: '',
-            isCompleted: false,
-          ),
-        );
+        return CardList( obj: appState.exercises );
       default:
-        return HomePage();
+        return LoginScreen();
     }
   }
 }

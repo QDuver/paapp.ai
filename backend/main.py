@@ -13,9 +13,9 @@ from quentinDuverge.meals import Meal, Meals
 if __name__ == "__main__":
 
     # routines = Routines.build()
-    # routines = Routines.build_from_db()
-    # exercises = Exercises.build()
+    # routines = Routines.query()
+    exercises = Exercises.build()
     # print(json.dumps(exercises.model_dump(), indent=2))
 
-    ex = requests.post("http://localhost:8000/quentin-duverge/exercises/2025-08-26", json={})
-    print(ex.json())
+    # ex = requests.get("http://localhost:8000/quentin-duverge/routines/2025-08-30")
+    # print(ex.json())

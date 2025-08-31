@@ -1,7 +1,10 @@
+import 'package:frontend/components/card/abstracts.dart';
+import 'package:frontend/model/exercise.dart';
+import 'package:frontend/model/routine.dart';
+import 'package:frontend/state.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -27,7 +30,11 @@ String get baseUrl {
 }
 
 class ApiService {
-  static void _showMessage(AppStateInterface? appState, String message, {bool isError = false}) {
+  static void _showMessage(
+    AppStateInterface? appState,
+    String message, {
+    bool isError = false,
+  }) {
     if (appState?.context != null) {
       ScaffoldMessenger.of(appState!.context!).showSnackBar(
         SnackBar(
@@ -45,16 +52,13 @@ class ApiService {
     Map<String, dynamic>? payload,
     AppStateInterface? appState,
   }) async {
-
     if (appState != null) {
       appState.setState(() => appState.isLoading = true);
     }
-    
+
     try {
       final uri = Uri.parse('$baseUrl/$endpoint');
-      final headers = {
-        'Content-Type': 'application/json',
-      };
+      final headers = {'Content-Type': 'application/json'};
 
       // Add Firebase Auth token if user is authenticated
       final user = FirebaseAuth.instance.currentUser;
@@ -64,35 +68,43 @@ class ApiService {
       }
 
       http.Response response;
-      
+
       switch (method.toUpperCase()) {
         case 'GET':
-          response = await http.get(uri, headers: headers)
+          response = await http
+              .get(uri, headers: headers)
               .timeout(const Duration(seconds: 60));
           break;
         case 'POST':
-          response = await http.post(
-            uri,
-            headers: headers,
-            body: payload != null ? json.encode(payload) : null,
-          ).timeout(const Duration(seconds: 60));
+          response = await http
+              .post(
+                uri,
+                headers: headers,
+                body: payload != null ? json.encode(payload) : null,
+              )
+              .timeout(const Duration(seconds: 60));
           break;
         case 'PUT':
-          response = await http.put(
-            uri,
-            headers: headers,
-            body: payload != null ? json.encode(payload) : null,
-          ).timeout(const Duration(seconds: 60));
+          response = await http
+              .put(
+                uri,
+                headers: headers,
+                body: payload != null ? json.encode(payload) : null,
+              )
+              .timeout(const Duration(seconds: 60));
           break;
         case 'PATCH':
-          response = await http.patch(
-            uri,
-            headers: headers,
-            body: payload != null ? json.encode(payload) : null,
-          ).timeout(const Duration(seconds: 60));
+          response = await http
+              .patch(
+                uri,
+                headers: headers,
+                body: payload != null ? json.encode(payload) : null,
+              )
+              .timeout(const Duration(seconds: 60));
           break;
         case 'DELETE':
-          response = await http.delete(uri, headers: headers)
+          response = await http
+              .delete(uri, headers: headers)
               .timeout(const Duration(seconds: 60));
           break;
         default:
@@ -108,7 +120,7 @@ class ApiService {
         if (appState != null) {
           appState.setState(() => appState.isLoading = false);
         }
-        
+
         if (response.body.isNotEmpty) {
           return json.decode(response.body);
         }
@@ -117,21 +129,50 @@ class ApiService {
         if (appState != null) {
           appState.setState(() => appState.isLoading = false);
         }
-        
-        _showMessage(appState, 'API Error: ${response.statusCode}', isError: true);
-        
+
+        _showMessage(
+          appState,
+          'API Error: ${response.statusCode}',
+          isError: true,
+        );
+
         return null;
       }
     } catch (e) {
       if (appState != null) {
         appState.setState(() => appState.isLoading = false);
       }
-      
+
       // Show network error message
       _showMessage(appState, 'Network Error: Unable to connect', isError: true);
-      
+
       return null;
     }
   }
 
+  static Future updateDocument(AppState state, MetaAbstract obj) async {
+    await ApiService.request(
+      'quentin-duverge/${obj.collection}/${obj.id}',
+      'POST',
+      payload: obj.toJson(),
+      appState: state,
+   );
+  }
+
+
+  static Future loadAll(AppState state, setState) async {
+    final result = await ApiService.request(
+      'quentin-duverge/routines/${state.currentDate}',
+      'GET',
+      appState: state,
+    );
+
+    final routines = Routines.fromJson(result['routines']);
+    final exercises = Exercises.fromJson(result['exercises']);
+
+    setState(() {
+      state.routines = routines;
+      state.exercises = exercises;
+    });
+  }
 }
