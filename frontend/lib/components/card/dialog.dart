@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/model/abstracts.dart';
+import 'package:frontend/model/list.abstract.dart';
+import 'package:frontend/model/subcard.abstract.dart';
 import 'package:frontend/components/dialogs/delete.dart';
 import 'package:frontend/state.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +13,9 @@ class CustomEditDialog {
     required ListAbstract obj,
     bool isCreate = false,
   }) async {
-    final fieldDescriptors = item.getEditableFields();
+    final fieldDescriptors = item.getEditableFields()
+        .where((field) => field.name != 'isCompleted')
+        .toList();
     final controllers = <String, TextEditingController>{};
     final appState = context.read<AppState>();
 

@@ -1,7 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/model/exercise.dart';
-import 'package:frontend/model/routine.dart';
 import 'package:provider/provider.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 
@@ -125,8 +123,8 @@ class _NavState extends State<Nav> {
 
     final navBarItems = appState.navigation.map((section) {
       return SalomonBottomBarItem(
-        icon: Icon(section['icon']),
-        title: Text(section['name']),
+        icon: Icon(section.icon),
+        title: Text(section.label),
         selectedColor: themeState.themeData.colorScheme.secondary,
       );
     }).toList();

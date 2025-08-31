@@ -1,24 +1,15 @@
-import 'package:flutter/material.dart';
 import 'package:frontend/api.dart';
+import 'package:frontend/model/utils.dart';
 import 'package:frontend/state.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-class FieldDescriptor {
-  final String name;
-  final String label;
-  final dynamic Function() getter;
-  final void Function(dynamic) setter;
-  final Type type;
-
-  FieldDescriptor(this.name, this.label, this.getter, this.setter, this.type);
-}
-
 abstract class EditableItemAbstract {
   String name = '';
+  @JsonKey(includeFromJson: false, includeToJson: false)
   List<String> tags = [];
   List<FieldDescriptor> getEditableFields();
-  
-  void updateFields(Map<String, dynamic> values) {
+
+  void updateFields(Map<String, dynamic> values, [dynamic obj]) {
     final fields = getEditableFields();
     for (final field in fields) {
       if (values.containsKey(field.name)) {
@@ -26,9 +17,13 @@ abstract class EditableItemAbstract {
         if (field.type == String) {
           field.setter(value as String);
         } else if (field.type == int) {
-          field.setter(int.tryParse(value as String) ?? (field.getter() as int?));
+          field.setter(
+            int.tryParse(value as String) ?? (field.getter() as int?),
+          );
         } else if (field.type == double) {
-          field.setter(double.tryParse(value as String) ?? (field.getter() as double?));
+          field.setter(
+            double.tryParse(value as String) ?? (field.getter() as double?),
+          );
         } else if (field.type == bool) {
           field.setter(value as bool);
         }
@@ -51,17 +46,17 @@ abstract class EditableItemAbstract {
 
   void update(
     AppState appState,
-    ListAbstract obj,
+    dynamic obj,
     Map<String, dynamic> values,
   ) {
-    updateFields(values);
+    updateFields(values, obj);
     appState.setState(() {});
     ApiService.updateDocument(appState, obj);
   }
 
   void create<T>(
     AppState appState,
-    ListAbstract obj,
+    dynamic obj,
     T parent,
     Map<String, dynamic> values,
   ) {
@@ -71,7 +66,7 @@ abstract class EditableItemAbstract {
     ApiService.updateDocument(appState, obj);
   }
 
-  void delete<T>(AppState appState, ListAbstract obj, T parent) {
+  void delete<T>(AppState appState, dynamic obj, T parent) {
     (parent as dynamic).items.remove(this);
     appState.setState(() {});
     ApiService.updateDocument(appState, obj);
@@ -81,38 +76,4 @@ abstract class EditableItemAbstract {
 abstract class SubCardAbstract extends EditableItemAbstract {
   @override
   List<FieldDescriptor> getEditableFields();
-}
-
-abstract class CardAbstract extends EditableItemAbstract {
-  bool _isCompleted = false;
-  
-  bool get isCompleted => _isCompleted;
-  
-  set isCompleted(bool value) {
-    _isCompleted = value;
-    if (value) {
-      isExpanded = false;
-    }
-  }
-  
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  bool isExpanded = true;
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  bool canAddItems = true;
-
-  CardAbstract();
-
-  @override
-  List<FieldDescriptor> getEditableFields();
-}
-
-abstract class ListAbstract<T extends CardAbstract> {
-  IconData icon = Icons.help;
-  String collection = '';
-  String id = '';
-  List<T> items = const [];
-  ListAbstract();
-  Map<String, dynamic> toJson();
-  T? createNewItem();
 }

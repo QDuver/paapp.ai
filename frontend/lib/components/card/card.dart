@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/model/abstracts.dart';
+import 'package:frontend/model/card.abstract.dart';
+import 'package:frontend/model/list.abstract.dart';
 import 'package:frontend/components/card/dialog.dart' as custom_dialog;
 import 'package:frontend/components/card/subcard.dart';
 import 'package:frontend/state.dart';

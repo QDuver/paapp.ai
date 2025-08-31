@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/components/card/card.dart';
 import 'package:frontend/components/card/dialog.dart' as custom_dialog;
-import 'package:frontend/model/abstracts.dart';
+import 'package:frontend/model/list.abstract.dart';
+import 'package:frontend/state.dart';
 import 'package:frontend/theme/theme_state.dart';
 import 'package:provider/provider.dart';
 
@@ -18,7 +19,8 @@ class CardList extends StatefulWidget {
 class _CardListState extends State<CardList> {
   @override
   Widget build(BuildContext context) {
-    final themeState = Provider.of<ThemeState>(context);
+    final themeState = context.read<ThemeState>();
+    final appState = context.read<AppState>();
 
     return Stack(
       children: [
@@ -40,55 +42,71 @@ class _CardListState extends State<CardList> {
                 ),
               )
             else
-              Expanded(
+              Expanded( 
                 child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.inbox_outlined,
-                        size: 64,
-                        color: themeState.themeData.colorScheme.secondary,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Nothing for this date',
-                        style: themeState.themeData.textTheme.bodyMedium
-                            ?.copyWith(
-                              color: themeState.themeData.colorScheme.secondary,
-                            ),
-                      ),
-                    ],
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await widget.obj.buildItems(appState, widget.obj.collection, appState.currentDate);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: themeState.themeData.colorScheme.tertiary,
+                      foregroundColor: themeState.themeData.cardColor,
+                      padding: const EdgeInsets.all(24),
+                      shape: const CircleBorder(),
+                      elevation: 8,
+                      fixedSize: const Size(120, 120),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.auto_awesome,
+                          size: 32,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Start day',
+                          style: themeState.themeData.textTheme.labelMedium
+                              ?.copyWith(
+                                color: themeState.themeData.cardColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
           ],
         ),
-        Positioned(
-          bottom: 16,
-          right: 16,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              FloatingActionButton(
-                onPressed: _generateWithAI,
-                backgroundColor: themeState.themeData.colorScheme.tertiary,
-                heroTag: "generateAI",
-                child: Icon(
-                  Icons.auto_awesome,
-                  color: themeState.themeData.cardColor,
+        if (widget.obj.items.isNotEmpty)
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FloatingActionButton(
+                  onPressed: () async {
+                    await widget.obj.buildItems(appState, widget.obj.collection, appState.currentDate);
+                  },
+                  backgroundColor: themeState.themeData.colorScheme.tertiary,
+                  heroTag: "generateAI",
+                  child: Icon(
+                    Icons.auto_awesome,
+                    color: themeState.themeData.cardColor,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              FloatingActionButton(
-                onPressed: _addNewItem,
-                backgroundColor: themeState.themeData.colorScheme.secondary,
-                heroTag: "addNew",
-                child: Icon(Icons.add, color: themeState.themeData.cardColor),
-              ),
-            ],
+                const SizedBox(height: 12),
+                FloatingActionButton(
+                  onPressed: _addNewItem,
+                  backgroundColor: themeState.themeData.colorScheme.secondary,
+                  heroTag: "addNew",
+                  child: Icon(Icons.add, color: themeState.themeData.cardColor),
+                ),
+              ],
+            ),
           ),
-        ),
       ],
     );
   }
@@ -107,10 +125,4 @@ class _CardListState extends State<CardList> {
     }
   }
 
-  void _generateWithAI() async {
-    print('_generateWithAI called');
-    // final appState = Provider.of<AppState>(context, listen: false);
-    // String itemType = T.toString();
-    // await appState.generateWithAI(itemType);
-  }
 }

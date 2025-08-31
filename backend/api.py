@@ -35,13 +35,13 @@ app.add_middleware(
 
 @app.get("/{db}/routines/{day}")
 def get_routine(day: str):
-    routines = Routines.query(id=day)
-    exercises = Exercises.query(id=day)
-    meals = Meals.query(id=day)
+    routines = Routines(id=day).query()
+    exercises = Exercises(id=day).query()
+    meals = Meals(id=day).query()
     return {"routines": routines, "exercises": exercises, "meals": meals}
 
 @app.get("/{db}/{collection}")
-def get_collection(db: str, collection: str):
+def getcollection(db: str, collection: str):
     client = firestore.Client(database=db)
     documents = client.collection(collection).get()
     return [doc.to_dict() for doc in documents]
@@ -72,10 +72,15 @@ def overwrite(db: str, collection: str, document: str, request: dict):
     client.collection(collection).document(document).set(request)
 
 
-@app.post("/{db}/build/{collection}/{day}")
-def build_exercises(day: str, request:dict):
-    Exercises.build(day=day, **request)
-    return Routines.query(day=day).model_dump()
+@app.post("/{db}/build-items/{collection}/{id}")
+def buildItems(db: str, collection: str, id: str, request: dict):
+
+    if collection not in COLLECTION_CLASS_MAPPING:
+        raise HTTPException(status_code=400, detail=f"Collection '{collection}' not found in mapping. Available collections: {list(COLLECTION_CLASS_MAPPING.keys())}")
+    
+    instance = COLLECTION_CLASS_MAPPING[collection]()
+    instance.buildItems()
+    return instance.query().model_dump()
 
 
 @app.delete("/{db}/{collection}/{document}")

@@ -12,11 +12,16 @@ from quentinDuverge.meals import Meal, Meals
 
 if __name__ == "__main__":
 
-    # routines = Routines.build()
-    # routines = Routines.query()
+    # routines = Routines().query()
+    Routines().delete()
+    Exercises().delete()
+    Meals().delete()
+
     # exercises = Exercises.build()
-    Meals.build()
+    # Meals.build()
     # print(json.dumps(exercises.model_dump(), indent=2))
 
-    # ex = requests.get("http://localhost:8000/quentin-duverge/routines/2025-08-30")
+    # ex = requests.post(
+        # "http://localhost:8000/quentin-duverge/build-items/meals/2025-08-30", json={})
+    
     # print(ex.json())
