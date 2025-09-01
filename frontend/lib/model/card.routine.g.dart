@@ -26,5 +26,5 @@ Map<String, dynamic> _$RoutineToJson(Routine instance) => <String, dynamic>{
 const _$RoutineTypeEnumMap = {
   RoutineType.other: 'other',
   RoutineType.exercises: 'exercises',
-  RoutineType.meal: 'meal',
+  RoutineType.meals: 'meals',
 };

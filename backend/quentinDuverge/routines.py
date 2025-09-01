@@ -16,9 +16,9 @@ ROUTINE_TEMPLATE = [
     {"name": "1/2L of water"},
     {"name": 'Journaling / Coding', "durationMin": 60},
     {"name": 'Exercises', "routineType": 'exercises'},
-    {"name": 'Meal', "routineType": 'meal'},
+    {"name": 'Meal', "routineType": 'meals'},
     {"name": 'Running', "durationMin": 45},
-    {"name": 'Meal', "routineType": 'meal'},
+    {"name": 'Meal', "routineType": 'meals'},
 ]
 
 
@@ -26,7 +26,7 @@ class Routine(BaseModel):
     name: str
     isCompleted: bool = False
     durationMin: Optional[int] = 0
-    routineType: Literal['other', 'exercises', 'meal'] = 'other'
+    routineType: Literal['other', 'exercises', 'meals'] = 'other'
     ref: str = ''
 
 
@@ -36,4 +36,5 @@ class Routines(FirestoreModel):
 
     def buildItems(self):
         self.items = [Routine(**item) for item in ROUTINE_TEMPLATE]
+        print(self.items)
         self.save()

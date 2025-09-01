@@ -14,14 +14,14 @@ if __name__ == "__main__":
 
     # routines = Routines().query()
     Routines().delete()
-    Exercises().delete()
-    Meals().delete()
+    # Exercises().delete()
+    # Meals().delete()
 
     # exercises = Exercises.build()
     # Meals.build()
     # print(json.dumps(exercises.model_dump(), indent=2))
 
     # ex = requests.post(
-        # "http://localhost:8000/quentin-duverge/build-items/meals/2025-08-30", json={})
+        # "http://localhost:8000/quentin-duverge/build-items/routines/2025-09-01", json={})
     
     # print(ex.json())

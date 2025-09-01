@@ -35,14 +35,19 @@ class AppState extends ChangeNotifier implements AppStateInterface {
   }
 
   int selectedNavigation = 0;
-  List<ListAbstract> navigation = [
-    Routines(), Exercises(), Meals()
+  
+  Map<String, Map<String, dynamic>> collections = {
+    'routines': {'data': Routines(), 'isLoading': false},
+    'exercises': {'data': Exercises(), 'isLoading': false},
+    'meals': {'data': Meals(), 'isLoading': false},
+  };
+  
+  List<ListAbstract> get navigation => [
+    collections['routines']!['data'], 
+    collections['exercises']!['data'], 
+    collections['meals']!['data']
   ];
   String get currentDate => DateFormat('yyyy-MM-dd').format(DateTime.now());
-
-  Routines routines = Routines();
-  Exercises exercises = Exercises();
-  Meals meals = Meals();
 
   AppState() {
     ApiService.loadAll(this, setState);

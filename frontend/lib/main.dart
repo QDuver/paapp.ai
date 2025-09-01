@@ -177,11 +177,11 @@ class _NavState extends State<Nav> {
 
     switch (index) {
       case 0:
-        return CardList( obj: appState.routines );
+        return CardList( obj: appState.collections['routines']!['data'] );
       case 1:
-        return CardList( obj: appState.exercises );
+        return CardList( obj: appState.collections['exercises']! ['data'] );
       default:
-        return CardList(obj: appState.meals);
+        return CardList(obj: appState.collections['meals']!['data']);
     }
   }
 }
