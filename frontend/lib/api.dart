@@ -169,9 +169,9 @@ class ApiService {
     );
 
     setState(() {
-      state.routines = Routines.fromJson(result['routines']);
-      state.exercises = Exercises.fromJson(result['exercises']);;
-      state.meals = Meals.fromJson(result['meals']);
+      state.collections['routines']!['data'] = Routines.fromJson(result['routines']);
+      state.collections['exercises']!['data'] = Exercises.fromJson(result['exercises']);
+      state.collections['meals']!['data'] = Meals.fromJson(result['meals']);
     });
   }
 

@@ -21,9 +21,9 @@ class Ingredient(BaseModel):
 class Meal(BaseModel):
     name: str = None
     isCompleted: bool = False
+    instructions: str = None
+    calories: int = None
     items: Optional[List[Ingredient]] = None
-    instructions: Optional[str] = None
-    calories: Optional[int] = None
 
 
 class MealsList(BaseModel):

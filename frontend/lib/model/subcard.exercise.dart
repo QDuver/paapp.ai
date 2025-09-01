@@ -9,7 +9,7 @@ part 'subcard.exercise.g.dart';
 class ExerciseSet extends SubCardAbstract {
   double? weightKg;
   int? repetitions;
-  int? durationSec;
+  int? duration;
   int rest = 90;
 
   ExerciseSet();
@@ -24,7 +24,7 @@ class ExerciseSet extends SubCardAbstract {
     List<String> parts = [];
     if (weightKg != null) parts.add('${weightKg}kg');
     if (repetitions != null) parts.add('${repetitions} reps');
-    if (durationSec != null) parts.add('${durationSec}s');
+    if (duration != null) parts.add('${duration}s');
     return parts.isNotEmpty ? parts.join(' × ') : 'Set';
   }
 
@@ -67,10 +67,10 @@ class ExerciseSet extends SubCardAbstract {
         int,
       ),
       FieldDescriptor(
-        'durationSec',
+        'duration',
         'Duration (sec)',
-        () => durationSec,
-        (v) => durationSec = v,
+        () => duration,
+        (v) => duration = v,
         int,
       ),
       FieldDescriptor('rest', 'Rest', () => rest, (v) => rest = v ?? 90, int),

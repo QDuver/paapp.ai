@@ -2,6 +2,7 @@ import 'package:frontend/model/card.abstract.dart';
 import 'package:frontend/model/subcard.abstract.dart';
 import 'package:frontend/model/subcard.meal.dart';
 import 'package:frontend/model/utils.dart';
+import 'package:frontend/model/json_utils.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'card.meal.g.dart';
@@ -35,7 +36,9 @@ List<String> get tags {
     return Ingredient();
   }
 
-  factory Meal.fromJson(Map<String, dynamic> json) => _$MealFromJson(json);
+  factory Meal.fromJson(Map<String, dynamic> json) {
+    return safeFromJson('Meal', json, _$MealFromJson);
+  }
 
   Map<String, dynamic> toJson() => _$MealToJson(this);
 }

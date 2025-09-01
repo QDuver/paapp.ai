@@ -3,7 +3,6 @@
 - Build from FE
 - Pictures of meals
 - Autosuggest exercise names
-- Propagation of set
 - Routine type to dropdown
 - Weight input should not accept non-numeric
 - Don't trigger loading for isCompleted

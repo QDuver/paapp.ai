@@ -20,26 +20,28 @@ abstract class ListAbstract<T extends CardAbstract> {
   T? createNewItem();
 
   Future<void> buildItems(AppState appState, String collection, String day) async {
-    appState.isLoading = true;
+    appState.setState(() {
+      appState.collections[collection]!['isLoading'] = true;
+    });
 
     final result = await ApiService.buildItems(appState, collection, day);
-    if(result == null) {
-      appState.isLoading = false;
-      return;
-    }
-
+    
     appState.setState(() {
+      appState.collections[collection]!['isLoading'] = false;
+      
+      if(result == null) return;
+
       switch (collection) {
         case 'routines':
-          appState.routines = Routines.fromJson(result);
+          appState.collections[collection]!['data'] = Routines.fromJson(result);
           buildItems(appState, 'exercises', day);
           buildItems(appState, 'meals', day);
           break;
         case 'exercises':
-          appState.exercises = Exercises.fromJson(result);
+          appState.collections[collection]!['data'] = Exercises.fromJson(result);
           break;
         case 'meals':
-          appState.meals = Meals.fromJson(result);
+          appState.collections[collection]!['data'] = Meals.fromJson(result);
           break;
       }
     });

@@ -6,7 +6,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'list.routine.g.dart';
 
 @JsonEnum()
-enum RoutineType { other, exercises, meal }
+enum RoutineType { other, exercises, meals }
 
 @JsonSerializable(explicitToJson: true)
 class Routines extends ListAbstract<Routine> {
