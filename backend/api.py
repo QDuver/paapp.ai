@@ -1,16 +1,28 @@
-from fastapi import FastAPI
+import json
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
-from clients.db import Database
-from clients.firestore import Firestore
-from typing import Any, List
+from google.cloud import firestore
+
+from quentinDuverge import meals, exercises
+from quentinDuverge.routines import Routine, Routines
+from quentinDuverge.exercises import Exercises
+from quentinDuverge.meals import Meals
+
+# Mapping of collection names to their corresponding classes
+COLLECTION_CLASS_MAPPING = {
+    'exercises': Exercises,
+    'meals': Meals,
+    'routines': Routines,
+}
+
 
 class InitDayRequest(BaseModel):
-    extra_comments: Optional[str] = "None"
+    notes: Optional[str] = "None"
+
 
 app = FastAPI()
-fs = Firestore(database='quentin-duverge')
 origins = ["*"]
 app.add_middleware(
     CORSMiddleware,
@@ -20,13 +32,59 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/exercises")
-def exercises_endpoint():
-    db = Database(db_path="quentinDuverge/database.db")
-    result = db.query('SELECT * FROM exercise_sets JOIN exercises ON exercise_sets.exercise_id = exercises.id JOIN exercise_days ON exercises.exercise_day_id = exercise_days.id')
-    return result['data']
+
+@app.get("/{db}/routines/{day}")
+def get_routine(day: str):
+    routines = Routines(id=day).query()
+    exercises = Exercises(id=day).query()
+    meals = Meals(id=day).query()
+    return {"routines": routines, "exercises": exercises, "meals": meals}
+
+@app.get("/{db}/{collection}")
+def getcollection(db: str, collection: str):
+    client = firestore.Client(database=db)
+    documents = client.collection(collection).get()
+    return [doc.to_dict() for doc in documents]
+
+@app.get("/{db}/{collection}/{document}")
+def get_document(db: str, collection: str, document: str):
+    client = firestore.Client(database=db)
+    doc = client.collection(collection).document(document).get()
+    return doc.to_dict()
+
+@app.post("/{db}/{collection}")
+def create(db: str, collection: str, document: dict):
+    client = firestore.Client(database=db)
+    client.collection(collection).add(document)
 
 
-# @app.post("/init-day")
-# def init_day_endpoint(request: InitDayRequest):
-#     return init_day(request.extra_comments)
+@app.post("/{db}/{collection}/{document}")
+def overwrite(db: str, collection: str, document: str, request: dict):
+    client = firestore.Client(database=db)
+    
+    if collection not in COLLECTION_CLASS_MAPPING:
+        raise HTTPException(status_code=400, detail=f"Collection '{collection}' not found in mapping. Available collections: {list(COLLECTION_CLASS_MAPPING.keys())}")
+    
+    model_class = COLLECTION_CLASS_MAPPING[collection]
+    validated_data = model_class(**request)
+    request = validated_data.model_dump()
+    
+    client.collection(collection).document(document).set(request)
+
+
+@app.post("/{db}/build-items/{collection}/{id}")
+def buildItems(db: str, collection: str, id: str, request: dict):
+
+    if collection not in COLLECTION_CLASS_MAPPING:
+        raise HTTPException(status_code=400, detail=f"Collection '{collection}' not found in mapping. Available collections: {list(COLLECTION_CLASS_MAPPING.keys())}")
+    
+    instance = COLLECTION_CLASS_MAPPING[collection]()
+    instance.buildItems()
+    return instance.query().model_dump()
+
+
+@app.delete("/{db}/{collection}/{document}")
+def delete(db: str, collection: str, document: str, path: Optional[str] = None):
+    client = firestore.Client(database=db)
+    client.collection(collection).document(document).delete()
+

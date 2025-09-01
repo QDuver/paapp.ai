@@ -1,4 +1,4 @@
-# workout_api_models.model.ExerciseDay
+# workout_api_models.model.Day
 
 ## Load the model package
 ```dart

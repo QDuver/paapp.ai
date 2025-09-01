@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/theme_state.dart';
+import '../state.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final int selectedIndex;
@@ -15,7 +16,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final themeState = context.read<ThemeState>();
-
+    final appState = context.watch<AppState>();
+    
     return AppBar(
       leading: IconButton(
         icon: Icon(
@@ -24,8 +26,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         onPressed: onMenuPressed,
       ),
-
-      backgroundColor: themeState.themeData.primaryColor,
+      // title: _buildDateNavigation(context, themeState, appState),
+      centerTitle: true,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
     );
   }
 

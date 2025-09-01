@@ -4,13 +4,12 @@ from google.genai import types
 from config import is_local_environment
 
 
-class Vertex:
-    def __init__(self, model='gemini-2.5-pro'):
-        # gemini-2.0-flash-lite-001
+class Agent:
+    def __init__(self, model):
         self.client = genai.Client( vertexai=True, project="final-app-429707", location="us-central1" )
         self.model = model
 
-    def generate_content(self, prompt, text_contexts=[], image_contexts=[]):
+    def _generate_content(self, prompt, text_contexts=[], image_contexts=[]):
         contents = [prompt]
         for text in text_contexts:
             contents.append(types.Part.from_text(text=text))
@@ -18,14 +17,21 @@ class Vertex:
             contents.append(types.Part.from_bytes(data=open(image, "rb").read(), mime_type="image/jpeg"),)
 
         return contents
+    
 
+    def prompt(self, dict_):
+        prompt = ''
+        for key, value in dict_.items():
+            if(value):
+                prompt += f'## {key}\n{value}\n\n ---- \n\n'
+        return prompt
 
-    def call_agent(self, agent, prompt, text_contexts=[], image_contexts=[], schema=None):
-        contents = self.generate_content(prompt, text_contexts, image_contexts)
+    def call(self, si, prompt, text_contexts=[], image_contexts=[], schema=None):
+        contents = self._generate_content(prompt, text_contexts, image_contexts)
         response = self.client.models.generate_content(
             model=self.model,
             config=types.GenerateContentConfig( 
-                system_instruction=agent, 
+                system_instruction=si, 
                 response_mime_type="application/json",
                 response_schema=schema,
                 max_output_tokens=8192
@@ -33,12 +39,4 @@ class Vertex:
             contents=contents
         )
         return response.text
-    
-    
-    def call(self, prompt, text_contexts=[], image_contexts=[]):
-        contents = self.generate_content(prompt, text_contexts, image_contexts)
-        response = self.client.models.generate_content(
-            model=self.model,
-            contents=contents
-        )
-        return response.text
+

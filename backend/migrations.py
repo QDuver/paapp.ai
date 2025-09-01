@@ -1,30 +1,61 @@
-#  data = fs_old.query(collection='routine')
-#     exerciseDay = [x for x in data if x['day'] == '2025-08-05'][0]
-#     for exercise in exerciseDay['exercises']:
-#         exercise['sets'] = [{"repetitions": exercise['repetitions'], "weight_kg": exercise['weight_kg'], "duration_sec": exercise['duration_sec'] if 'duration_sec' in exercise else None, "rest": exercise['rest'] if 'rest' in exercise else None}]
-#         exercise.pop('repetitions', None)
-#         exercise.pop('weight_kg', None)
-#         exercise.pop('duration_sec', None)
-#         exercise.pop('rest', None)
+import json
+from clients.shared import get_firestore_client
+
+fs = get_firestore_client('quentin-duverge')
+
+def create_backup(collection):
+    source_col_ref = fs.collection(collection)
+    backup_col_ref = fs.collection(collection + '_backup')
+    docs = source_col_ref.get()
+    
+    for doc in docs:
+        doc_data = doc.to_dict()
+        backup_col_ref.document(doc.id).set(doc_data)
+
+def pull_example(collection, doc):
+    obj = fs.collection(collection).document(doc).get()
+    return obj.to_dict()
+
+def migrate():
+    """Migrate all exercise documents to rename 'sets' field to 'items'"""
+    collection_ref = fs.collection('exercises')
+    docs = collection_ref.get()
+    
+    updated_count = 0
+    
+    for doc in docs:
+        doc_data = doc.to_dict()
+        doc_updated = False
         
-#     # remove the duplicate exercises based on name
-#     unique_exercises = {}
-#     for exercise in exerciseDay['exercises']:
-#         if exercise['name'] not in unique_exercises:
-#             unique_exercises[exercise['name']] = exercise
-#         else:
-#             unique_exercises[exercise['name']]['sets'].extend(exercise['sets'])
-            
-#     exerciseDay['exercises'] = list(unique_exercises.values())
+        # Check if this document has exercises with 'sets' field
+        if 'exercises' in doc_data:
+            for exercise in doc_data['exercises']:
+                if 'sets' in exercise:
+                    # Rename 'sets' to 'items'
+                    exercise['items'] = exercise.pop('sets')
+                    doc_updated = True
         
-#     exerciseDay = ExerciseDay(**exerciseDay)
+        # Update the document if any changes were made
+        if doc_updated:
+            collection_ref.document(doc.id).set(doc_data)
+            updated_count += 1
+            print(f"Updated document: {doc.id}")
     
-#     print(json.dumps(exerciseDay.model_dump(), indent=2))
+    print(f"Migration completed. Updated {updated_count} documents.")
+
+
+if __name__ == "__main__":
+    # Pull an example to see current structure
+    obj = pull_example('exercises', '2025-08-22')
+    print("Current document structure:")
+    print(json.dumps(obj, indent=2))
+
+    # Create backup before migration
+    print("\nCreating backup...")
+    create_backup('exercises')
+    print("Backup created successfully.")
     
-    
-    
-#     # exerciseDay = ExerciseDay(**data[0])
-    
-#     # fs.delete(collection='exercises', doc_id='2025-08-05')
-#     # print(data)
-#     fs.insert(collection='exercises', data=exerciseDay.model_dump(), doc_id='2025-08-05')
+    # Run the migration
+    print("\nStarting migration to rename 'sets' to 'items'...")
+    migrate()
+    print("\nMigration completed!")
