@@ -168,11 +168,13 @@ class ApiService {
       appState: state,
     );
 
-    setState(() {
-      state.collections['routines']!['data'] = Routines.fromJson(result['routines']);
-      state.collections['exercises']!['data'] = Exercises.fromJson(result['exercises']);
-      state.collections['meals']!['data'] = Meals.fromJson(result['meals']);
-    });
+    if (result != null) {
+      setState(() {
+        state.collections['routines']!['data'] = Routines.fromJson(result['routines']);
+        state.collections['exercises']!['data'] = Exercises.fromJson(result['exercises']);
+        state.collections['meals']!['data'] = Meals.fromJson(result['meals']);
+      });
+    }
   }
 
   static Future buildItems(AppState state, String collection, String day) async {

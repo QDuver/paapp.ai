@@ -13,12 +13,12 @@ from quentinDuverge.meals import Meal, Meals
 if __name__ == "__main__":
 
     # routines = Routines().query()
-    Routines().delete()
+    # Routines().delete()
     # Exercises().delete()
     # Meals().delete()
-
-    # exercises = Exercises.build()
-    # Meals.build()
+    Routines().buildItems()
+    Exercises().buildItems()
+    Meals().buildItems()
     # print(json.dumps(exercises.model_dump(), indent=2))
 
     # ex = requests.post(
