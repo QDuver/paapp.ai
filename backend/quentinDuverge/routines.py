@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from clients.shared import get_firestore_client
 from quentinDuverge.exercises import Exercise, Exercises
 from quentinDuverge.meals import Meal, Meals
-from quentinDuverge.abstracts import FirestoreModel
+from quentinDuverge.abstracts import Entity, FirestoreDoc
 
 
 today = datetime.datetime.now().strftime("%Y-%m-%d")
@@ -22,7 +22,7 @@ ROUTINE_TEMPLATE = [
 ]
 
 
-class Routine(BaseModel):
+class Routine(Entity):
     name: str
     isCompleted: bool = False
     durationMin: Optional[int] = 0
@@ -30,7 +30,7 @@ class Routine(BaseModel):
     ref: str = ''
 
 
-class Routines(FirestoreModel):
+class Routines(FirestoreDoc):
     wakeupTime: Optional[str] = datetime.datetime.now().strftime("%H:%M")
     items: List[Routine] = []
 

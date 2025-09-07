@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from quentinDuverge.agents import exercise_agent
 from clients.shared import get_agent_smart, get_firestore_client
-from quentinDuverge.abstracts import FirestoreModel
+from quentinDuverge.abstracts import Entity, FirestoreDoc
 
 from utils import process_output
 
@@ -21,8 +21,8 @@ class ExerciseSet(BaseModel):
     rest: Optional[int] = 90
 
 
-class Exercise(BaseModel):
-    name: str
+class Exercise(Entity):
+    name: str = ''
     isCompleted: bool = False
     items: List[ExerciseSet] = []
 
@@ -31,7 +31,7 @@ class ExercisesList(BaseModel):
     items: List[Exercise]
 
 
-class Exercises(FirestoreModel):
+class Exercises(FirestoreDoc):
     atHome: Optional[bool] = False
     availableTimeMin: Optional[int] = None
     notes: Optional[str] = None
@@ -44,10 +44,8 @@ class Exercises(FirestoreModel):
             'CONDITIONS': f'Available time in minutes : {availableTimeMin}, At home: {atHome}',
             'USER_NOTES': notes
         })
-        print(prompt)
         output = agent.call( si=exercise_agent, prompt=prompt, schema=ExercisesList)
         exercises_ = process_output(output, model=ExercisesList)
-        print(exercises_.model_dump())
         exercises = Exercises(
             id=self.id,
             atHome=atHome,

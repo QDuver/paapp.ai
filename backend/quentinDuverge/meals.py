@@ -5,7 +5,7 @@ from quentinDuverge.agents import meals_agent
 from pydantic import BaseModel, Field
 
 from clients.shared import get_agent_lite, get_firestore_client
-from quentinDuverge.abstracts import FirestoreModel
+from quentinDuverge.abstracts import Entity, FirestoreDoc
 from utils import process_output
 
 collection = 'meals'
@@ -18,8 +18,7 @@ class Ingredient(BaseModel):
     quantity: float = Field(description="The volume in ml or weight in grams")
     calories: int
 
-class Meal(BaseModel):
-    name: str = None
+class Meal(Entity):
     isCompleted: bool = False
     instructions: str = None
     calories: int = None
@@ -30,7 +29,7 @@ class MealsList(BaseModel):
     items: List[Meal] = []
 
 
-class Meals(FirestoreModel):
+class Meals(FirestoreDoc):
     items: List[Meal] = []
     notes: Optional[str] = None
 

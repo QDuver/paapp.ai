@@ -1,5 +1,5 @@
 import datetime
-from typing import ClassVar, Optional, Type, TypeVar
+from typing import ClassVar, Optional, Type, TypeVar, List, Union, Any
 from pydantic import BaseModel, Field
 from clients.shared import get_firestore_client
 fs = get_firestore_client('quentin-duverge')
@@ -11,10 +11,14 @@ COLLECTION_MAPPING = {
     'Meals': 'meals'
 }
 
+class Entity(BaseModel):
+    name: str
+    items: List[Any] = Field(default_factory=list, description="List of nested Entity objects")
 
-class FirestoreModel(BaseModel):
-    id: Optional[str] = None
-    collection: Optional[str] = None
+class FirestoreDoc(BaseModel):
+    id: str
+    collection: str = ''
+    items: list[Entity]
 
     def __init__(self, **data):
         if 'id' not in data or data['id'] is None:

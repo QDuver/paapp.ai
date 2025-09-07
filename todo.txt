@@ -1,1 +1,14 @@
-- store historical data in DB
+Frontend
+
+- Reordering
+- Start Day
+- Theme
+- Calendar Icon + Swipability
+- Build from FE
+- Pictures of meals
+- Autosuggest exercise names
+- Routine type to dropdown
+- Weight input should not accept non-numeric
+- Implement tests
+- User Settings
+- Custom prompts

@@ -67,9 +67,10 @@ def overwrite(db: str, collection: str, document: str, request: dict):
     
     model_class = COLLECTION_CLASS_MAPPING[collection]
     validated_data = model_class(**request)
-    request = validated_data.model_dump()
-    
-    client.collection(collection).document(document).set(request)
+    data = validated_data.model_dump()
+    print('data', data)
+
+    client.collection(collection).document(document).set(data)
 
 
 @app.post("/{db}/build-items/{collection}/{id}")
@@ -88,3 +89,8 @@ def delete(db: str, collection: str, document: str, path: Optional[str] = None):
     client = firestore.Client(database=db)
     client.collection(collection).document(document).delete()
 
+
+@app.get("/health")
+def health_check():
+    """Simple endpoint to test connectivity from mobile devices"""
+    return {"status": "ok", "message": "Backend server is reachable from mobile device"}

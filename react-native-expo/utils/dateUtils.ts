@@ -1,8 +1,12 @@
 /**
- * Get current date in YYYY-MM-DD format
- * @returns {string} Current date formatted as YYYY-MM-DD
+ * Utility functions for date manipulation and formatting
  */
-export const getCurrentDate = () => {
+
+/**
+ * Get current date in YYYY-MM-DD format
+ * @returns Current date formatted as YYYY-MM-DD
+ */
+export const getCurrentDate = (): string => {
   const today = new Date();
   const year = today.getFullYear();
   const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -12,10 +16,10 @@ export const getCurrentDate = () => {
 
 /**
  * Format date object to YYYY-MM-DD string
- * @param {Date} date - Date object to format
- * @returns {string} Formatted date string
+ * @param date - Date object to format
+ * @returns Formatted date string
  */
-export const formatDate = (date) => {
+export const formatDate = (date: Date): string => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
@@ -24,9 +28,9 @@ export const formatDate = (date) => {
 
 /**
  * Parse YYYY-MM-DD string to Date object
- * @param {string} dateString - Date string in YYYY-MM-DD format
- * @returns {Date} Date object
+ * @param dateString - Date string in YYYY-MM-DD format
+ * @returns Date object
  */
-export const parseDate = (dateString) => {
-  return new Date(dateString + 'T00:00:00.000Z');
+export const parseDate = (dateString: string): Date => {
+  return new Date(dateString);
 };

@@ -16,9 +16,9 @@ if __name__ == "__main__":
     # Routines().delete()
     # Exercises().delete()
     # Meals().delete()
-    Routines().buildItems()
+    # Routines().buildItems()
     Exercises().buildItems()
-    Meals().buildItems()
+    # Meals().buildItems()
     # print(json.dumps(exercises.model_dump(), indent=2))
 
     # ex = requests.post(
