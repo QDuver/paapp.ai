@@ -3,6 +3,8 @@ import {
   CardListAbstract,
   IEntity,
   IFirestoreDoc,
+  IFieldMetadata,
+  FieldConverters,
 } from "./Abstracts";
 
 export type RoutineType = "other" | "exercises" | "meals";
@@ -25,13 +27,22 @@ export class Routine extends CardAbstract implements IRoutine {
   routineType: RoutineType = "other";
   ref: string = "";
 
-  constructor(data: IRoutine) {
-    super(data);
-    Object.assign(this, data);
+  constructor() {
+    super();
   }
 
-  getEditableFields(): string[] {
-    return ["name", "durationMin", "routineType"];
+  static fromJson(data: IRoutine): Routine {
+    const routine = new Routine();
+    Object.assign(routine, data);
+    return routine;
+  }
+
+  getEditableFields(): IFieldMetadata[] {
+    return [
+      { field: "name", label: "Name", type: "string", keyboardType: "default", converter: FieldConverters.string },
+      { field: "durationMin", label: "Duration (min)", type: "number", keyboardType: "number-pad", converter: FieldConverters.number },
+      { field: "routineType", label: "Routine Type", type: "string", keyboardType: "default", converter: FieldConverters.string },
+    ];
   }
 
   getTags(): string[] {
@@ -42,12 +53,12 @@ export class Routine extends CardAbstract implements IRoutine {
   }
 }
 
-export class Routines extends CardListAbstract implements IRoutines {
+export class Routines extends CardListAbstract<Routine> implements IRoutines {
   items: Routine[] = [];
   wakeupTime: string = "";
 
   constructor(data: IRoutines) {
-    super(data);
-    this.items = (data.items || []).map((item) => new Routine(item));
+    super(data, Routine);
+    this.items = (data.items || []).map((item) => Routine.fromJson(item));
   }
 }

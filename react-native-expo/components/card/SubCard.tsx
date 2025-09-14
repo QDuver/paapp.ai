@@ -13,7 +13,7 @@ import { useAppContext } from '../../contexts/AppContext';
 interface SubCardProps {
   subItem: SubCardAbstract;
   parentItem: CardAbstract;
-  cardList: CardListAbstract;
+  cardList: CardListAbstract<any>;
   index: number;
 }
 
@@ -23,7 +23,7 @@ const SubCard = ({
   cardList,
   index, 
 }: SubCardProps) => {
-  const { onUpdate } = useAppContext();
+  const { onUpdate, refreshCounter } = useAppContext();
   const [showEditDialog, setShowEditDialog] = useState<boolean>(false);
 
 
@@ -60,6 +60,7 @@ const SubCard = ({
         visible={showEditDialog}
         item={subItem}
         cardList={cardList}
+        parent={parentItem}
         onClose={() => setShowEditDialog(false)}
       />
     </View>

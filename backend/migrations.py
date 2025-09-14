@@ -17,7 +17,7 @@ def pull_example(collection, doc):
     return obj.to_dict()
 
 def migrate():
-    """Migrate all exercise documents to rename 'sets' field to 'items'"""
+    """Set all 'rest' fields to null in exercise items"""
     collection_ref = fs.collection('exercises')
     docs = collection_ref.get()
     
@@ -27,13 +27,15 @@ def migrate():
         doc_data = doc.to_dict()
         doc_updated = False
         
-        # Check if this document has exercises with 'sets' field
-        if 'exercises' in doc_data:
-            for exercise in doc_data['exercises']:
-                if 'sets' in exercise:
-                    # Rename 'sets' to 'items'
-                    exercise['items'] = exercise.pop('sets')
-                    doc_updated = True
+        # Check if this document has items (exercises)
+        if 'items' in doc_data:
+            for exercise in doc_data['items']:
+                if 'items' in exercise:
+                    for item in exercise['items']:
+                        if 'rest' in item:
+                            # Set rest field to null
+                            item['rest'] = None
+                            doc_updated = True
         
         # Update the document if any changes were made
         if doc_updated:
@@ -46,16 +48,16 @@ def migrate():
 
 if __name__ == "__main__":
     # Pull an example to see current structure
-    obj = pull_example('exercises', '2025-08-22')
-    print("Current document structure:")
-    print(json.dumps(obj, indent=2))
+    # obj = pull_example('exercises', '2025-09-07')
+    # print("Current document structure:")
+    # print(json.dumps(obj, indent=2))
 
-    # Create backup before migration
-    print("\nCreating backup...")
-    create_backup('exercises')
-    print("Backup created successfully.")
+    # # Create backup before migration
+    # print("\nCreating backup...")
+    # create_backup('exercises')
+    # print("Backup created successfully.")
     
-    # Run the migration
+    # # Run the migration
     print("\nStarting migration to rename 'sets' to 'items'...")
     migrate()
     print("\nMigration completed!")

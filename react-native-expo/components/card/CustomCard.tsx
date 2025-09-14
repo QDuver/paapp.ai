@@ -6,29 +6,58 @@ import SubCard from "./SubCard";
 import EditDialog from "./EditDialog";
 
 interface CustomCardProps {
-  cardList: CardListAbstract; // Add this
+  cardList: CardListAbstract<any>; // Add this
   item: CardAbstract;
   index: number;
 }
 
 const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
-  const { onUpdate } = useAppContext();
+  const { onUpdate, refreshCounter } = useAppContext();
   const [isEditDialogVisible, setIsEditDialogVisible] = useState(false);
+  const [isSubCardEditDialogVisible, setIsSubCardEditDialogVisible] = useState(false);
+  const [newSubCard, setNewSubCard] = useState<SubCardAbstract | null>(null);
   
   const renderSubCards = (): React.ReactNode => {
-    if (!item.isExpanded || !item.items || item.items.length === 0) {
+    if (!item.isExpanded) {
       return null;
     }
 
-    return item.items.map((subItem: SubCardAbstract, subIndex: number) => (
-      <SubCard
-        key={`subcard-${index}-${subIndex}`}
-        subItem={subItem}
-        parentItem={item}
-        cardList={cardList}
-        index={subIndex}
-      />
-    ));
+    const hasSubCards = item.items && item.items.length > 0;
+    const supportsSubCards = item.createNewSubCard() !== null;
+    
+    // Show subcards container if there are existing subcards OR if this card type supports subcards
+    if (!hasSubCards && !supportsSubCards) {
+      return null;
+    }
+
+    return (
+      <View>
+        {hasSubCards && item.items!.map((subItem: SubCardAbstract, subIndex: number) => (
+          <SubCard
+            key={`${refreshCounter}-subcard-${index}-${subIndex}`}
+            subItem={subItem}
+            parentItem={item}
+            cardList={cardList}
+            index={subIndex}
+          />
+        ))}
+        
+        {/* Add New Subcard Button - only show if this card type supports subcards */}
+        {supportsSubCards && (
+          <TouchableOpacity
+            style={styles.addSubCardButton}
+            onPress={() => {
+              // Don't create the sub-item yet - just signal that we want to create one
+              setNewSubCard(null);
+              setIsSubCardEditDialogVisible(true);
+            }}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.addSubCardText}>+ Add</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
   };
 
   const cardBackgroundColor: string = item.isCompleted ? "#2C2C2E" : "#1C1C1E";
@@ -74,7 +103,7 @@ const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
               {item.name || `Item ${index + 1}`}
             </Text>
 
-            {item.items && item.items.length > 0 && (
+            {(item.items && item.items.length > 0) || item.createNewSubCard() !== null ? (
               <TouchableOpacity
                 style={styles.expandButtonRight}
                 onPress={() => {
@@ -86,7 +115,7 @@ const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
                   {item.isExpanded ? "▼" : "▶"}
                 </Text>
               </TouchableOpacity>
-            )}
+            ) : null}
           </View>
 
           {((item as any).description || (item as any).instructions) && (
@@ -103,9 +132,25 @@ const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
         visible={isEditDialogVisible}
         onClose={() => setIsEditDialogVisible(false)}
         cardList={cardList}
+        parent={cardList}
         item={item}
         isCreate={false}
       />
+
+      {item.createNewSubCard() !== null && (
+        <EditDialog
+          visible={isSubCardEditDialogVisible}
+          onClose={() => {
+            setIsSubCardEditDialogVisible(false);
+            setNewSubCard(null);
+            onUpdate(cardList); // Update after dialog closes
+          }}
+          cardList={cardList}
+          parent={item}
+          item={newSubCard || item.createNewSubCard()!}
+          isCreate={true}
+        />
+      )}
     </View>
   );
 };
@@ -175,6 +220,24 @@ const styles = StyleSheet.create({
   expandText: {
     fontSize: 14,
     fontWeight: "600",
+  },
+  addSubCardButton: {
+    marginLeft: 32,
+    marginRight: 16,
+    marginVertical: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: "#48484A",
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: "#8E8E93",
+    borderStyle: "dashed",
+  },
+  addSubCardText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#8E8E93",
+    textAlign: "center",
   },
 });
 

@@ -11,134 +11,77 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { CardListAbstract } from "../../models/Abstracts";
+import { CardListAbstract, CardAbstract, BaseEditableEntity, IFieldMetadata } from "../../models/Abstracts";
+import { useAppContext } from "../../contexts/AppContext";
 
 interface EditDialogProps {
   visible: boolean;
   onClose: () => void;
-  cardList: CardListAbstract;
-  item: any;
+  cardList: CardListAbstract<any>;
+  item: BaseEditableEntity;
+  parent: CardListAbstract<any> | CardAbstract;
   isCreate?: boolean;
-  onSave?: (item: any) => void; // Optional callback when item is saved
 }
+
+
 
 const EditDialog = ({
   visible,
   onClose,
   cardList,
   item,
+  parent,
   isCreate = false,
-  onSave,
 }: EditDialogProps) => {
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
   const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
 
+  const { onUpdate } = useAppContext();
   useEffect(() => {
     if (visible && item && cardList) {
       const initialData: { [key: string]: any } = {};
-      const fieldNames = item.getEditableFields
-        ? item.getEditableFields()
-        : Object.keys(item || {}).filter(
-            (field) => field !== "isCompleted" && field !== "id"
-          );
-
-      fieldNames.forEach((fieldName) => {
+      item.getEditableFields().forEach((fieldMetadata) => {
+        const fieldName = fieldMetadata.field;
         const value = item[fieldName];
-        // Keep the original type, don't convert to string
         initialData[fieldName] = value;
       });
-
       setFormData(initialData);
       setErrors({});
     }
   }, [visible, item, cardList]);
 
   const handleInputChange = (fieldName: string, value: string) => {
-    const fieldType = typeof item[fieldName];
-    const currentValue = formData[fieldName];
-
-    const convertedValue = convertInputValue(value, fieldType, currentValue);
-    
-    // Only update if the value actually changed or is valid
-    if (convertedValue !== currentValue) {
-      setFormData((prev) => ({ ...prev, [fieldName]: convertedValue }));
-    }
-
-    // Clear error for this field when user starts typing
+    setFormData((prev) => ({ ...prev, [fieldName]: value }));
     if (errors[fieldName]) {
       setErrors((prev) => ({ ...prev, [fieldName]: null }));
     }
   };
 
   const handleDelete = () => {
-    Alert.alert("Delete Item", "Are you sure you want to delete this item?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: () => {
-          // For now, just close the dialog since we don't have onDelete callback
-          console.log("Item to delete:", item);
-          onClose();
-        },
-      },
-    ]);
-  };
-
-  const getFieldLabel = (fieldName: string): string => {
-    return fieldName
-      .replace(/([a-z])([A-Z])/g, "$1 $2")
-      .replace(/^./, (str) => str.toUpperCase());
-  };
-
-  const typeToKeyboardType = (type: string): any => {
-    switch (type) {
-      case "number":
-        return "number-pad"; // More restrictive than "numeric"
-      default:
-        return "default";
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm("Are you sure you want to delete this item?");
+      if (!confirmed) return;
     }
-  };
-
-  const convertInputValue = (value: string, fieldType: string, currentValue: any): any => {
-    if (fieldType === "number") {
-      // Allow only numbers, decimal points, and negative signs for display
-      const numericValue = value.replace(/[^0-9.-]/g, "");
-      // Prevent multiple decimal points or negative signs
-      const parts = numericValue.split(".");
-      const cleanValue =
-        parts.length > 2
-          ? parts[0] + "." + parts.slice(1).join("")
-          : numericValue;
-      
-      // Convert to actual number for storage
-      if (cleanValue === "" || cleanValue === "-") {
-        return null; // Keep null for empty or just negative sign
-      } else {
-        const numValue = Number(cleanValue);
-        return isNaN(numValue) ? currentValue : numValue; // Return current value if invalid
-      }
-    } else if (fieldType === "boolean") {
-      return value === "true";
+    
+    if (item.delete(parent)) {
+      onUpdate(cardList);
     }
-    // For strings, keep as is
-    return value;
+    
+    onClose();
   };
 
-  const renderField = (fieldName: string) => {
+  const renderField = (fieldMetadata: IFieldMetadata) => {
     if (!cardList) return null;
 
-    const fieldType = typeof item[fieldName];
+    const { field: fieldName, label: fieldLabel, type: fieldType, keyboardType, multiline } = fieldMetadata;
 
     const value = formData[fieldName];
+    
     // Convert to string for display in TextInput, handling null/undefined
-    const displayValue = value === null || value === undefined ? "" : value.toString();
+    const displayValue =
+      value === null || value === undefined ? "" : value.toString();
     const hasError = !!errors[fieldName];
-    const isMultiline =
-      fieldName === "instructions" ||
-      fieldName === "description" ||
-      fieldName === "notes";
-    const fieldLabel = getFieldLabel(fieldName);
+    const isMultiline = multiline || false;
 
     return (
       <View key={fieldName} style={styles.fieldContainer}>
@@ -146,27 +89,27 @@ const EditDialog = ({
           {fieldLabel}
         </Text>
 
-        <TextInput
-          style={[
-            styles.textInput,
-            isMultiline && styles.multilineInput,
-            {
-              backgroundColor: "#2C2C2E",
-              borderColor: hasError ? "#FF3B30" : "#48484A",
-              color: "#FFFFFF",
-            },
-          ]}
-          value={displayValue}
-          onChangeText={(text) => handleInputChange(fieldName, text)}
-          placeholder={`Enter ${fieldLabel}`}
-          placeholderTextColor="#8E8E93"
-          keyboardType={typeToKeyboardType(fieldType)}
-          inputMode={fieldType === "number" ? "numeric" : "text"}
-          autoComplete={fieldType === "number" ? "off" : undefined}
-          multiline={isMultiline}
-          numberOfLines={isMultiline ? 3 : 1}
-          textAlignVertical={isMultiline ? "top" : "center"}
-        />
+          <TextInput
+            style={[
+              styles.textInput,
+              isMultiline && styles.multilineInput,
+              {
+                backgroundColor: "#2C2C2E",
+                borderColor: hasError ? "#FF3B30" : "#48484A",
+                color: "#FFFFFF",
+              },
+            ]}
+            value={displayValue}
+            onChangeText={(text) => handleInputChange(fieldName, text)}
+            placeholder={`Enter ${fieldLabel}`}
+            placeholderTextColor="#8E8E93"
+            keyboardType={keyboardType || "default"}
+            inputMode={fieldType === "number" ? "numeric" : "text"}
+            autoComplete={fieldType === "number" ? "off" : undefined}
+            multiline={isMultiline}
+            numberOfLines={isMultiline ? 3 : 1}
+            textAlignVertical={isMultiline ? "top" : "center"}
+          />
 
         {hasError && <Text style={styles.errorText}>{errors[fieldName]}</Text>}
       </View>
@@ -177,12 +120,6 @@ const EditDialog = ({
     return null;
   }
 
-  const fieldNames = item.getEditableFields
-    ? item.getEditableFields()
-    : Object.keys(item || {}).filter(
-        (fieldName) => fieldName !== "isCompleted" && fieldName !== "id"
-      );
-  const editableFields = fieldNames;
 
   const modalBackgroundColor = "#1C1C1E";
   const overlayColor = "rgba(0,0,0,0.7)";
@@ -214,7 +151,9 @@ const EditDialog = ({
             style={styles.formContainer}
             showsVerticalScrollIndicator={false}
           >
-            {editableFields.map(renderField)}
+            {item.getEditableFields()
+              .filter(fieldMetadata => isCreate || (formData[fieldMetadata.field] != null))
+              .map(renderField)}
           </ScrollView>
 
           <View style={styles.actionContainer}>
@@ -245,41 +184,32 @@ const EditDialog = ({
 
                 <TouchableOpacity
                   style={styles.saveButton}
-                  onPress={async () => {
-                    console.log('formData', formData);
-                    // Direct assignment since formData already has the correct types
-                    const editableFields = item.getEditableFields
-                      ? item.getEditableFields()
-                      : Object.keys(item || {}).filter(
-                          (fieldName) => fieldName !== "isCompleted" && fieldName !== "id"
-                        );
-                    
-                    editableFields.forEach((fieldName) => {
+                  onPress={() => {
+                    // Convert form data using field converters
+                    const convertedData: { [key: string]: any } = {};
+                    item.getEditableFields().forEach(fieldMetadata => {
+                      const fieldName = fieldMetadata.field;
                       if (formData.hasOwnProperty(fieldName)) {
-                        const value = formData[fieldName];
-                        const fieldType = typeof item[fieldName];
-                        
-                        // Handle null values for numeric fields by setting to 0 or keeping original
-                        if (fieldType === "number" && value === null) {
-                          // Keep the original value if new value is null/empty
-                          // Or set to 0 if you prefer: item[fieldName] = 0;
-                          return;
-                        }
-                        
-                        item[fieldName] = value;
+                        const rawValue = formData[fieldName];
+                        const stringValue = rawValue === null || rawValue === undefined ? "" : rawValue.toString();
+                        convertedData[fieldName] = fieldMetadata.converter 
+                          ? fieldMetadata.converter(stringValue) 
+                          : stringValue;
                       }
                     });
-                    
-                    // Trigger onFieldsUpdated if available (for derived fields)
-                    if (typeof item.onFieldsUpdated === "function") {
-                      item.onFieldsUpdated();
+
+                    if (isCreate) {
+                      item.update(convertedData); 
+                      (parent as any).items.push(item);
+                      // If parent is a CardAbstract (sub-item being added), ensure it's expanded
+                      if ('isExpanded' in parent) {
+                        (parent as any).isExpanded = true;
+                      }
+                      onUpdate(cardList);
+                    } else {
+                      item.update(convertedData); 
+                      onUpdate(cardList);
                     }
-                    
-                    // Call onSave callback if provided
-                    if (onSave) {
-                      onSave(item);
-                    }
-                    
                     onClose();
                   }}
                 >

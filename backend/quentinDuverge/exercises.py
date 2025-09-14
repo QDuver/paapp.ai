@@ -18,7 +18,7 @@ class ExerciseSet(BaseModel):
     weightKg: Optional[float] = None
     repetitions: Optional[int] = None
     duration: Optional[int] = None
-    rest: Optional[int] = 90
+    rest: Optional[int] = None
 
 
 class Exercise(Entity):

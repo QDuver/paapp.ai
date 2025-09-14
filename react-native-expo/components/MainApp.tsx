@@ -11,7 +11,9 @@ import {
   Modal,
   RefreshControl,
 } from 'react-native';
+import { Provider as PaperProvider, FAB } from 'react-native-paper';
 import CardList from './card/CardList';
+import EditDialog from './card/EditDialog';
 import { useAppContext } from '../contexts/AppContext';
 
 const MainApp = () => {
@@ -21,6 +23,8 @@ const MainApp = () => {
   const [isAuthChecking, setIsAuthChecking] = useState(true);
   const [selectedTab, setSelectedTab] = useState(1);
   const [showSettings, setShowSettings] = useState(false);
+  const [isEditDialogVisible, setIsEditDialogVisible] = useState(false);
+  const [newItem, setNewItem] = useState<any>(null);
 
   useEffect(() => {
     setTimeout(() => {
@@ -76,19 +80,28 @@ console.log('data', data);
   const currentTab = tabs[selectedTab];
   const cardList = data?.[currentTab.key];
 
+  const createNewItem = () => {
+    if (!cardList) return;
+    
+    // Don't create the item yet - just signal that we want to create one
+    setNewItem(null);
+    setIsEditDialogVisible(true);
+  };
+
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: '#000' }]}>
-      {/* Header */}
-      <View style={[styles.header, { borderBottomColor: '#333' }]}>
-        <Text style={[styles.title, { color: '#fff' }]}>
-          Life Automation
-        </Text>
-        <TouchableOpacity onPress={() => setShowSettings(true)}>
-          <Text style={[styles.settingsButton, { color: '#fff' }]}>
-            ⚙️
+    <PaperProvider>
+      <SafeAreaView style={[styles.container, { backgroundColor: '#000' }]}>
+        {/* Header */}
+        <View style={[styles.header, { borderBottomColor: '#333' }]}>
+          <Text style={[styles.title, { color: '#fff' }]}>
+            Life Automation
           </Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity onPress={() => setShowSettings(true)}>
+            <Text style={[styles.settingsButton, { color: '#fff' }]}>
+              ⚙️
+            </Text>
+          </TouchableOpacity>
+        </View>
 
       {/* Date and Actions */}
       <View style={[styles.dateContainer, { borderBottomColor: '#333' }]}>
@@ -209,8 +222,31 @@ console.log('data', data);
           </View>
         </View>
       </Modal>
+      
+      {/* Edit Dialog */}
+      {cardList && (
+        <EditDialog
+          visible={isEditDialogVisible}
+          onClose={() => {
+            setIsEditDialogVisible(false);
+            setNewItem(null);
+          }}
+          cardList={cardList}
+          parent={cardList}
+          item={newItem || cardList.createNewItem()}
+          isCreate={true}
+        />
+      )}
+      
+      <FAB
+        style={styles.fab}
+        icon="plus"
+        onPress={createNewItem}
+      />
+      
       <StatusBar style='light' />
     </SafeAreaView>
+    </PaperProvider>
   );
 };
 
@@ -361,6 +397,14 @@ const styles = StyleSheet.create({
     color: '#fff',
     textAlign: 'center',
     fontSize: 14,
+  },
+  fab: {
+    position: 'absolute',
+    margin: 16,
+    right: 0,
+    bottom: 0,
+    zIndex: 9999,
+    elevation: 16,
   },
 });
 

@@ -1,6 +1,8 @@
 meals_agent = """
-Consider the historical data of my meals to suggest the upcoming ones. It should show diversity in ingredients, nutriments, and be healthy.
+Consider the historical data of my meals to suggest the upcoming ones for that given day. It should show diversity in ingredients, nutriments, and be healthy.
 My overall goal is not to lose weight but to gain muscle and lose belly fat.
+I never eat Breakfasts, so you can only focus on Lunch and Dinner. So each output should only contain two items.
+I can only eat Gluten for Dinner.
 """
 
 exercise_agent = """

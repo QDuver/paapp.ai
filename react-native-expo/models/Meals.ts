@@ -4,6 +4,8 @@ import {
   IEntity,
   IFirestoreDoc,
   SubCardAbstract,
+  IFieldMetadata,
+  FieldConverters,
 } from "./Abstracts";
 
 export interface IIngredient {
@@ -25,17 +27,35 @@ export interface IMeals extends IFirestoreDoc {
 }
 
 export class Ingredient extends SubCardAbstract implements IIngredient {
-  name: string = "";
+  private _name: string = "";
   quantity: number = 0.0;
   calories: number = 0;
 
-  constructor(data: IIngredient) {
-    super(data);
-    Object.assign(this, data);
+  constructor() {
+    super();
   }
 
-  getEditableFields(): string[] {
-    return ["name", "quantity", "calories"];
+  static fromJson(data: IIngredient): Ingredient {
+    const ingredient = new Ingredient();
+    Object.assign(ingredient, data);
+    ingredient._name = data.name;
+    return ingredient;
+  }
+
+  get name(): string {
+    return this._name;
+  }
+
+  set name(value: string) {
+    this._name = value;
+  }
+
+  getEditableFields(): IFieldMetadata[] {
+    return [
+      { field: "name", label: "Ingredient Name", type: "string", keyboardType: "default", converter: FieldConverters.string },
+      { field: "quantity", label: "Quantity", type: "number", keyboardType: "number-pad", converter: FieldConverters.number },
+      { field: "calories", label: "Calories", type: "number", keyboardType: "number-pad", converter: FieldConverters.number },
+    ];
   }
 
   getTags(): string[] {
@@ -51,13 +71,23 @@ export class Meal extends CardAbstract implements IMeal {
   instructions: string = "";
   calories: number = 0;
 
-  constructor(data: IMeal) {
-    super(data);
-    this.items = (data.items || []).map((item) => new Ingredient(item));
+  constructor() {
+    super();
   }
 
-  getEditableFields(): string[] {
-    return ["name", "instructions", "calories"];
+  static fromJson(data: IMeal): Meal {
+    const meal = new Meal();
+    Object.assign(meal, data);
+    meal.items = (data.items || []).map((item) => Ingredient.fromJson(item));
+    return meal;
+  }
+
+  getEditableFields(): IFieldMetadata[] {
+    return [
+      { field: "name", label: "Meal Name", type: "string", keyboardType: "default", converter: FieldConverters.string },
+      { field: "instructions", label: "Instructions", type: "string", keyboardType: "default", multiline: true, converter: FieldConverters.string },
+      { field: "calories", label: "Calories", type: "number", keyboardType: "number-pad", converter: FieldConverters.number },
+    ];
   }
 
   getTags(): string[] {
@@ -68,15 +98,21 @@ export class Meal extends CardAbstract implements IMeal {
     }
     return tags;
   }
+
+  createNewSubCard(): Ingredient {
+    const ingredient = new Ingredient();
+    ingredient.name = "New ingredient";
+    return ingredient;
+  }
 }
 
-export class Meals extends CardListAbstract implements IMeals {
+export class Meals extends CardListAbstract<Meal> implements IMeals {
   items: Meal[] = [];
   notes: string = "";
 
   constructor(data: IMeals) {
-    super(data);
-    this.items = (data.items || []).map((item) => new Meal(item));
+    super(data, Meal);
+    this.items = (data.items || []).map((item) => Meal.fromJson(item));
   }
 }
     

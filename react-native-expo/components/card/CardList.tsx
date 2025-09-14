@@ -8,12 +8,14 @@ import {
 } from "react-native";
 import { CardListAbstract, CardAbstract } from "../../models/Abstracts";
 import CustomCard from "./CustomCard";
+import { useAppContext } from "../../contexts/AppContext";
 
 interface CardListProps {
-  cardList: CardListAbstract;
+  cardList: CardListAbstract<any>;
 }
 
 const CardList = ({ cardList }: CardListProps) => {
+  const { refreshCounter } = useAppContext();
 
   const renderCard: ListRenderItem<CardAbstract> = ({ item, index }) => (
     <CustomCard
@@ -28,7 +30,7 @@ const CardList = ({ cardList }: CardListProps) => {
       <FlatList<CardAbstract>
         data={cardList.items}
         renderItem={renderCard}
-        keyExtractor={(item, index) => `card-${index}`}
+        keyExtractor={(item, index) => `${refreshCounter}-card-${index}`}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
         bounces={true}
@@ -53,6 +55,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#8E8E93",
     textAlign: "center",
+  },
+  fabContainer: {
+    position: 'absolute',
+    bottom: 16,
+    right: 16,
+    zIndex: 9999,
+  },
+  fab: {
+    backgroundColor: '#6200EE',
+    elevation: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
 });
 

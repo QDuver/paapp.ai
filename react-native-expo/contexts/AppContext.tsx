@@ -25,7 +25,8 @@ interface AppContextType {
   data: DataType | undefined;
   currentDate: string;
   isLoading: boolean;
-  onUpdate: (cardList: CardListAbstract) => void;
+  refreshCounter: number;
+  onUpdate: (cardList: CardListAbstract<any>) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -60,7 +61,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     setIsLoading(status === RequestStatusType.LOADING);
   }, [status]);
 
-  const onUpdate = (cardList: CardListAbstract) => {
+  const onUpdate = (cardList: CardListAbstract<any>) => {
     setRefreshCounter(prev => prev + 1);
     post(`quentin-duverge/${cardList.collection}/${cardList.id}`, cardList);
   };
@@ -69,6 +70,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     data,
     currentDate,
     isLoading,
+    refreshCounter,
     onUpdate,
   };
 
