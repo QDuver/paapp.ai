@@ -16,12 +16,14 @@ if __name__ == "__main__":
     # Routines().delete()
     # Exercises().delete()
     # Meals().delete()
-    Routines().buildItems()
-    Exercises().buildItems()
-    Meals().buildItems()
+    # Meals().build_items()
+    
+    # Routines().build_items()
+    # Exercises().build_items()
+    # exercises = Exercises().get_unique()
+    # print(json.dumps(exercises, indent=2))
+    # Meals().build_items()
     # print(json.dumps(exercises.model_dump(), indent=2))
 
-    # ex = requests.post(
-        # "http://localhost:8000/quentin-duverge/build-items/routines/2025-09-01", json={})
-    
-    # print(ex.json())
+    ex = requests.get("http://localhost:8000/quentin-duverge/routines/2025-09-21")
+    print(ex.json())

@@ -1,25 +1,25 @@
 import React, {
-    createContext,
-    ReactNode,
-    useContext,
-    useEffect,
-    useState
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState
 } from "react";
 import useApi from "../hooks/useApi";
 import { Exercises, IExercises } from "../models/Exercises";
 // import { Meals } from "../models/Meals";
+import { BaseEditableEntity, CardAbstract, CardListAbstract } from "../models/Abstracts";
+import { IMeals, Meals } from "../models/Meals";
 import { IRoutines, Routines } from "../models/Routines";
 import { RequestStatusType } from "../models/Shared";
 import { getCurrentDate } from "../utils/dateUtils";
-import { IMeals, Meals } from "../models/Meals";
-import { CardListAbstract, CardAbstract, BaseEditableEntity } from "../models/Abstracts";
-import { collection } from "firebase/firestore/lite";
 
 interface DataType {
   routines: Routines | null;
   exercises: Exercises | null;
   meals: Meals | null;
 }
+
 
 interface DialogSettings {
   visible: boolean;
@@ -48,7 +48,7 @@ interface AppProviderProps {
 
 export const AppProvider = ({ children }: AppProviderProps) => {
   const { get, data: apiData, status, } = useApi<{ routines: IRoutines; exercises: IExercises; meals: IMeals; }>();
-  const {post, status: postStatus} = useApi();
+  const {post} = useApi();
   const [data, setData] = useState<DataType>();
   const [currentDate, setCurrentDate] = useState<string>(getCurrentDate());
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -73,6 +73,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
       exercises: new Exercises(apiData.exercises),
       meals: new Meals(apiData.meals),
     });
+
   }, [apiData]);
 
   useEffect(() => {

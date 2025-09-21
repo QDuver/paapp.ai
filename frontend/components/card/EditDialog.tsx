@@ -1,19 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
+  KeyboardAvoidingView,
   Modal,
-  View,
+  Platform,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
+  View
 } from "react-native";
-import { CardListAbstract, CardAbstract, BaseEditableEntity, IFieldMetadata } from "../../models/Abstracts";
-import { ExerciseSet } from "../../models/Exercises";
 import { useAppContext } from "../../contexts/AppContext";
+import { IFieldMetadata } from "../../models/Abstracts";
 
 const EditDialog = () => {
   const [formData, setFormData] = useState<{ [key: string]: any }>({});

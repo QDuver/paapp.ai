@@ -105,7 +105,7 @@ console.log('data', data);
         <View style={styles.actionButtons}>
           <TouchableOpacity 
             style={[styles.actionButton, { backgroundColor: '#333' }]}
-            // onPress={() => buildItems(currentTab.key)}
+            // onPress={() => build_items(currentTab.key)}
             disabled={isLoading}
           >
             <Text style={[styles.actionButtonText, { color: '#fff' }]}>
@@ -168,7 +168,7 @@ console.log('data', data);
             </Text>
             <TouchableOpacity 
               style={[styles.actionButton, { backgroundColor: '#333' }]}
-              // onPress={() => buildItems(currentTab.key)}
+              // onPress={() => build_items(currentTab.key)}
             >
               <Text style={[styles.actionButtonText, { color: '#fff' }]}>
                 Build {currentTab.name}

@@ -33,7 +33,7 @@ class Meals(FirestoreDoc):
     items: List[Meal] = []
     notes: Optional[str] = None
 
-    def buildItems(self, notes: Optional[str] = None):
+    def build_items(self, notes: Optional[str] = None):
         prompt = agent.prompt({
             'HISTORICAL_MEALS_DATA': fs.historics(collection, self.id),
             'USER_NOTES': notes 

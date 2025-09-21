@@ -14,12 +14,16 @@ agent = get_agent_smart()
 fs = get_firestore_client('quentin-duverge')
 today = datetime.datetime.now().strftime("%Y-%m-%d")
 
+
 class ExerciseSet(BaseModel):
     weightKg: Optional[float] = None
     repetitions: Optional[int] = None
     duration: Optional[int] = None
     rest: Optional[int] = None
 
+class ExerciseUnique(BaseModel):
+    name: str
+    latestSet: List[ExerciseSet] = []
 
 class Exercise(Entity):
     name: str = ''
@@ -36,9 +40,35 @@ class Exercises(FirestoreDoc):
     availableTimeMin: Optional[int] = None
     notes: Optional[str] = None
     items: List[Exercise] = []
+    uniqueExercises: List[ExerciseUnique] = []
+    
+    
+    def get_unique(self):
+        unique_exercises = {}
+        
+        for doc in fs.collection(collection).stream():
+            doc_data = doc.to_dict()
+            if not doc_data or 'items' not in doc_data:
+                continue
+                
+            for exercise in doc_data['items']:
+                name = exercise.get('name', '')
+                if not name or (name in unique_exercises and doc.id <= unique_exercises[name]['date']):
+                    continue
+                    
+                latest_set = exercise.get('items', [])[-1] if exercise.get('items') else None
+                unique_exercises[name] = {'name': name, 'date': doc.id, 'latestSet': latest_set}
+
+        self.uniqueExercises = sorted([{'name': ex['name'], 'latestSet': ex['latestSet']}
+                                       for ex in unique_exercises.values()], key=lambda x: x['name'])
+
+    def query(self):
+        result = super().query()
+        result.get_unique()
+        return result
 
 
-    def buildItems(self, atHome: Optional[bool] = False, availableTimeMin: Optional[int] = None, notes: Optional[str] = None):
+    def build_items(self, atHome: Optional[bool] = False, availableTimeMin: Optional[int] = None, notes: Optional[str] = None):
         prompt = agent.prompt({
             'HISTORICAL_TRAINING_DATA': fs.historics(collection, self.id),
             'CONDITIONS': f'Available time in minutes : {availableTimeMin}, At home: {atHome}',
@@ -55,5 +85,3 @@ class Exercises(FirestoreDoc):
         )
         exercises.save()
         return exercises
-
-

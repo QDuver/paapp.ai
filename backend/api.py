@@ -37,6 +37,7 @@ app.add_middleware(
 def get_routine(day: str):
     routines = Routines(id=day).query()
     exercises = Exercises(id=day).query()
+    print('exercises', exercises)
     meals = Meals(id=day).query()
     return {"routines": routines, "exercises": exercises, "meals": meals}
 
@@ -74,13 +75,13 @@ def overwrite(db: str, collection: str, document: str, request: dict):
 
 
 @app.post("/{db}/build-items/{collection}/{id}")
-def buildItems(db: str, collection: str, id: str, request: dict):
+def build_items(db: str, collection: str, id: str, request: dict):
 
     if collection not in COLLECTION_CLASS_MAPPING:
         raise HTTPException(status_code=400, detail=f"Collection '{collection}' not found in mapping. Available collections: {list(COLLECTION_CLASS_MAPPING.keys())}")
     
     instance = COLLECTION_CLASS_MAPPING[collection]()
-    instance.buildItems()
+    instance.build_items()
     return instance.query().model_dump()
 
 

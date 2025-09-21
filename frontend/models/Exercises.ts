@@ -8,6 +8,13 @@ import {
   FieldConverters,
 } from "./Abstracts";
 
+
+export interface IExerciseUnique {
+  name: string;
+  latestSet: IExerciseSet
+}
+
+
 export interface IExerciseSet {
   name: string;
   weightKg?: number;
@@ -28,6 +35,7 @@ export interface IExercises extends IFirestoreDoc {
   notes?: string;
   items: Exercise[];
   durationMin?: number;
+  uniqueExercises: IExerciseUnique[];
 }
 
 export class ExerciseSet extends SubCardAbstract implements IExerciseSet {
@@ -78,7 +86,6 @@ export class ExerciseSet extends SubCardAbstract implements IExerciseSet {
       return; // This set is not found or is the last set
     }
 
-    // Update all subsequent sets with the current set's values
     for (let i = currentIndex + 1; i < parent.items.length; i++) {
       const subsequentSet = parent.items[i];
       subsequentSet.weightKg = this.weightKg;
@@ -134,6 +141,7 @@ export class Exercises extends CardListAbstract<Exercise> implements IExercises 
   availableTimeMin?: number;
   notes?: string;
   durationMin?: number;
+  uniqueExercises: IExerciseUnique[] = [];
 
   constructor(data: IExercises) {
     super(data, Exercise);

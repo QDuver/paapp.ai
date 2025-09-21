@@ -34,7 +34,7 @@ class Routines(FirestoreDoc):
     wakeupTime: Optional[str] = datetime.datetime.now().strftime("%H:%M")
     items: List[Routine] = []
 
-    def buildItems(self):
+    def build_items(self):
         self.items = [Routine(**item) for item in ROUTINE_TEMPLATE]
         print(self.items)
         self.save()
