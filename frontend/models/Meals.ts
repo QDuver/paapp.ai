@@ -50,7 +50,7 @@ export class Ingredient extends SubCardAbstract implements IIngredient {
     this._name = value;
   }
 
-  getEditableFields(): IFieldMetadata[] {
+  getEditableFields(parent?: any): IFieldMetadata[] {
     return [
       { field: "name", label: "Ingredient Name", type: "string", keyboardType: "default", converter: FieldConverters.string },
       { field: "quantity", label: "Quantity", type: "number", keyboardType: "number-pad", converter: FieldConverters.number },
@@ -82,7 +82,7 @@ export class Meal extends CardAbstract implements IMeal {
     return meal;
   }
 
-  getEditableFields(): IFieldMetadata[] {
+  getEditableFields(parent?: any): IFieldMetadata[] {
     return [
       { field: "name", label: "Meal Name", type: "string", keyboardType: "default", converter: FieldConverters.string },
       { field: "instructions", label: "Instructions", type: "string", keyboardType: "default", multiline: true, converter: FieldConverters.string },
@@ -99,7 +99,7 @@ export class Meal extends CardAbstract implements IMeal {
     return tags;
   }
 
-  createNewSubCard(parent: Meal | CardListAbstract<any>): Ingredient {
+  createNewSubCard(): Ingredient {
     return new Ingredient();
   }
 }

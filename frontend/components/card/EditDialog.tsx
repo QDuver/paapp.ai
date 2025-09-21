@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { useAppContext } from "../../contexts/AppContext";
 import { IFieldMetadata } from "../../models/Abstracts";
+import AutocompleteInput from "../AutocompleteInput";
 
 const EditDialog = () => {
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
@@ -19,7 +20,7 @@ const EditDialog = () => {
 
   const { onUpdate, dialogSettings, hideEditDialog } = useAppContext();
   const { visible, item, parent, cardList, isNew } = dialogSettings;
-  console.log('parent', parent);
+  
   useEffect(() => {
     if (visible && item && cardList) {
       setFormData(item.toFormData());
@@ -31,6 +32,27 @@ const EditDialog = () => {
     setFormData((prev) => ({ ...prev, [fieldName]: value }));
     if (errors[fieldName]) {
       setErrors((prev) => ({ ...prev, [fieldName]: null }));
+    }
+  };
+
+  const handleSuggestionSelect = (fieldName: string, suggestion: any) => {
+    if (fieldName === 'name' && suggestion?.items && Array.isArray(suggestion.items)) {
+      // Set the name
+      setFormData((prev) => ({ ...prev, [fieldName]: suggestion.name }));
+      
+      // Create the exercise with sets from the suggestion
+      if (item && parent) {
+        (item as any).name = suggestion.name;
+        (item as any).items = suggestion.items.map((setData: any) => {
+          const exerciseSet = (item as any).createNewSubCard();
+          Object.assign(exerciseSet, setData);
+          return exerciseSet;
+        });
+        
+        item.update({ name: suggestion.name }, parent, isNew);
+        onUpdate(cardList);
+        hideEditDialog();
+      }
     }
   };
 
@@ -50,13 +72,14 @@ const EditDialog = () => {
   const renderField = (fieldMetadata: IFieldMetadata) => {
     if (!cardList) return null;
 
-    const { field: fieldName, label: fieldLabel, type: fieldType, keyboardType, multiline } = fieldMetadata;
+    const { field: fieldName, label: fieldLabel, type: fieldType, keyboardType, multiline, suggestions } = fieldMetadata;
 
     const value = formData[fieldName];
     const displayValue =
       value === null || value === undefined ? "" : value.toString();
     const hasError = !!errors[fieldName];
     const isMultiline = multiline || false;
+    const hasSuggestions = suggestions && suggestions.length > 0;
 
     return (
       <View key={fieldName} style={styles.fieldContainer}>
@@ -64,6 +87,24 @@ const EditDialog = () => {
           {fieldLabel}
         </Text>
 
+        {hasSuggestions && !isMultiline ? (
+          <AutocompleteInput
+            value={displayValue}
+            onChangeText={(text) => handleInputChange(fieldName, text)}
+            placeholder={`Enter ${fieldLabel}`}
+            placeholderTextColor="#8E8E93"
+            suggestions={suggestions}
+            style={[styles.textInput]}
+            keyboardType={keyboardType || "default"}
+            inputMode={fieldType === "number" ? "numeric" : "text"}
+            autoComplete={fieldType === "number" ? "off" : undefined}
+            hasError={hasError}
+            borderColor="#48484A"
+            backgroundColor="#2C2C2E"
+            color="#FFFFFF"
+            onSuggestionSelect={(suggestion) => handleSuggestionSelect(fieldName, suggestion)}
+          />
+        ) : (
           <TextInput
             testID={`input-${fieldName}`}
             style={[
@@ -86,6 +127,7 @@ const EditDialog = () => {
             numberOfLines={isMultiline ? 3 : 1}
             textAlignVertical={isMultiline ? "top" : "center"}
           />
+        )}
 
         {hasError && <Text style={styles.errorText}>{errors[fieldName]}</Text>}
       </View>
@@ -127,9 +169,11 @@ const EditDialog = () => {
             style={styles.formContainer}
             showsVerticalScrollIndicator={false}
           >
-            {item.getEditableFields()
-              .filter(fieldMetadata => isNew || (formData[fieldMetadata.field] != null))
-              .map(renderField)}
+            {(() => {
+              const editableFields = item.getEditableFields(parent);
+              const filteredFields = editableFields.filter(fieldMetadata => isNew || (formData[fieldMetadata.field] != null));
+              return filteredFields.map(renderField);
+            })()}
           </ScrollView>
 
           <View style={styles.actionContainer}>
@@ -164,7 +208,6 @@ const EditDialog = () => {
                   testID="save-button"
                   style={styles.saveButton}
                   onPress={() => {
-                    console.log('parent', parent)
                       item.update(formData, parent, isNew); 
                     onUpdate(cardList);
                     hideEditDialog();

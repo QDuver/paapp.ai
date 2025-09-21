@@ -19,7 +19,7 @@ const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
     }
 
     const hasSubCards = item.items && item.items.length > 0;
-    const supportsSubCards = item.createNewSubCard(cardList) !== null;
+    const supportsSubCards = item.createNewSubCard() !== null;
     
     // Show subcards container if there are existing subcards OR if this card type supports subcards
     if (!hasSubCards && !supportsSubCards) {
@@ -43,7 +43,7 @@ const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
             testID={`add-subcard-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
             style={styles.addSubCardButton}
             onPress={() => {
-              const newSubCard = item.createNewSubCard(cardList)!;
+              const newSubCard = item.createNewSubCard()!;
               
               if (item.shouldSkipDialogForNewSubCard()) {
                 item.items!.push(newSubCard);
@@ -106,7 +106,7 @@ const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
               {item.name || `Item ${index + 1}`}
             </Text>
 
-            {(item.items && item.items.length > 0) || item.createNewSubCard(cardList) !== null ? (
+            {(item.items && item.items.length > 0) || item.createNewSubCard() !== null ? (
               <TouchableOpacity
                 testID={`expand-button-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
                 style={styles.expandButtonRight}

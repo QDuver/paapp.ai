@@ -10,13 +10,14 @@ export interface IFirestoreDoc {
   items: any[];
 }
 
-export interface IFieldMetadata {
+export interface IFieldMetadata<T = string> {
   field: string;
   label: string;
   type: 'string' | 'number' | 'boolean';
   keyboardType?: 'default' | 'number-pad' | 'numeric' | 'email-address' | 'phone-pad';
   multiline?: boolean;
   converter?: (value: string) => any;
+  suggestions?: T[];
 }
 
 // Standard field converters
@@ -29,18 +30,18 @@ export const FieldConverters = {
   boolean: (value: string) => value === 'true',
 };
 
-export abstract class BaseEditableEntity {
+export abstract class BaseEditableEntity<T = string> {
   constructor() {
     // Default constructor - subclasses set their own defaults
   }
 
-  static fromJson(data: any): BaseEditableEntity {
+  static fromJson(data: any): BaseEditableEntity<any> {
     const instance = new (this as any)();
     Object.assign(instance, data);
     return instance;
   }
 
-  abstract getEditableFields(): IFieldMetadata[];
+  abstract getEditableFields(parent?: any): IFieldMetadata<T>[];
 
   getTags(): string[] {
     return [];
@@ -85,10 +86,6 @@ export abstract class BaseEditableEntity {
     if(isNew){
       (parent as any).items.push(this);
     }
-
-    console.log('Updated entity:', this);
-    console.log('Parent after update:', parent);
-
   }
 
   delete(parent: CardListAbstract<any> | CardAbstract): boolean {
@@ -105,19 +102,19 @@ export abstract class BaseEditableEntity {
 
 }
 
-export abstract class SubCardAbstract extends BaseEditableEntity {
+export abstract class SubCardAbstract<T = string> extends BaseEditableEntity<T> {
   abstract get name(): string;
   
   constructor() {
     super();
   }
 
-  getEditableFields(): IFieldMetadata[] {
+  getEditableFields(parent?: any): IFieldMetadata<T>[] {
     return [];
   }
 }
 
-export abstract class CardAbstract extends BaseEditableEntity {
+export abstract class CardAbstract<T = string> extends BaseEditableEntity<T> {
   name: string = '';
   isCompleted: boolean = false;
   isExpanded: boolean = true;
@@ -129,7 +126,7 @@ export abstract class CardAbstract extends BaseEditableEntity {
     super();
   }
 
-  getEditableFields(): IFieldMetadata[] {
+  getEditableFields(parent?: any): IFieldMetadata<T>[] {
     return [];
   }
 
@@ -141,35 +138,21 @@ export abstract class CardAbstract extends BaseEditableEntity {
   }
 
   onToggleExpand() {
-    // Allow expanding if there are existing subcards OR this card supports creating subcards
-    if ((this.items && this.items.length > 0) || this.createNewSubCard(this) !== null) {
+    if ((this.items && this.items.length > 0) || this.createNewSubCard() !== null) {
       this.isExpanded = !this.isExpanded;
     }
   }
 
-  // Method to create a new subcard - to be implemented by subclasses
-  createNewSubCard(parent: CardAbstract | CardListAbstract<any>): SubCardAbstract | null {
+  createNewSubCard(): SubCardAbstract | null {
     return null; // Base implementation returns null (no subcards supported)
   }
 
-  // Method to determine if dialog should be skipped when creating new subcards
   shouldSkipDialogForNewSubCard(): boolean {
     return false; // Base implementation always shows dialog
   }
-
-  // Method to add a new subcard to this card
-  addNewSubCard(): SubCardAbstract | null {
-    const newSubCard = this.createNewSubCard(this);
-    if (newSubCard && this.items) {
-      this.items.push(newSubCard);
-      // Ensure the card is expanded to show the new subcard
-      this.isExpanded = true;
-    }
-    return newSubCard;
-  }
 }
 
-export abstract class CardListAbstract<T extends CardAbstract> {
+export abstract class CardListAbstract<T extends CardAbstract<any>> {
   items: T[] = [];
   collection: string;
   id: string;

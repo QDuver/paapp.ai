@@ -75,8 +75,6 @@ const MainApp = ({ user }: MainAppProps) => {
     { id: 2, name: 'Meals', key: 'meals' }
   ];
 
-console.log('data', data);
-
   const currentTab = tabs[selectedTab];
   const cardList = data?.[currentTab.key];
 

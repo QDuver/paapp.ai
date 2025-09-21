@@ -11,7 +11,7 @@ import {
 
 export interface IExerciseUnique {
   name: string;
-  latestSet: IExerciseSet
+  items: IExerciseSet[]
 }
 
 
@@ -62,7 +62,7 @@ export class ExerciseSet extends SubCardAbstract implements IExerciseSet {
     return parts.length > 0 ? parts.join(" × ") : "Set";
   }
 
-  getEditableFields(): IFieldMetadata[] {
+  getEditableFields(parent?: any): IFieldMetadata[] {
     return [
       { field: "weightKg", label: "Weight (kg)", type: "number", keyboardType: "number-pad", converter: FieldConverters.number },
       { field: "repetitions", label: "Repetitions", type: "number", keyboardType: "number-pad", converter: FieldConverters.number },
@@ -96,7 +96,7 @@ export class ExerciseSet extends SubCardAbstract implements IExerciseSet {
   }
 }
 
-export class Exercise extends CardAbstract implements IExercise {
+export class Exercise extends CardAbstract<IExerciseUnique> implements IExercise {
   items: ExerciseSet[] = [];
 
   constructor() {
@@ -110,13 +110,14 @@ export class Exercise extends CardAbstract implements IExercise {
     return exercise;
   }
 
-  getEditableFields(): IFieldMetadata[] {
+  getEditableFields(parent?: any): IFieldMetadata<IExerciseUnique>[] {
+    const suggestions = parent?.uniqueExercises || [];
     return [
-      { field: "name", label: "Exercise Name", type: "string", keyboardType: "default", converter: FieldConverters.string },
+      { field: "name", label: "Exercise Name", type: "string", keyboardType: "default", converter: FieldConverters.string, suggestions: suggestions },
     ];
   }
 
-  createNewSubCard(parent: Exercise | CardListAbstract<any>): ExerciseSet {
+  createNewSubCard(): ExerciseSet {
     const newSet = new ExerciseSet();
     
     if (this.items && this.items.length > 0) {
@@ -146,5 +147,6 @@ export class Exercises extends CardListAbstract<Exercise> implements IExercises 
   constructor(data: IExercises) {
     super(data, Exercise);
     this.items = data.items.map((item) => Exercise.fromJson(item));
+    this.uniqueExercises = data.uniqueExercises || [];
   }
 }

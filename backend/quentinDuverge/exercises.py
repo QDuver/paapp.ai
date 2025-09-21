@@ -23,7 +23,7 @@ class ExerciseSet(BaseModel):
 
 class ExerciseUnique(BaseModel):
     name: str
-    latestSet: List[ExerciseSet] = []
+    items: List[ExerciseSet] = []
 
 class Exercise(Entity):
     name: str = ''
@@ -56,10 +56,10 @@ class Exercises(FirestoreDoc):
                 if not name or (name in unique_exercises and doc.id <= unique_exercises[name]['date']):
                     continue
                     
-                latest_set = exercise.get('items', [])[-1] if exercise.get('items') else None
-                unique_exercises[name] = {'name': name, 'date': doc.id, 'latestSet': latest_set}
+                latest_sets = exercise.get('items', [])
+                unique_exercises[name] = {'name': name, 'date': doc.id, 'items': latest_sets}
 
-        self.uniqueExercises = sorted([{'name': ex['name'], 'latestSet': ex['latestSet']}
+        self.uniqueExercises = sorted([{'name': ex['name'], 'items': ex['items']}
                                        for ex in unique_exercises.values()], key=lambda x: x['name'])
 
     def query(self):

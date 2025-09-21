@@ -37,7 +37,7 @@ export class Routine extends CardAbstract implements IRoutine {
     return routine;
   }
 
-  getEditableFields(): IFieldMetadata[] {
+  getEditableFields(parent?: any): IFieldMetadata[] {
     return [
       { field: "name", label: "Name", type: "string", keyboardType: "default", converter: FieldConverters.string },
       { field: "durationMin", label: "Duration (min)", type: "number", keyboardType: "number-pad", converter: FieldConverters.number },
