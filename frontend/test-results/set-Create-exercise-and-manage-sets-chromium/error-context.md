@@ -1,0 +1,104 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e4]:
+  - generic [ref=e5]:
+    - generic [ref=e6]: Routine Assistant
+    - generic [ref=e8] [cursor=pointer]: ⚙️
+  - generic [ref=e9]:
+    - generic [ref=e10]: 2025-09-18
+    - generic [ref=e13] [cursor=pointer]: Build Exercises
+  - generic [ref=e14]:
+    - generic [ref=e16] [cursor=pointer]: Routines
+    - generic [ref=e18] [cursor=pointer]: Exercises
+    - generic [ref=e20] [cursor=pointer]: Meals
+  - generic [ref=e26]:
+    - generic [ref=e28]:
+      - generic [ref=e31] [cursor=pointer]:
+        - generic [ref=e33] [cursor=pointer]: Barbell Squats
+        - generic [ref=e35] [cursor=pointer]: ▼
+      - generic [ref=e36]:
+        - generic [ref=e40] [cursor=pointer]: 55kg × 7 reps
+        - generic [ref=e44] [cursor=pointer]: 55kg × 7 reps
+        - generic [ref=e48] [cursor=pointer]: 55kg × 7 reps
+        - generic [ref=e52] [cursor=pointer]: 55kg × 7 reps
+        - generic [ref=e54] [cursor=pointer]: + Add
+    - generic [ref=e56]:
+      - generic [ref=e59] [cursor=pointer]:
+        - generic [ref=e61] [cursor=pointer]: Romanian Deadlifts
+        - generic [ref=e63] [cursor=pointer]: ▼
+      - generic [ref=e64]:
+        - generic [ref=e68] [cursor=pointer]: 52.5kg × 10 reps
+        - generic [ref=e72] [cursor=pointer]: 52.5kg × 10 reps
+        - generic [ref=e76] [cursor=pointer]: 52.5kg × 8 reps
+        - generic [ref=e78] [cursor=pointer]: + Add
+    - generic [ref=e80]:
+      - generic [ref=e83] [cursor=pointer]:
+        - generic [ref=e85] [cursor=pointer]: Incline Dumbbell Press
+        - generic [ref=e87] [cursor=pointer]: ▼
+      - generic [ref=e88]:
+        - generic [ref=e92] [cursor=pointer]: 18kg × 10 reps
+        - generic [ref=e96] [cursor=pointer]: 18kg × 9 reps
+        - generic [ref=e100] [cursor=pointer]: 18kg × 8 reps
+        - generic [ref=e102] [cursor=pointer]: + Add
+    - generic [ref=e104]:
+      - generic [ref=e107] [cursor=pointer]:
+        - generic [ref=e109] [cursor=pointer]: Lateral Raises
+        - generic [ref=e111] [cursor=pointer]: ▼
+      - generic [ref=e112]:
+        - generic [ref=e116] [cursor=pointer]: 7.5kg × 12 reps
+        - generic [ref=e120] [cursor=pointer]: 7.5kg × 10 reps
+        - generic [ref=e124] [cursor=pointer]: 7.5kg × 10 reps
+        - generic [ref=e126] [cursor=pointer]: + Add
+    - generic [ref=e128]:
+      - generic [ref=e131] [cursor=pointer]:
+        - generic [ref=e133] [cursor=pointer]: Dumbbell Bicep Curls
+        - generic [ref=e135] [cursor=pointer]: ▼
+      - generic [ref=e136]:
+        - generic [ref=e140] [cursor=pointer]: 12.5kg × 10 reps
+        - generic [ref=e144] [cursor=pointer]: 12.5kg × 8 reps
+        - generic [ref=e148] [cursor=pointer]: 12.5kg × 8 reps
+        - generic [ref=e150] [cursor=pointer]: + Add
+    - generic [ref=e152]:
+      - generic [ref=e155] [cursor=pointer]:
+        - generic [ref=e157] [cursor=pointer]: Triceps Pushdowns
+        - generic [ref=e159] [cursor=pointer]: ▼
+      - generic [ref=e160]:
+        - generic [ref=e164] [cursor=pointer]: 17.5kg × 10 reps
+        - generic [ref=e168] [cursor=pointer]: 17.5kg × 10 reps
+        - generic [ref=e172] [cursor=pointer]: 17.5kg × 8 reps
+        - generic [ref=e174] [cursor=pointer]: + Add
+    - generic [ref=e176]:
+      - generic [ref=e179] [cursor=pointer]:
+        - generic [ref=e181] [cursor=pointer]: Barbell Calf Raises
+        - generic [ref=e183] [cursor=pointer]: ▼
+      - generic [ref=e184]:
+        - generic [ref=e188] [cursor=pointer]: 52.5kg × 15 reps
+        - generic [ref=e192] [cursor=pointer]: 52.5kg × 15 reps
+        - generic [ref=e196] [cursor=pointer]: 52.5kg × 15 reps
+        - generic [ref=e198] [cursor=pointer]: + Add
+    - generic [ref=e200]:
+      - generic [ref=e203] [cursor=pointer]:
+        - generic [ref=e205] [cursor=pointer]: Hanging Knee Raise
+        - generic [ref=e207] [cursor=pointer]: ▼
+      - generic [ref=e208]:
+        - generic [ref=e212] [cursor=pointer]: 12 reps
+        - generic [ref=e216] [cursor=pointer]: 12 reps
+        - generic [ref=e220] [cursor=pointer]: 12 reps
+        - generic [ref=e222] [cursor=pointer]: + Add
+    - generic [ref=e224]:
+      - generic [ref=e227] [cursor=pointer]:
+        - generic [ref=e229] [cursor=pointer]: aa
+        - generic [ref=e231] [cursor=pointer]: ▼
+      - generic [ref=e234] [cursor=pointer]: + Add
+    - generic [ref=e236]:
+      - generic [ref=e239] [cursor=pointer]:
+        - generic [ref=e241] [cursor=pointer]: Set Management Test 1758177717014
+        - generic [ref=e243] [cursor=pointer]: ▼
+      - generic [ref=e246] [cursor=pointer]: + Add
+  - button [ref=e248] [cursor=pointer]:
+    - generic:
+      - generic:
+        - generic:
+          - img: 󰐕
+```
