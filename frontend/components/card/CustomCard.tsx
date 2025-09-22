@@ -8,9 +8,11 @@ interface CustomCardProps {
   cardList: CardListAbstract<any>; // Add this
   item: CardAbstract;
   index: number;
+  drag?: () => void;
+  isActive?: boolean;
 }
 
-const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
+const CustomCard = ({ item, index, cardList, drag, isActive }: CustomCardProps) => {
   const { onUpdate, refreshCounter, showEditDialog } = useAppContext();
   
   const renderSubCards = (): React.ReactNode => {
@@ -67,7 +69,11 @@ const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
   const subtitleColor: string = "#8E8E93";
 
   return (
-    <View style={[styles.card, { backgroundColor: cardBackgroundColor }]}>
+    <View style={[
+      styles.card, 
+      { backgroundColor: cardBackgroundColor },
+      isActive && styles.activeCard
+    ]}>
       <TouchableOpacity 
         testID={`exercise-card-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
         style={styles.cardHeader} 
@@ -76,6 +82,17 @@ const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
       >
         <View style={styles.headerContent}>
           <View style={styles.titleRow}>
+            {drag && (
+              <TouchableOpacity
+                onLongPress={drag}
+                delayLongPress={100}
+                style={styles.dragHandle}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.dragText}>≡</Text>
+              </TouchableOpacity>
+            )}
+            
             <TouchableOpacity
               style={[
                 styles.completionButton,
@@ -218,6 +235,23 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#8E8E93",
     textAlign: "center",
+  },
+  activeCard: {
+    transform: [{ scale: 1.05 }],
+    shadowOpacity: 0.25,
+    elevation: 8,
+  },
+  dragHandle: {
+    width: 32,
+    height: 32,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 8,
+  },
+  dragText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#8E8E93",
   },
 });
 

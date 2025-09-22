@@ -1,15 +1,12 @@
 
-- Remove rest
-- Section navigation to left mnu
-- Autosuggest exercise names
+- Start Day / Build Exercises
 - Reordering
 - Differentiate dbs based on profile
-- Start Day
 - Theme
 - Calendar Icon + Swipability
 - Pictures of meals
 - Routine type to dropdown
 - Weight input should not accept non-numeric
-- Implement tests
+- Allow tests to go through authentication
 - User Settings
 - Custom prompts

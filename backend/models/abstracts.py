@@ -2,7 +2,6 @@ import datetime
 from typing import ClassVar, Optional, Type, TypeVar, List, Union, Any
 from pydantic import BaseModel, Field
 from clients.shared import get_firestore_client
-fs = get_firestore_client('quentin-duverge')
 today = datetime.datetime.now().strftime('%Y-%m-%d')
 T = TypeVar('T', bound=BaseModel)
 COLLECTION_MAPPING = {
@@ -20,21 +19,22 @@ class FirestoreDoc(BaseModel):
     collection: str = ''
     items: list[Entity]
 
+
     def __init__(self, **data):
         if 'id' not in data or data['id'] is None:
             data['id'] = today
         super().__init__(**data)
         self.collection = COLLECTION_MAPPING[self.__class__.__name__]
 
-    def save(self):
+    def save(self, fs):
         fs.collection(self.collection).document( self.id).set(self.model_dump(exclude_none=True))
 
-    def query(self):
+    def query(self, fs):
         data = fs.collection(self.collection).document(self.id).get().to_dict()
         if data is None:
-            self.save()
+            self.save(fs)
             return self
         return self.__class__(**data)
 
-    def delete(self):
+    def delete(self, fs):
         fs.collection(self.collection).document(self.id).delete()

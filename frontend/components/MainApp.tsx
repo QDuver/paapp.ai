@@ -165,6 +165,17 @@ const MainApp = ({ user }: MainAppProps) => {
       <EditDialog />
       
       <FAB
+        style={styles.aiFab}
+        icon="auto-fix"
+        onPress={() => {
+          if (cardList && typeof cardList.getEditableFields === 'function') {
+            showEditDialog(cardList, cardList, cardList, true);
+          }
+        }}
+        testID="ai-fab"
+      />
+      
+      <FAB
         style={styles.fab}
         icon="plus"
         onPress={createNewItem}
@@ -253,6 +264,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   // FAB
+  aiFab: {
+    position: 'absolute',
+    margin: 16,
+    right: 0,
+    bottom: 70,
+    zIndex: 9999,
+    elevation: 16,
+    backgroundColor: '#6A5ACD', // SlateBlue - complements the #007AFF theme
+  },
   fab: {
     position: 'absolute',
     margin: 16,

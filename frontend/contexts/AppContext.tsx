@@ -3,23 +3,27 @@ import React, {
   ReactNode,
   useContext,
   useEffect,
-  useState
+  useState,
 } from "react";
 import useApi from "../hooks/useApi";
-import { Exercises, IExercises } from "../models/Exercises";
+import { Exercises, IExercises, IExerciseUnique } from "../models/Exercises";
 // import { Meals } from "../models/Meals";
-import { BaseEditableEntity, CardAbstract, CardListAbstract } from "../models/Abstracts";
+import {
+  BaseEditableEntity,
+  CardAbstract,
+  CardListAbstract,
+} from "../models/Abstracts";
 import { IMeals, Meals } from "../models/Meals";
 import { IRoutines, Routines } from "../models/Routines";
 import { RequestStatusType } from "../models/Shared";
-import { getCurrentDate } from "../utils/dateUtils";
+import { getCurrentDate } from "../utils/utils";
 
 interface DataType {
   routines: Routines | null;
-  exercises: Exercises | null;
+  exercises: Exercises | null /*  */;
   meals: Meals | null;
+  uniqueExercises: IExerciseUnique[];
 }
-
 
 interface DialogSettings {
   visible: boolean;
@@ -36,7 +40,12 @@ interface AppContextType {
   refreshCounter: number;
   onUpdate: (cardList: CardListAbstract<any>) => void;
   dialogSettings: DialogSettings;
-  showEditDialog: (item: BaseEditableEntity, parent: CardListAbstract<any> | CardAbstract, cardList: CardListAbstract<any>, isNew?: boolean) => void;
+  showEditDialog: (
+    item: BaseEditableEntity,
+    parent: CardListAbstract<any> | CardAbstract,
+    cardList: CardListAbstract<any>,
+    isNew?: boolean
+  ) => void;
   hideEditDialog: () => void;
 }
 
@@ -47,8 +56,17 @@ interface AppProviderProps {
 }
 
 export const AppProvider = ({ children }: AppProviderProps) => {
-  const { get, data: apiData, status, } = useApi<{ routines: IRoutines; exercises: IExercises; meals: IMeals; }>();
-  const {post} = useApi();
+  const {
+    get,
+    data: apiData,
+    status,
+  } = useApi<{
+    routines: IRoutines;
+    exercises: IExercises;
+    meals: IMeals;
+    uniqueExercises: IExerciseUnique[];
+  }>();
+  const { post } = useApi();
   const [data, setData] = useState<DataType>();
   const [currentDate, setCurrentDate] = useState<string>(getCurrentDate());
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -60,9 +78,9 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     cardList: null,
     isNew: false,
   });
-  
+
   useEffect(() => {
-    get(`quentin-duverge/routines/${currentDate}`);
+    get(`routines/${currentDate}`);
   }, [currentDate]);
 
   useEffect(() => {
@@ -72,8 +90,8 @@ export const AppProvider = ({ children }: AppProviderProps) => {
       routines: new Routines(apiData.routines),
       exercises: new Exercises(apiData.exercises),
       meals: new Meals(apiData.meals),
+      uniqueExercises: apiData.uniqueExercises || [],
     });
-
   }, [apiData]);
 
   useEffect(() => {
@@ -82,13 +100,13 @@ export const AppProvider = ({ children }: AppProviderProps) => {
 
   const onUpdate = (cardList: CardListAbstract<any>) => {
     setRefreshCounter(prev => prev + 1);
-    post(`quentin-duverge/${cardList.collection}/${cardList.id}`, cardList);
+    post(`${cardList.collection}/${cardList.id}`, cardList);
   };
 
   const showEditDialog = (
-    item: BaseEditableEntity, 
-    parent: CardListAbstract<any> | CardAbstract, 
-    cardList: CardListAbstract<any>, 
+    item: BaseEditableEntity,
+    parent: CardListAbstract<any> | CardAbstract,
+    cardList: CardListAbstract<any>,
     isNew: boolean = false
   ) => {
     setDialogSettings({
@@ -138,4 +156,3 @@ export const useAppContext = (): AppContextType => {
 };
 
 export { AppContext };
-

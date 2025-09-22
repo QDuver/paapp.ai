@@ -11,7 +11,6 @@ from utils import process_output
 
 collection = 'exercises'
 agent = get_agent_smart()
-fs = get_firestore_client()
 today = datetime.datetime.now().strftime("%Y-%m-%d")
 
 
@@ -42,7 +41,7 @@ class Exercises(FirestoreDoc):
     items: List[Exercise] = []
     
     
-    def get_unique(self) -> List[ExerciseUnique]:
+    def get_unique(self, fs) -> List[ExerciseUnique]:
         unique_exercises = {}
         
         for doc in fs.collection(collection).stream():
@@ -61,7 +60,7 @@ class Exercises(FirestoreDoc):
         return sorted([{'name': ex['name'], 'items': ex['items']}
                                        for ex in unique_exercises.values()], key=lambda x: x['name'])
 
-    def build_items(self, atHome: Optional[bool] = False, availableTimeMin: Optional[int] = None, notes: Optional[str] = None):
+    def build_items(self, fs, atHome: Optional[bool] = False, availableTimeMin: Optional[int] = None, notes: Optional[str] = None):
         prompt = agent.prompt({
             'HISTORICAL_TRAINING_DATA': fs.historics(collection, self.id),
             'CONDITIONS': f'Available time in minutes : {availableTimeMin}, At home: {atHome}',
@@ -76,5 +75,5 @@ class Exercises(FirestoreDoc):
             notes=notes,
             items=exercises_.items
         )
-        exercises.save()
+        exercises.save(fs)
         return exercises

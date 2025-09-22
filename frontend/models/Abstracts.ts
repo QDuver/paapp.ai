@@ -1,3 +1,5 @@
+import { FormDataUtils } from "../utils/utils";
+
 export interface IEntity {
   name: string;
   items?: any[];
@@ -13,9 +15,15 @@ export interface IFirestoreDoc {
 export interface IFieldMetadata<T = string> {
   field: string;
   label: string;
-  type: 'string' | 'number' | 'boolean';
-  keyboardType?: 'default' | 'number-pad' | 'numeric' | 'email-address' | 'phone-pad';
+  type: "string" | "number" | "boolean";
+  keyboardType?:
+    | "default"
+    | "number-pad"
+    | "numeric"
+    | "email-address"
+    | "phone-pad";
   multiline?: boolean;
+  placeholder?: string;
   converter?: (value: string) => any;
   suggestions?: T[];
 }
@@ -27,7 +35,7 @@ export const FieldConverters = {
     const numValue = Number(value);
     return isNaN(numValue) ? 0 : numValue;
   },
-  boolean: (value: string) => value === 'true',
+  boolean: (value: string) => value === "true",
 };
 
 export abstract class BaseEditableEntity<T = string> {
@@ -41,41 +49,26 @@ export abstract class BaseEditableEntity<T = string> {
     return instance;
   }
 
-  abstract getEditableFields(parent?: any): IFieldMetadata<T>[];
+  abstract getEditableFields(): IFieldMetadata<T>[];
 
   getTags(): string[] {
     return [];
   }
 
   toFormData(): { [key: string]: any } {
-    const formData: { [key: string]: any } = {};
-    this.getEditableFields().forEach((fieldMetadata) => {
-      const fieldName = fieldMetadata.field;
-      const value = (this as any)[fieldName];
-      formData[fieldName] = value;
-    });
-    return formData;
+    return FormDataUtils.toFormData(this, () => this.getEditableFields());
   }
 
   fromFormData(formData: { [key: string]: any }): { [key: string]: any } {
-    const convertedData: { [key: string]: any } = {};
-    this.getEditableFields().forEach(fieldMetadata => {
-      const fieldName = fieldMetadata.field;
-      if (formData.hasOwnProperty(fieldName)) {
-        const rawValue = formData[fieldName];
-        const stringValue = rawValue === null || rawValue === undefined ? "" : rawValue.toString();
-        convertedData[fieldName] = fieldMetadata.converter 
-          ? fieldMetadata.converter(stringValue) 
-          : stringValue;
-      }
-    });
-    return convertedData;
+    return FormDataUtils.fromFormData(formData, () => this.getEditableFields());
   }
 
-  update(rawData: { [key: string]: any }, parent: any, isNew: boolean): void {
-    const data = this.fromFormData(rawData);
+  update(formData: { [key: string]: any }, parent: any, isNew: boolean): void {
+    const data = FormDataUtils.fromFormData(formData, () =>
+      this.getEditableFields()
+    );
     const editableFields = this.getEditableFields();
-    editableFields.forEach((fieldMetadata) => {
+    editableFields.forEach(fieldMetadata => {
       const fieldName = fieldMetadata.field;
       if (data.hasOwnProperty(fieldName)) {
         const value = data[fieldName];
@@ -83,39 +76,44 @@ export abstract class BaseEditableEntity<T = string> {
       }
     });
 
-    if(isNew){
+    if (isNew) {
       (parent as any).items.push(this);
     }
   }
 
   delete(parent: CardListAbstract<any> | CardAbstract): boolean {
     if (parent.items && Array.isArray(parent.items)) {
-      const itemIndex = parent.items.findIndex((item) => item === this);
+      const itemIndex = parent.items.findIndex(item => item === this);
       if (itemIndex !== -1) {
         parent.items.splice(itemIndex, 1);
         return true;
       }
     }
-    
-    return false; // Item not found
+
+    return false;
   }
 
+  handleSuggestionSelect(suggestion: any): void {
+    return null;
+  }
 }
 
-export abstract class SubCardAbstract<T = string> extends BaseEditableEntity<T> {
+export abstract class SubCardAbstract<
+  T = string,
+> extends BaseEditableEntity<T> {
   abstract get name(): string;
-  
+
   constructor() {
     super();
   }
 
-  getEditableFields(parent?: any): IFieldMetadata<T>[] {
+  getEditableFields(): IFieldMetadata<T>[] {
     return [];
   }
 }
 
 export abstract class CardAbstract<T = string> extends BaseEditableEntity<T> {
-  name: string = '';
+  name: string = "";
   isCompleted: boolean = false;
   isExpanded: boolean = true;
   canAddItems: boolean = true;
@@ -126,7 +124,7 @@ export abstract class CardAbstract<T = string> extends BaseEditableEntity<T> {
     super();
   }
 
-  getEditableFields(parent?: any): IFieldMetadata<T>[] {
+  getEditableFields(): IFieldMetadata<T>[] {
     return [];
   }
 
@@ -138,7 +136,10 @@ export abstract class CardAbstract<T = string> extends BaseEditableEntity<T> {
   }
 
   onToggleExpand() {
-    if ((this.items && this.items.length > 0) || this.createNewSubCard() !== null) {
+    if (
+      (this.items && this.items.length > 0) ||
+      this.createNewSubCard() !== null
+    ) {
       this.isExpanded = !this.isExpanded;
     }
   }
@@ -165,5 +166,19 @@ export abstract class CardListAbstract<T extends CardAbstract<any>> {
 
   createNewItem(): T {
     return new this.childConstructor();
+  }
+
+  reorderItems(fromIndex: number, toIndex: number): void {
+    if (
+      fromIndex < 0 ||
+      fromIndex >= this.items.length ||
+      toIndex < 0 ||
+      toIndex >= this.items.length
+    ) {
+      return;
+    }
+
+    const [movedItem] = this.items.splice(fromIndex, 1);
+    this.items.splice(toIndex, 0, movedItem);
   }
 }

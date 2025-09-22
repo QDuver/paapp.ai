@@ -50,11 +50,11 @@ export class Ingredient extends SubCardAbstract implements IIngredient {
     this._name = value;
   }
 
-  getEditableFields(parent?: any): IFieldMetadata[] {
+  getEditableFields(): IFieldMetadata[] {
     return [
-      { field: "name", label: "Ingredient Name", type: "string", keyboardType: "default", converter: FieldConverters.string },
-      { field: "quantity", label: "Quantity", type: "number", keyboardType: "number-pad", converter: FieldConverters.number },
-      { field: "calories", label: "Calories", type: "number", keyboardType: "number-pad", converter: FieldConverters.number },
+      { field: "name", label: "Ingredient Name", type: "string", keyboardType: "default", converter: FieldConverters.string, placeholder: "e.g., Chicken breast, Rice, Broccoli" },
+      { field: "quantity", label: "Quantity", type: "number", keyboardType: "number-pad", converter: FieldConverters.number, placeholder: "0" },
+      { field: "calories", label: "Calories", type: "number", keyboardType: "number-pad", converter: FieldConverters.number, placeholder: "0" },
     ];
   }
 
@@ -82,11 +82,11 @@ export class Meal extends CardAbstract implements IMeal {
     return meal;
   }
 
-  getEditableFields(parent?: any): IFieldMetadata[] {
+  getEditableFields(): IFieldMetadata[] {
     return [
-      { field: "name", label: "Meal Name", type: "string", keyboardType: "default", converter: FieldConverters.string },
-      { field: "instructions", label: "Instructions", type: "string", keyboardType: "default", multiline: true, converter: FieldConverters.string },
-      { field: "calories", label: "Calories", type: "number", keyboardType: "number-pad", converter: FieldConverters.number },
+      { field: "name", label: "Meal Name", type: "string", keyboardType: "default", converter: FieldConverters.string, placeholder: "e.g., Breakfast, Lunch, Dinner" },
+      { field: "instructions", label: "Instructions", type: "string", keyboardType: "default", multiline: true, converter: FieldConverters.string, placeholder: "Describe how to prepare this meal..." },
+      { field: "calories", label: "Calories", type: "number", keyboardType: "number-pad", converter: FieldConverters.number, placeholder: "0" },
     ];
   }
 

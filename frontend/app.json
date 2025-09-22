@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "react-native-expo",
-    "slug": "react-native-expo",
+    "name": "aiapps",
+    "slug": "aiapps",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

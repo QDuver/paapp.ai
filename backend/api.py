@@ -1,14 +1,17 @@
 import json
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 from google.cloud import firestore
 
-from quentinDuverge import meals, exercises
-from quentinDuverge.routines import Routine, Routines
-from quentinDuverge.exercises import Exercises
-from quentinDuverge.meals import Meals
+from clients.shared import get_firestore_client
+from models import meals, exercises
+from models.routines import Routine, Routines
+from models.exercises import Exercises
+from models.meals import Meals
+from auth import get_current_user
+from models.users import User
 
 # Mapping of collection names to their corresponding classes
 COLLECTION_CLASS_MAPPING = {
@@ -33,65 +36,38 @@ app.add_middleware(
 )
 
 
-@app.get("/{db}/routines/{day}")
-def get_routine(day: str):
-    routines = Routines(id=day).query()
-    exercises = Exercises(id=day).query()
-    print('exercises', exercises)
-    meals = Meals(id=day).query()
-    return {"routines": routines, "exercises": exercises, "meals": meals}
-
-@app.get("/{db}/{collection}")
-def getcollection(db: str, collection: str):
-    client = firestore.Client(database=db)
-    documents = client.collection(collection).get()
-    return [doc.to_dict() for doc in documents]
-
-@app.get("/{db}/{collection}/{document}")
-def get_document(db: str, collection: str, document: str):
-    client = firestore.Client(database=db)
-    doc = client.collection(collection).document(document).get()
-    return doc.to_dict()
-
-@app.post("/{db}/{collection}")
-def create(db: str, collection: str, document: dict):
-    client = firestore.Client(database=db)
-    client.collection(collection).add(document)
+@app.get("/routines/{day}")
+def get_routine(day: str, user: User = Depends(get_current_user)):
+    fs = get_firestore_client()
+    routines = Routines(id=day).query(fs)
+    exercises = Exercises(id=day).query(fs)
+    uniqueExercises = exercises.get_unique(fs)
+    meals = Meals(id=day).query(fs)
+    return {"routines": routines, "exercises": exercises, "uniqueExercises": uniqueExercises, "meals": meals}
 
 
-@app.post("/{db}/{collection}/{document}")
-def overwrite(db: str, collection: str, document: str, request: dict):
-    client = firestore.Client(database=db)
-    
+@app.post("/{collection}/{document}")
+def overwrite(collection: str, document: str, request: dict, user: User = Depends(get_current_user)):
+    fs = get_firestore_client()
+
     if collection not in COLLECTION_CLASS_MAPPING:
-        raise HTTPException(status_code=400, detail=f"Collection '{collection}' not found in mapping. Available collections: {list(COLLECTION_CLASS_MAPPING.keys())}")
-    
+        raise HTTPException(
+            status_code=400, detail=f"Collection '{collection}' not found in mapping. Available collections: {list(COLLECTION_CLASS_MAPPING.keys())}")
+
     model_class = COLLECTION_CLASS_MAPPING[collection]
     validated_data = model_class(**request)
     data = validated_data.model_dump()
-    print('data', data)
 
-    client.collection(collection).document(document).set(data)
+    fs.collection(collection).document(document).set(data)
 
 
-@app.post("/{db}/build-items/{collection}/{id}")
-def build_items(db: str, collection: str, id: str, request: dict):
+@app.post("/build-items/{collection}/{id}")
+def build_items(collection: str, id: str, request: dict, user: User = Depends(get_current_user)):
 
     if collection not in COLLECTION_CLASS_MAPPING:
-        raise HTTPException(status_code=400, detail=f"Collection '{collection}' not found in mapping. Available collections: {list(COLLECTION_CLASS_MAPPING.keys())}")
-    
+        raise HTTPException(
+            status_code=400, detail=f"Collection '{collection}' not found in mapping. Available collections: {list(COLLECTION_CLASS_MAPPING.keys())}")
+
     instance = COLLECTION_CLASS_MAPPING[collection]()
     instance.build_items()
     return instance.query().model_dump()
-
-
-@app.delete("/{db}/{collection}/{document}")
-def delete(db: str, collection: str, document: str, path: Optional[str] = None):
-    client = firestore.Client(database=db)
-    client.collection(collection).document(document).delete()
-
-
-@app.get("/health")
-def health_check():
-    """Simple endpoint to test connectivity from mobile devices"""
-    return {"status": "ok", "message": "Backend server is reachable from mobile device"}

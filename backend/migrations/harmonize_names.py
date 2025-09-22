@@ -58,7 +58,7 @@ def harmonize_exercise_names(fs):
     print(f"Total exercise names updated: {updated_count}")
 
 if __name__ == "__main__":
-    fs = get_firestore_client('quentin-duverge')
+    fs = get_firestore_client()
     
     print("Starting exercise name harmonization...")
     harmonize_exercise_names(fs)

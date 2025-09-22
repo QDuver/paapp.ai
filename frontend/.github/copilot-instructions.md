@@ -5,6 +5,9 @@ Concise, project-specific guidance for this Expo React Native app. Focus on thes
 You should create a minimum code as possible to satisfy the request. Do not create unnecessary code, try / catch blocks, or comments.
 Feel free to do some refactoring if it helps to keep the code minimal.
 
+use external libraries if it helps reduce code.
+react-native-paper is already installed, but you can add more if needed.
+
 ## 1. Purpose & Domain
 Routine Assistant mobile app (Expo managed workflow) showing daily routines, exercises, and meals for a selected `currentDate`. Data is fetched from a backend API (DEV: local server via IP/port, PROD: `PROD_CONFIG.API_URL`) and shaped into rich model classes for UI interaction.
 

@@ -4,14 +4,12 @@ import datetime
 from typing import List, Optional, Literal, ClassVar
 from pydantic import BaseModel
 from clients.shared import get_firestore_client
-from quentinDuverge.exercises import Exercise, Exercises
-from quentinDuverge.meals import Meal, Meals
-from quentinDuverge.abstracts import Entity, FirestoreDoc
+from models.exercises import Exercise, Exercises
+from models.meals import Meal, Meals
+from models.abstracts import Entity, FirestoreDoc
 
 
 today = datetime.datetime.now().strftime("%Y-%m-%d")
-fs = get_firestore_client('quentin-duverge')
-
 ROUTINE_TEMPLATE = [
     {"name": "1/2L of water"},
     {"name": 'Journaling / Coding', "durationMin": 60},
@@ -34,7 +32,6 @@ class Routines(FirestoreDoc):
     wakeupTime: Optional[str] = datetime.datetime.now().strftime("%H:%M")
     items: List[Routine] = []
 
-    def build_items(self):
+    def build_items(self, fs):
         self.items = [Routine(**item) for item in ROUTINE_TEMPLATE]
-        print(self.items)
-        self.save()
+        self.save(fs)

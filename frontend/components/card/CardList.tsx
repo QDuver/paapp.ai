@@ -2,10 +2,9 @@ import React from "react";
 import {
   StyleSheet,
   View,
-  FlatList,
   Text,
-  ListRenderItem
 } from "react-native";
+import DraggableFlatList, { RenderItemParams } from "react-native-draggable-flatlist";
 import { CardListAbstract, CardAbstract } from "../../models/Abstracts";
 import CustomCard from "./CustomCard";
 import { useAppContext } from "../../contexts/AppContext";
@@ -15,25 +14,36 @@ interface CardListProps {
 }
 
 const CardList = ({ cardList }: CardListProps) => {
-  const { refreshCounter } = useAppContext();
+  const { refreshCounter, onUpdate } = useAppContext();
 
-  const renderCard: ListRenderItem<CardAbstract> = ({ item, index }) => (
+  const renderCard = ({ item, drag, isActive, getIndex }: RenderItemParams<CardAbstract>) => (
     <CustomCard
       cardList={cardList}
       item={item}
-      index={index}
+      index={getIndex() ?? 0}
+      drag={drag}
+      isActive={isActive}
     />
   );
 
+  const onDragEnd = ({ data, from, to }: { data: CardAbstract[], from: number, to: number }) => {
+    if (from !== to) {
+      cardList.reorderItems(from, to);
+      onUpdate(cardList);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <FlatList<CardAbstract>
+      <DraggableFlatList<CardAbstract>
         data={cardList.items}
         renderItem={renderCard}
         keyExtractor={(item, index) => `${refreshCounter}-card-${index}`}
+        onDragEnd={onDragEnd}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
-        bounces={true}
+        activationDistance={10}
+        dragItemOverflow={true}
       />
     </View>
   );

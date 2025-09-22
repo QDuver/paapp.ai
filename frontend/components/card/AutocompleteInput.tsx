@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,13 +7,15 @@ import {
   View,
   FlatList,
 } from "react-native";
+import { useAppContext } from "../../contexts/AppContext";
 
 interface AutocompleteInputProps {
   value: string;
   onChangeText: (text: string) => void;
   placeholder?: string;
   placeholderTextColor?: string;
-  suggestions?: any[];
+  fieldName?: string; // Add fieldName to determine suggestions
+  suggestions?: any[]; // External suggestions from field metadata
   style?: any;
   keyboardType?: any;
   inputMode?: any;
@@ -33,7 +35,8 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   onChangeText,
   placeholder,
   placeholderTextColor,
-  suggestions = [],
+  fieldName,
+  suggestions: externalSuggestions,
   style,
   keyboardType,
   inputMode,
@@ -50,15 +53,43 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<any[]>([]);
 
+  const { data, dialogSettings } = useAppContext();
+
+  // Determine suggestions based on field name and context
+  const suggestions = useMemo(() => {
+    // Use external suggestions if provided, otherwise fall back to internal logic
+    if (externalSuggestions && externalSuggestions.length > 0) {
+      return externalSuggestions;
+    }
+
+    if (
+      fieldName === "name" &&
+      dialogSettings.cardList?.collection === "exercises"
+    ) {
+      return data?.uniqueExercises || [];
+    }
+
+    return [];
+  }, [
+    externalSuggestions,
+    fieldName,
+    dialogSettings.cardList?.collection,
+    data?.uniqueExercises,
+  ]);
+
   const handleTextChange = (text: string) => {
     onChangeText(text);
 
     if (suggestions.length > 0 && text.length > 0) {
-      const filtered = suggestions.filter((suggestion) => {
+      const filtered = suggestions.filter(suggestion => {
         return suggestion.name.toLowerCase().includes(text.toLowerCase());
       });
+
       setFilteredSuggestions(filtered);
-      setShowSuggestions(filtered.length > 0 && filtered[0].name.toLowerCase() !== text.toLowerCase());
+      setShowSuggestions(
+        filtered.length > 0 &&
+          filtered[0].name.toLowerCase() !== text.toLowerCase()
+      );
     } else {
       setShowSuggestions(false);
     }
@@ -67,8 +98,8 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   const selectSuggestion = (suggestion: any) => {
     onChangeText(suggestion.name);
     setShowSuggestions(false);
-    
-    if (onSuggestionSelect && typeof suggestion === 'object') {
+
+    if (onSuggestionSelect && typeof suggestion === "object") {
       onSuggestionSelect(suggestion);
     }
   };
@@ -100,7 +131,11 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
           }
         }}
       />
-      
+
+      {(() => {
+        return null;
+      })()}
+
       {showSuggestions && (
         <View style={[styles.suggestionsContainer, { backgroundColor }]}>
           <FlatList
@@ -108,10 +143,15 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
             keyExtractor={(item, index) => `${item}-${index}`}
             renderItem={({ item }) => (
               <TouchableOpacity
-                style={[styles.suggestionItem, { borderBottomColor: borderColor }]}
+                style={[
+                  styles.suggestionItem,
+                  { borderBottomColor: borderColor },
+                ]}
                 onPress={() => selectSuggestion(item)}
               >
-                <Text style={[styles.suggestionText, { color }]}>{item.name}</Text>
+                <Text style={[styles.suggestionText, { color }]}>
+                  {item.name}
+                </Text>
               </TouchableOpacity>
             )}
             showsVerticalScrollIndicator={false}

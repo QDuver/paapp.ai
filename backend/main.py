@@ -4,10 +4,11 @@ import json
 import requests
 
 from google.cloud import firestore
-from quentinDuverge import meals, routines
-from quentinDuverge.exercises import Exercises
-from quentinDuverge.routines import ROUTINE_TEMPLATE, Routines, Routine
-from quentinDuverge.meals import Meal, Meals
+from clients.shared import get_firestore_client
+from models import meals, routines
+from models.exercises import Exercises
+from models.routines import ROUTINE_TEMPLATE, Routines, Routine
+from models.meals import Meal, Meals
 
 
 if __name__ == "__main__":
@@ -17,9 +18,9 @@ if __name__ == "__main__":
     # Exercises().delete()
     # Meals().delete()
     # Meals().build_items()
-    
-    Routines().build_items()
-    # Exercises().build_items()
+    fs = get_firestore_client('qd-umileigiudber2rbzjguipjfys23')
+    Routines().build_items(fs)
+    Exercises().build_items(fs)
     # exercises = Exercises().get_unique()
     # print(json.dumps(exercises, indent=2))
     # Meals().build_items()

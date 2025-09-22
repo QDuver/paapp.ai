@@ -8,11 +8,11 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { useAppContext } from "../../contexts/AppContext";
 import { IFieldMetadata } from "../../models/Abstracts";
-import AutocompleteInput from "../AutocompleteInput";
+import AutocompleteInput from "./AutocompleteInput";
 
 const EditDialog = () => {
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
@@ -20,7 +20,7 @@ const EditDialog = () => {
 
   const { onUpdate, dialogSettings, hideEditDialog } = useAppContext();
   const { visible, item, parent, cardList, isNew } = dialogSettings;
-  
+
   useEffect(() => {
     if (visible && item && cardList) {
       setFormData(item.toFormData());
@@ -29,50 +29,38 @@ const EditDialog = () => {
   }, [visible, item, cardList]);
 
   const handleInputChange = (fieldName: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [fieldName]: value }));
+    setFormData(prev => ({ ...prev, [fieldName]: value }));
     if (errors[fieldName]) {
-      setErrors((prev) => ({ ...prev, [fieldName]: null }));
-    }
-  };
-
-  const handleSuggestionSelect = (fieldName: string, suggestion: any) => {
-    if (fieldName === 'name' && suggestion?.items && Array.isArray(suggestion.items)) {
-      // Set the name
-      setFormData((prev) => ({ ...prev, [fieldName]: suggestion.name }));
-      
-      // Create the exercise with sets from the suggestion
-      if (item && parent) {
-        (item as any).name = suggestion.name;
-        (item as any).items = suggestion.items.map((setData: any) => {
-          const exerciseSet = (item as any).createNewSubCard();
-          Object.assign(exerciseSet, setData);
-          return exerciseSet;
-        });
-        
-        item.update({ name: suggestion.name }, parent, isNew);
-        onUpdate(cardList);
-        hideEditDialog();
-      }
+      setErrors(prev => ({ ...prev, [fieldName]: null }));
     }
   };
 
   const handleDelete = () => {
-    if (Platform.OS === 'web') {
-      const confirmed = window.confirm("Are you sure you want to delete this item?");
+    if (Platform.OS === "web") {
+      const confirmed = window.confirm(
+        "Are you sure you want to delete this item?"
+      );
       if (!confirmed) return;
     }
-    
+
     if (item.delete(parent)) {
       onUpdate(cardList);
     }
-    
+
     hideEditDialog();
   };
 
   const renderField = (fieldMetadata: IFieldMetadata) => {
     if (!cardList) return null;
 
-    const { field: fieldName, label: fieldLabel, type: fieldType, keyboardType, multiline, suggestions } = fieldMetadata;
+    const {
+      field: fieldName,
+      label: fieldLabel,
+      type: fieldType,
+      keyboardType,
+      multiline,
+      suggestions,
+    } = fieldMetadata;
 
     const value = formData[fieldName];
     const displayValue =
@@ -81,16 +69,24 @@ const EditDialog = () => {
     const isMultiline = multiline || false;
     const hasSuggestions = suggestions && suggestions.length > 0;
 
+    // Use AutocompleteInput for "name" field in exercises even without external suggestions
+    // because AutocompleteInput has its own internal logic for exercise suggestions
+    const shouldUseAutocomplete =
+      (hasSuggestions && !isMultiline) ||
+      (fieldName === "name" &&
+        cardList?.collection === "exercises" &&
+        !isMultiline);
+
     return (
       <View key={fieldName} style={styles.fieldContainer}>
         <Text style={[styles.fieldLabel, { color: "#FFFFFF" }]}>
           {fieldLabel}
         </Text>
 
-        {hasSuggestions && !isMultiline ? (
+        {shouldUseAutocomplete ? (
           <AutocompleteInput
             value={displayValue}
-            onChangeText={(text) => handleInputChange(fieldName, text)}
+            onChangeText={text => handleInputChange(fieldName, text)}
             placeholder={`Enter ${fieldLabel}`}
             placeholderTextColor="#8E8E93"
             suggestions={suggestions}
@@ -102,7 +98,13 @@ const EditDialog = () => {
             borderColor="#48484A"
             backgroundColor="#2C2C2E"
             color="#FFFFFF"
-            onSuggestionSelect={(suggestion) => handleSuggestionSelect(fieldName, suggestion)}
+            onSuggestionSelect={suggestion => {
+              item.handleSuggestionSelect(suggestion);
+              item.update({ name: suggestion.name }, parent, isNew);
+              onUpdate(cardList);
+              hideEditDialog();
+            }}
+            fieldName={fieldName}
           />
         ) : (
           <TextInput
@@ -117,7 +119,7 @@ const EditDialog = () => {
               },
             ]}
             value={displayValue}
-            onChangeText={(text) => handleInputChange(fieldName, text)}
+            onChangeText={text => handleInputChange(fieldName, text)}
             placeholder={`Enter ${fieldLabel}`}
             placeholderTextColor="#8E8E93"
             keyboardType={keyboardType || "default"}
@@ -137,7 +139,6 @@ const EditDialog = () => {
   if (!visible || !item || !cardList || !parent) {
     return null;
   }
-
 
   const modalBackgroundColor = "#1C1C1E";
   const overlayColor = "rgba(0,0,0,0.7)";
@@ -160,9 +161,7 @@ const EditDialog = () => {
           ]}
         >
           <View style={styles.header}>
-            <Text style={[styles.title, { color: "#FFFFFF" }]}>
-              Edit Item
-            </Text>
+            <Text style={[styles.title, { color: "#FFFFFF" }]}>Edit Item</Text>
           </View>
 
           <ScrollView
@@ -170,8 +169,10 @@ const EditDialog = () => {
             showsVerticalScrollIndicator={false}
           >
             {(() => {
-              const editableFields = item.getEditableFields(parent);
-              const filteredFields = editableFields.filter(fieldMetadata => isNew || (formData[fieldMetadata.field] != null));
+              const editableFields = item.getEditableFields();
+              const filteredFields = editableFields.filter(
+                fieldMetadata => isNew || formData[fieldMetadata.field] != null
+              );
               return filteredFields.map(renderField);
             })()}
           </ScrollView>
@@ -208,14 +209,12 @@ const EditDialog = () => {
                   testID="save-button"
                   style={styles.saveButton}
                   onPress={() => {
-                      item.update(formData, parent, isNew); 
+                    item.update(formData, parent, isNew);
                     onUpdate(cardList);
                     hideEditDialog();
                   }}
                 >
-                  <Text style={styles.saveButtonText}>
-                    Save
-                  </Text>
+                  <Text style={styles.saveButtonText}>Save</Text>
                 </TouchableOpacity>
               </View>
             </View>

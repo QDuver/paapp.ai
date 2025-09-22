@@ -8,12 +8,10 @@ import {
   FieldConverters,
 } from "./Abstracts";
 
-
 export interface IExerciseUnique {
   name: string;
-  items: IExerciseSet[]
+  items: IExerciseSet[];
 }
-
 
 export interface IExerciseSet {
   name: string;
@@ -35,7 +33,6 @@ export interface IExercises extends IFirestoreDoc {
   notes?: string;
   items: Exercise[];
   durationMin?: number;
-  uniqueExercises: IExerciseUnique[];
 }
 
 export class ExerciseSet extends SubCardAbstract implements IExerciseSet {
@@ -62,26 +59,53 @@ export class ExerciseSet extends SubCardAbstract implements IExerciseSet {
     return parts.length > 0 ? parts.join(" × ") : "Set";
   }
 
-  getEditableFields(parent?: any): IFieldMetadata[] {
+  getEditableFields(): IFieldMetadata[] {
     return [
-      { field: "weightKg", label: "Weight (kg)", type: "number", keyboardType: "number-pad", converter: FieldConverters.number },
-      { field: "repetitions", label: "Repetitions", type: "number", keyboardType: "number-pad", converter: FieldConverters.number },
-      { field: "duration", label: "Duration (s)", type: "number", keyboardType: "number-pad", converter: FieldConverters.number },
-      { field: "rest", label: "Rest (s)", type: "number", keyboardType: "number-pad", converter: FieldConverters.number },
+      {
+        field: "weightKg",
+        label: "Weight (kg)",
+        type: "number",
+        keyboardType: "number-pad",
+        converter: FieldConverters.number,
+        placeholder: "0",
+      },
+      {
+        field: "repetitions",
+        label: "Repetitions",
+        type: "number",
+        keyboardType: "number-pad",
+        converter: FieldConverters.number,
+        placeholder: "0",
+      },
+      {
+        field: "duration",
+        label: "Duration (s)",
+        type: "number",
+        keyboardType: "number-pad",
+        converter: FieldConverters.number,
+        placeholder: "0",
+      },
+      {
+        field: "rest",
+        label: "Rest (s)",
+        type: "number",
+        keyboardType: "number-pad",
+        converter: FieldConverters.number,
+        placeholder: "0",
+      },
     ];
   }
 
   update(rawData: { [key: string]: any }, parent: any, isNew: boolean): void {
     super.update(rawData, parent, isNew);
-    
+
     if (parent) {
       this.editSubsequentSets(parent);
     }
   }
 
   editSubsequentSets(parent: Exercise): void {
-
-    const currentIndex = parent.items.findIndex(set => set === this);
+    const currentIndex = parent.items.findIndex((set) => set === this);
     if (currentIndex === -1 || currentIndex === parent.items.length - 1) {
       return; // This set is not found or is the last set
     }
@@ -96,7 +120,10 @@ export class ExerciseSet extends SubCardAbstract implements IExerciseSet {
   }
 }
 
-export class Exercise extends CardAbstract<IExerciseUnique> implements IExercise {
+export class Exercise
+  extends CardAbstract<IExerciseUnique>
+  implements IExercise
+{
   items: ExerciseSet[] = [];
 
   constructor() {
@@ -110,16 +137,23 @@ export class Exercise extends CardAbstract<IExerciseUnique> implements IExercise
     return exercise;
   }
 
-  getEditableFields(parent?: any): IFieldMetadata<IExerciseUnique>[] {
-    const suggestions = parent?.uniqueExercises || [];
+  getEditableFields(): IFieldMetadata<IExerciseUnique>[] {
     return [
-      { field: "name", label: "Exercise Name", type: "string", keyboardType: "default", converter: FieldConverters.string, suggestions: suggestions },
+      {
+        field: "name",
+        label: "Exercise Name",
+        type: "string",
+        keyboardType: "default",
+        converter: FieldConverters.string,
+        suggestions: [],
+        placeholder: "e.g., Push-ups, Squats, Deadlifts",
+      },
     ];
   }
 
   createNewSubCard(): ExerciseSet {
     const newSet = new ExerciseSet();
-    
+
     if (this.items && this.items.length > 0) {
       const lastSet = this.items[this.items.length - 1];
       newSet.weightKg = lastSet.weightKg;
@@ -127,26 +161,57 @@ export class Exercise extends CardAbstract<IExerciseUnique> implements IExercise
       newSet.duration = lastSet.duration;
       newSet.rest = lastSet.rest;
     }
-    
+
     return newSet;
   }
 
   shouldSkipDialogForNewSubCard(): boolean {
     return this.items && this.items.length > 0;
   }
+
+  handleSuggestionSelect(suggestion: IExerciseUnique): void {
+    this.name = suggestion.name;
+    this.items = suggestion.items.map((setData: IExerciseSet) => {
+      const exerciseSet = this.createNewSubCard();
+      Object.assign(exerciseSet, setData);
+      return exerciseSet;
+    });
+  }
 }
 
-export class Exercises extends CardListAbstract<Exercise> implements IExercises {
+export class Exercises
+  extends CardListAbstract<Exercise>
+  implements IExercises
+{
   items: Exercise[] = [];
   atHome?: boolean;
   availableTimeMin?: number;
   notes?: string;
   durationMin?: number;
-  uniqueExercises: IExerciseUnique[] = [];
 
   constructor(data: IExercises) {
     super(data, Exercise);
     this.items = data.items.map((item) => Exercise.fromJson(item));
-    this.uniqueExercises = data.uniqueExercises || [];
+  }
+
+  getEditableFields(): IFieldMetadata[] {
+    return [
+      {
+        field: "atHome",
+        label: "At Home",
+        type: "boolean",
+        keyboardType: "default",
+        converter: FieldConverters.boolean,
+      },
+      {
+        field: "notes",
+        label: "Notes (Optional)",
+        type: "string",
+        keyboardType: "default",
+        converter: FieldConverters.string,
+        multiline: true,
+        placeholder: "Add any additional notes about this workout session...",
+      },
+    ];
   }
 }
