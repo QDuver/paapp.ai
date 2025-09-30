@@ -32,7 +32,7 @@ const SubCard = ({
   return (
     <View style={[styles.subCard, { backgroundColor }]}>
       <TouchableOpacity
-        testID={`subcard-${parentItem.name.toLowerCase().replace(/\s+/g, '-')}-${index}`}
+        testID={`subcard-${parentItem.name?.toLowerCase().replace(/\s+/g, '-') || 'unnamed'}-${index}`}
         style={styles.subCardContent}
         onPress={() => showEditDialog(subItem, parentItem, cardList, false)}
         activeOpacity={0.7}

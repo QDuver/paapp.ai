@@ -24,7 +24,6 @@ def verify_token(token: str) -> User:
     return user
 
 def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> User:
-    """FastAPI dependency to get current authenticated user"""
     token = credentials.credentials
     user = verify_token(token)
     return user

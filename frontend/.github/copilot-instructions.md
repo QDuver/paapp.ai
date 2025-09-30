@@ -62,7 +62,7 @@ When introducing a new collection (e.g., `Habits`):
 - After POST, only `refreshCounter` changes; server response isn't merged. If future features require server-confirmed state, extend `onUpdate` to await response and patch models.
 
 ## 10. Testing & Dev Scripts
-- Scripts: `npm start|android|ios|web` (Expo). No custom test runner configured; `test/createNewItemTest.ts` appears as placeholder—add Jest + React Native Testing Library if expanding tests.
+- Scripts: `npm start|android|ios|web` (Expo). No custom test runner configured; `test/createChildTest.ts` appears as placeholder—add Jest + React Native Testing Library if expanding tests.
 - Prefer colocating future tests under `test/` mirroring source paths.
 
 ## 11. Firebase & Auth Considerations

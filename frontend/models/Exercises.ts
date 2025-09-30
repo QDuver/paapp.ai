@@ -7,6 +7,7 @@ import {
   IFieldMetadata,
   FieldConverters,
 } from "./Abstracts";
+import useApi from "../hooks/useApi";
 
 export interface IExerciseUnique {
   name: string;
@@ -96,8 +97,8 @@ export class ExerciseSet extends SubCardAbstract implements IExerciseSet {
     ];
   }
 
-  update(rawData: { [key: string]: any }, parent: any, isNew: boolean): void {
-    super.update(rawData, parent, isNew);
+  onDialogSave(rawData: { [key: string]: any }, parent: any): void {
+    super.onDialogSave(rawData, parent);
 
     if (parent) {
       this.editSubsequentSets(parent);

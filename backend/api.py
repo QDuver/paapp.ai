@@ -48,12 +48,12 @@ def get_routine(day: str, user: User = Depends(get_current_user)):
 
 @app.post("/{collection}/{document}")
 def overwrite(collection: str, document: str, request: dict, user: User = Depends(get_current_user)):
-    fs = get_firestore_client()
 
     if collection not in COLLECTION_CLASS_MAPPING:
         raise HTTPException(
             status_code=400, detail=f"Collection '{collection}' not found in mapping. Available collections: {list(COLLECTION_CLASS_MAPPING.keys())}")
 
+    fs = get_firestore_client()
     model_class = COLLECTION_CLASS_MAPPING[collection]
     validated_data = model_class(**request)
     data = validated_data.model_dump()
@@ -67,7 +67,8 @@ def build_items(collection: str, id: str, request: dict, user: User = Depends(ge
     if collection not in COLLECTION_CLASS_MAPPING:
         raise HTTPException(
             status_code=400, detail=f"Collection '{collection}' not found in mapping. Available collections: {list(COLLECTION_CLASS_MAPPING.keys())}")
-
-    instance = COLLECTION_CLASS_MAPPING[collection]()
-    instance.build_items()
-    return instance.query().model_dump()
+    
+    fs = get_firestore_client()
+    instance = COLLECTION_CLASS_MAPPING[collection](id=id)
+    instance = instance.build_items(fs, **request)
+    return instance.model_dump()

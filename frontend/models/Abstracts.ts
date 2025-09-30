@@ -1,3 +1,4 @@
+import useApi from "../hooks/useApi";
 import { FormDataUtils } from "../utils/utils";
 
 export interface IEntity {
@@ -63,7 +64,7 @@ export abstract class BaseEditableEntity<T = string> {
     return FormDataUtils.fromFormData(formData, () => this.getEditableFields());
   }
 
-  update(formData: { [key: string]: any }, parent: any, isNew: boolean): void {
+  onDialogSave(formData: { [key: string]: any }, parent: any): void {
     const data = FormDataUtils.fromFormData(formData, () =>
       this.getEditableFields()
     );
@@ -76,9 +77,10 @@ export abstract class BaseEditableEntity<T = string> {
       }
     });
 
-    if (isNew) {
+    if (parent) { //new Items
       (parent as any).items.push(this);
     }
+
   }
 
   delete(parent: CardListAbstract<any> | CardAbstract): boolean {
@@ -153,32 +155,21 @@ export abstract class CardAbstract<T = string> extends BaseEditableEntity<T> {
   }
 }
 
-export abstract class CardListAbstract<T extends CardAbstract<any>> {
+export abstract class CardListAbstract<
+  T extends CardAbstract<any>,
+> extends BaseEditableEntity {
   items: T[] = [];
   collection: string;
   id: string;
   private childConstructor: new () => T;
 
   constructor(data: any, childConstructor: new () => T) {
+    super();
     Object.assign(this, data);
     this.childConstructor = childConstructor;
   }
 
-  createNewItem(): T {
+  createChild(): T {
     return new this.childConstructor();
-  }
-
-  reorderItems(fromIndex: number, toIndex: number): void {
-    if (
-      fromIndex < 0 ||
-      fromIndex >= this.items.length ||
-      toIndex < 0 ||
-      toIndex >= this.items.length
-    ) {
-      return;
-    }
-
-    const [movedItem] = this.items.splice(fromIndex, 1);
-    this.items.splice(toIndex, 0, movedItem);
   }
 }

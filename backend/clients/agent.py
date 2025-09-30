@@ -1,5 +1,8 @@
 from google import genai
 from google.genai import types
+import json
+import os
+from datetime import datetime
 
 from config import is_local_environment
 
@@ -8,6 +11,8 @@ class Agent:
     def __init__(self, model):
         self.client = genai.Client( vertexai=True, project="final-app-429707", location="us-central1" )
         self.model = model
+        self.output_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'agents', 'outputs')
+        os.makedirs(self.output_dir, exist_ok=True)
 
     def _generate_content(self, prompt, text_contexts=[], image_contexts=[]):
         contents = [prompt]
@@ -38,5 +43,27 @@ class Agent:
                 ),
             contents=contents
         )
+        
+        # Auto-save the output
+        self._save_output(si, prompt, response.text, text_contexts, image_contexts)
+        
         return response.text
+
+    def _save_output(self, system_instruction, prompt, output, text_contexts, image_contexts):
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"llm_output_{timestamp}.json"
+        filepath = os.path.join(self.output_dir, filename)
+        
+        data = {
+            "timestamp": datetime.now().isoformat(),
+            "model": self.model,
+            "system_instruction": system_instruction,
+            "prompt": prompt,
+            "text_contexts": text_contexts,
+            "image_contexts_count": len(image_contexts),
+            "output": output
+        }
+        
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
 

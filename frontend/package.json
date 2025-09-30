@@ -11,10 +11,10 @@
     "deploy": "expo export --platform web && firebase deploy",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "playwright test",
-    "test:ui": "playwright test --ui",
-    "test:headed": "playwright test --headed",
-    "test:debug": "playwright test --debug"
+    "test": "set NODE_ENV=test && playwright test",
+    "test:ui": "set NODE_ENV=test && playwright test --ui",
+    "test:headed": "set NODE_ENV=test && playwright test --headed",
+    "test:debug": "set NODE_ENV=test && playwright test --debug"
   },
   "dependencies": {
     "@expo/metro-runtime": "~5.0.4",

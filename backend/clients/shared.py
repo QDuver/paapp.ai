@@ -1,6 +1,6 @@
 from typing import Optional
 from clients.agent import Agent
-from clients.firestore import ExtendedFirestoreClient
+from google.cloud import firestore
 
 vertex_instances: dict[Optional[str], Agent] = {}
 current_user = None
@@ -10,9 +10,9 @@ def get_agent(model: Optional[str] = None) -> Agent:
         vertex_instances[model] = Agent(model=model) if model else Agent()
     return vertex_instances[model]
 
-def get_firestore_client(database=None) -> ExtendedFirestoreClient:
+def get_firestore_client(database=None):
     database = database or current_user.fs_name
-    return ExtendedFirestoreClient(database)
+    return firestore.Client(project="final-app-429707", database=database)
 
 def get_agent_lite() -> Agent:
     return get_agent('gemini-2.0-flash-lite-001')

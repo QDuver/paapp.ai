@@ -39,6 +39,7 @@ interface AppContextType {
   isLoading: boolean;
   refreshCounter: number;
   onUpdate: (cardList: CardListAbstract<any>) => void;
+  onBuildItems: (cardList: CardListAbstract<any>, formData: { [key: string]: any }) => void;
   dialogSettings: DialogSettings;
   showEditDialog: (
     item: BaseEditableEntity,
@@ -100,8 +101,16 @@ export const AppProvider = ({ children }: AppProviderProps) => {
 
   const onUpdate = (cardList: CardListAbstract<any>) => {
     setRefreshCounter(prev => prev + 1);
-    post(`${cardList.collection}/${cardList.id}`, cardList);
+    const { items, ...cardListData } = cardList;
+    post(`${cardList.collection}/${cardList.id}`, cardListData);
   };
+
+  const onBuildItems = async (cardList: CardListAbstract<any>, formData: { [key: string]: any }) => {
+      setIsLoading(true);
+      await post(`build-items/${cardList.collection}/${cardList.id}`, formData);
+      await get(`routines/${currentDate}`);
+      setIsLoading(false);
+  }
 
   const showEditDialog = (
     item: BaseEditableEntity,
@@ -134,6 +143,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     isLoading,
     refreshCounter,
     onUpdate,
+onBuildItems, 
     dialogSettings,
     showEditDialog,
     hideEditDialog,

@@ -1,6 +1,6 @@
-
-- Start Day / Build Exercises
-- Reordering
+- Design form routines / modes on Android
+- Run automated tests on AI scripts
+- Reordering not stable
 - Differentiate dbs based on profile
 - Theme
 - Calendar Icon + Swipability

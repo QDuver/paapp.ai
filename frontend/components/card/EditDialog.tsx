@@ -10,15 +10,16 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Switch } from "react-native-paper";
 import { useAppContext } from "../../contexts/AppContext";
-import { IFieldMetadata } from "../../models/Abstracts";
+import { CardAbstract, CardListAbstract, IFieldMetadata } from "../../models/Abstracts";
 import AutocompleteInput from "./AutocompleteInput";
 
 const EditDialog = () => {
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
   const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
 
-  const { onUpdate, dialogSettings, hideEditDialog } = useAppContext();
+  const { onUpdate, onBuildItems, dialogSettings, hideEditDialog } = useAppContext();
   const { visible, item, parent, cardList, isNew } = dialogSettings;
 
   useEffect(() => {
@@ -28,7 +29,7 @@ const EditDialog = () => {
     }
   }, [visible, item, cardList]);
 
-  const handleInputChange = (fieldName: string, value: string) => {
+  const handleInputChange = (fieldName: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [fieldName]: value }));
     if (errors[fieldName]) {
       setErrors(prev => ({ ...prev, [fieldName]: null }));
@@ -69,6 +70,26 @@ const EditDialog = () => {
     const isMultiline = multiline || false;
     const hasSuggestions = suggestions && suggestions.length > 0;
 
+    // Handle boolean fields with a toggle
+    if (fieldType === "boolean") {
+      return (
+        <View key={fieldName} style={styles.fieldContainer}>
+          <View style={styles.toggleContainer}>
+            <Text style={[styles.fieldLabel, { color: "#FFFFFF", flex: 1 }]}>
+              {fieldLabel}
+            </Text>
+            <Switch
+              value={!!value}
+              onValueChange={(newValue) => handleInputChange(fieldName, newValue)}
+              thumbColor="#FFFFFF"
+              trackColor={{ false: "#3A3A3C", true: "#007AFF" }}
+            />
+          </View>
+          {hasError && <Text style={styles.errorText}>{errors[fieldName]}</Text>}
+        </View>
+      );
+    }
+
     // Use AutocompleteInput for "name" field in exercises even without external suggestions
     // because AutocompleteInput has its own internal logic for exercise suggestions
     const shouldUseAutocomplete =
@@ -100,7 +121,7 @@ const EditDialog = () => {
             color="#FFFFFF"
             onSuggestionSelect={suggestion => {
               item.handleSuggestionSelect(suggestion);
-              item.update({ name: suggestion.name }, parent, isNew);
+              item.onDialogSave({ name: suggestion.name }, parent);
               onUpdate(cardList);
               hideEditDialog();
             }}
@@ -209,8 +230,13 @@ const EditDialog = () => {
                   testID="save-button"
                   style={styles.saveButton}
                   onPress={() => {
-                    item.update(formData, parent, isNew);
-                    onUpdate(cardList);
+                    if(!(item instanceof CardListAbstract)) {
+                      item.onDialogSave(formData, parent);
+                      onUpdate(cardList);
+                    }
+                    else{
+                      onBuildItems(cardList, formData);
+                    }
                     hideEditDialog();
                   }}
                 >
@@ -252,6 +278,11 @@ const styles = StyleSheet.create({
   },
   fieldContainer: {
     marginBottom: 20,
+  },
+  toggleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   fieldLabel: {
     fontSize: 16,

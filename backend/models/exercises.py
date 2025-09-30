@@ -3,11 +3,11 @@ import datetime
 from typing import List, Optional, ClassVar
 from pydantic import BaseModel
 
-from models.agents import exercise_agent
 from clients.shared import get_agent_smart, get_firestore_client
 from models.abstracts import Entity, FirestoreDoc
+from agents.exercises import exercise_agent
 
-from utils import process_output
+from utils import json_to_model
 
 collection = 'exercises'
 agent = get_agent_smart()
@@ -62,12 +62,14 @@ class Exercises(FirestoreDoc):
 
     def build_items(self, fs, atHome: Optional[bool] = False, availableTimeMin: Optional[int] = None, notes: Optional[str] = None):
         prompt = agent.prompt({
-            'HISTORICAL_TRAINING_DATA': fs.historics(collection, self.id),
-            'CONDITIONS': f'Available time in minutes : {availableTimeMin}, At home: {atHome}',
+            'HISTORICAL_TRAINING_DATA': self.historics(fs, collection, self.id),
+            'AVAILABLE_TIME_MIN': availableTimeMin,
+            'AT_HOME': atHome,
             'USER_NOTES': notes
         })
+        print('prompt', prompt)
         output = agent.call( si=exercise_agent, prompt=prompt, schema=ExercisesList)
-        exercises_ = process_output(output, model=ExercisesList)
+        exercises_ = json_to_model(output, model=ExercisesList)
         exercises = Exercises(
             id=self.id,
             atHome=atHome,

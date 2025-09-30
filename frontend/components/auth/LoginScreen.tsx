@@ -31,6 +31,7 @@ export default function LoginScreen() {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
       <Text style={{ fontSize: 28, fontWeight: '600', marginBottom: 32 }}>Routine Assistant</Text>
+      
       <TouchableOpacity
         disabled={loading}
         onPress={onGooglePress}

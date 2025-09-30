@@ -31,7 +31,7 @@ const MainApp = ({ user }: MainAppProps) => {
   useEffect(() => {
     setTimeout(() => {
       setIsAuthChecking(false);
-      setIsLoggedIn(true);
+      setIsLoggedIn(process.env.NODE_ENV === 'test');
     }, 1000);
   }, []);
 
@@ -50,26 +50,6 @@ const MainApp = ({ user }: MainAppProps) => {
     );
   }
 
-  // Login screen (simplified)
-  if (!isLoggedIn) {
-    return (
-      <SafeAreaView style={[styles.container, { backgroundColor: '#000' }]}>
-        <View style={styles.loginContainer}>
-          <Text style={[styles.loginButtonText, { color: '#fff', fontSize: 24, marginBottom: 20 }]}>
-            Routine Assistant
-          </Text>
-          <TouchableOpacity 
-            style={styles.loginButton} 
-            onPress={() => setIsLoggedIn(true)}
-          >
-            <Text style={styles.loginButtonText}>Login</Text>
-          </TouchableOpacity>
-        </View>
-        <StatusBar style='light' />
-      </SafeAreaView>
-    );
-  }
-
   // Main app interface
   const tabs: Array<{ id: number; name: string; key: string }> = [
     { id: 0, name: 'Routines', key: 'routines' },
@@ -80,11 +60,11 @@ const MainApp = ({ user }: MainAppProps) => {
   const currentTab = tabs[selectedTab];
   const cardList = data?.[currentTab.key];
 
-  const createNewItem = () => {
+  const createChild = () => {
     if (!cardList) return;
     
     // Create new item and show dialog
-    const newItem = cardList.createNewItem();
+    const newItem = cardList.createChild();
     showEditDialog(newItem, cardList, cardList, true);
   };
 
@@ -168,7 +148,7 @@ const MainApp = ({ user }: MainAppProps) => {
         style={styles.aiFab}
         icon="auto-fix"
         onPress={() => {
-          if (cardList && typeof cardList.getEditableFields === 'function') {
+          if (cardList) {
             showEditDialog(cardList, cardList, cardList, true);
           }
         }}
@@ -178,7 +158,7 @@ const MainApp = ({ user }: MainAppProps) => {
       <FAB
         style={styles.fab}
         icon="plus"
-        onPress={createNewItem}
+        onPress={createChild}
         testID="add-exercise-fab"
       />
       

@@ -1,7 +1,7 @@
 import json
 
 
-def process_output(output, model):
+def json_to_model(output, model):
     output_data = json.loads(output)
     return model(**output_data)
 

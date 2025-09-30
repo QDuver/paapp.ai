@@ -1,5 +1,5 @@
 import datetime
-from typing import ClassVar, Optional, Type, TypeVar, List, Union, Any
+from typing import ClassVar, Dict, Optional, Type, TypeVar, List, Union, Any
 from pydantic import BaseModel, Field
 from clients.shared import get_firestore_client
 today = datetime.datetime.now().strftime('%Y-%m-%d')
@@ -38,3 +38,19 @@ class FirestoreDoc(BaseModel):
 
     def delete(self, fs):
         fs.collection(self.collection).document(self.id).delete()
+
+
+
+    def historics(self, fs, collection: str, day: str):
+        documents = [doc.id for doc in fs.collection( collection).list_documents()]
+        past_documents = [doc for doc in documents if doc < day]
+        historics = []
+
+        for doc_id in past_documents:
+            doc_data = fs.collection(
+                collection).document(doc_id).get().to_dict()
+            if doc_data: 
+                historics.append(doc_data)
+
+        return historics
+    
