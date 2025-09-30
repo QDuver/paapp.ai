@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('Create exercise and manage sets', async ({ page }) => {
   // Navigate to the app with skipAuth parameter
-  await page.goto('/?skipAuth=true');
+  await page.goto('/');
   
   // Wait for the app to load
   await page.waitForTimeout(2000);

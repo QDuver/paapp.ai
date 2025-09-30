@@ -10,7 +10,6 @@ from models import meals, exercises
 from models.routines import Routine, Routines
 from models.exercises import Exercises
 from models.meals import Meals
-from auth import get_current_user
 from models.users import User
 
 # Mapping of collection names to their corresponding classes
@@ -19,6 +18,13 @@ COLLECTION_CLASS_MAPPING = {
     'meals': Meals,
     'routines': Routines,
 }
+
+
+def get_model_class(collection: str):
+    if collection not in COLLECTION_CLASS_MAPPING:
+        raise HTTPException(
+            status_code=400, detail=f"Collection '{collection}' not found in mapping. Available collections: {list(COLLECTION_CLASS_MAPPING.keys())}")
+    return COLLECTION_CLASS_MAPPING[collection]
 
 
 class InitDayRequest(BaseModel):
@@ -37,7 +43,7 @@ app.add_middleware(
 
 
 @app.get("/routines/{day}")
-def get_routine(day: str, user: User = Depends(get_current_user)):
+def get_routine(day: str, user: User = Depends(User.from_firebase_token)):
     fs = get_firestore_client()
     routines = Routines(id=day).query(fs)
     exercises = Exercises(id=day).query(fs)
@@ -47,28 +53,22 @@ def get_routine(day: str, user: User = Depends(get_current_user)):
 
 
 @app.post("/{collection}/{document}")
-def overwrite(collection: str, document: str, request: dict, user: User = Depends(get_current_user)):
+def overwrite(collection: str, document: str, request: dict, user: User = Depends(User.from_firebase_token)):
 
-    if collection not in COLLECTION_CLASS_MAPPING:
-        raise HTTPException(
-            status_code=400, detail=f"Collection '{collection}' not found in mapping. Available collections: {list(COLLECTION_CLASS_MAPPING.keys())}")
-
-    fs = get_firestore_client()
-    model_class = COLLECTION_CLASS_MAPPING[collection]
+    model_class = get_model_class(collection)
     validated_data = model_class(**request)
     data = validated_data.model_dump()
 
+    fs = get_firestore_client()
     fs.collection(collection).document(document).set(data)
 
 
 @app.post("/build-items/{collection}/{id}")
-def build_items(collection: str, id: str, request: dict, user: User = Depends(get_current_user)):
+def build_items(collection: str, id: str, request: dict, user: User = Depends(User.from_firebase_token)):
 
-    if collection not in COLLECTION_CLASS_MAPPING:
-        raise HTTPException(
-            status_code=400, detail=f"Collection '{collection}' not found in mapping. Available collections: {list(COLLECTION_CLASS_MAPPING.keys())}")
+    model_class = get_model_class(collection)
     
     fs = get_firestore_client()
-    instance = COLLECTION_CLASS_MAPPING[collection](id=id)
+    instance = model_class(id=id)
     instance = instance.build_items(fs, **request)
     return instance.model_dump()
