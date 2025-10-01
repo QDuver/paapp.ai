@@ -1,17 +1,30 @@
 import datetime
 from typing import List, Literal, Optional, ClassVar
-from agents.meals import meals_agent
 
 
 from pydantic import BaseModel, Field
 
-from clients.shared import get_agent_lite
+from clients.vertex import Agent
+from config import CONFIG
 from models.abstracts import Entity, FirestoreDoc
 from utils import json_to_model
 
 collection = 'meals'
-agent = get_agent_lite()
 today = datetime.datetime.now().strftime("%Y-%m-%d")
+
+meals_agent = """
+You are a nutrition assistant creating daily meal plans based on historical data.
+
+OBJECTIVE: Muscle gain and belly fat reduction (not weight loss)
+
+CONSTRAINTS:
+- Only generate Lunch and Dinner (no breakfast)
+- Gluten only allowed at Dinner
+- Maximize ingredient diversity and nutritional balance
+
+OUTPUT: Two meals in JSON format matching historical data structure
+"""
+
 
 class Ingredient(BaseModel):
     name: str
@@ -33,17 +46,18 @@ class Meals(FirestoreDoc):
     items: List[Meal] = []
     notes: Optional[str] = None
 
-    def build_items(self, fs, notes: Optional[str] = None):
+    def build_items(self, notes: Optional[str] = None):
+        agent = Agent()
         prompt = agent.prompt({
-            'HISTORICAL_MEALS_DATA': fs.historics(collection, self.id),
-            'USER_NOTES': notes 
+            'HISTORICAL_MEALS_DATA': self.historics(collection, self.id),
+            'USER_NOTES': notes
         })
-        output = agent.call(si=meals_agent, prompt=prompt, schema=MealsList)
+        output = agent.call(si=meals_agent, prompt=prompt, model='gemini-2.0-flash-lite-001', schema=MealsList)
         meals = json_to_model(output, model=MealsList)
         meals = Meals(
             id=self.id,
             notes=notes,
             items=meals.items
         )
-        meals.save(fs)
+        meals.save()
         return meals

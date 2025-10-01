@@ -7,8 +7,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from migrations.harmonize_names import harmonize_exercise_names
 from migrations.rest_to_null import rest_to_null
-from clients.shared import get_firestore_client
-fs = get_firestore_client()
+from config import CONFIG
+fs = CONFIG.get_firestore_client()
 
 def create_backup(collection):
     source_col_ref = fs.collection(collection)
@@ -23,6 +23,4 @@ def create_backup(collection):
 if __name__ == "__main__":
 
     create_backup('exercises')
-    print("\nStarting migration")
     harmonize_exercise_names(fs)
-    print("\nMigration completed!")

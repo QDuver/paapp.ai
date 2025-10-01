@@ -107,6 +107,7 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   return (
     <View style={styles.container}>
       <TextInput
+        testID="autocomplete-input"
         style={[
           style,
           {

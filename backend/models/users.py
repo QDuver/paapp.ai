@@ -4,7 +4,7 @@ import firebase_admin
 from firebase_admin import auth, credentials
 from fastapi import Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from clients.shared import set_current_user
+from config import CONFIG
 
 # Initialize Firebase Admin SDK
 if not firebase_admin._apps:
@@ -26,18 +26,18 @@ class FirebaseInfo(BaseModel):
 
 class User(BaseModel):
     name: str
-    picture: str
-    iss: str
-    aud: str
-    auth_time: int
     user_id: str
-    sub: str
-    iat: int
-    exp: int
-    email: str
-    email_verified: bool
-    firebase: FirebaseInfo
-    uid: str
+    picture: Optional[str] = None
+    iss: Optional[str] = None
+    aud: Optional[str] = None
+    auth_time: Optional[int] = None
+    sub: Optional[str] = None
+    iat: Optional[int] = None
+    exp: Optional[int] = None
+    email: Optional[str] = None
+    email_verified: Optional[bool] = None
+    firebase: Optional[FirebaseInfo] = None
+    uid: Optional[str] = None
     
     @computed_field
     @property
@@ -50,6 +50,6 @@ class User(BaseModel):
     def from_firebase_token(cls, credentials: HTTPAuthorizationCredentials = Depends(security)) -> "User":
         decoded_token = auth.verify_id_token(credentials.credentials)
         user = cls(**decoded_token)
-        set_current_user(user)
+        CONFIG.set_user(user)
         return user
     

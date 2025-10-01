@@ -39,7 +39,10 @@ interface AppContextType {
   isLoading: boolean;
   refreshCounter: number;
   onUpdate: (cardList: CardListAbstract<any>) => void;
-  onBuildItems: (cardList: CardListAbstract<any>, formData: { [key: string]: any }) => void;
+  onBuildItems: (
+    cardList: CardListAbstract<any>,
+    formData: { [key: string]: any }
+  ) => void;
   dialogSettings: DialogSettings;
   showEditDialog: (
     item: BaseEditableEntity,
@@ -54,9 +57,13 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 interface AppProviderProps {
   children: ReactNode;
+  skipAuth?: boolean;
 }
 
-export const AppProvider = ({ children }: AppProviderProps) => {
+export const AppProvider = ({
+  children,
+  skipAuth = false,
+}: AppProviderProps) => {
   const {
     get,
     data: apiData,
@@ -66,11 +73,11 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     exercises: IExercises;
     meals: IMeals;
     uniqueExercises: IExerciseUnique[];
-  }>();
-  const { post } = useApi();
+  }>(skipAuth);
+  const { post } = useApi(skipAuth);
   const [data, setData] = useState<DataType>();
   const [currentDate, setCurrentDate] = useState<string>(getCurrentDate());
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [refreshCounter, setRefreshCounter] = useState<number>(0);
   const [dialogSettings, setDialogSettings] = useState<DialogSettings>({
     visible: false,
@@ -101,16 +108,18 @@ export const AppProvider = ({ children }: AppProviderProps) => {
 
   const onUpdate = (cardList: CardListAbstract<any>) => {
     setRefreshCounter(prev => prev + 1);
-    const { items, ...cardListData } = cardList;
-    post(`${cardList.collection}/${cardList.id}`, cardListData);
+    post(`format/${cardList.collection}/${cardList.id}`, cardList);
   };
 
-  const onBuildItems = async (cardList: CardListAbstract<any>, formData: { [key: string]: any }) => {
-      setIsLoading(true);
-      await post(`build-items/${cardList.collection}/${cardList.id}`, formData);
-      await get(`routines/${currentDate}`);
-      setIsLoading(false);
-  }
+  const onBuildItems = async (
+    cardList: CardListAbstract<any>,
+    formData: { [key: string]: any }
+  ) => {
+    setIsLoading(true);
+    await post(`build-items/${cardList.collection}/${cardList.id}`, formData);
+    await get(`routines/${currentDate}`);
+    setIsLoading(false);
+  };
 
   const showEditDialog = (
     item: BaseEditableEntity,
@@ -143,7 +152,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     isLoading,
     refreshCounter,
     onUpdate,
-onBuildItems, 
+    onBuildItems,
     dialogSettings,
     showEditDialog,
     hideEditDialog,

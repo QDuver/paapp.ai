@@ -7,7 +7,6 @@ import {
   IFieldMetadata,
   FieldConverters,
 } from "./Abstracts";
-import useApi from "../hooks/useApi";
 
 export interface IExerciseUnique {
   name: string;
@@ -29,11 +28,8 @@ export interface IExercise extends IEntity {
 }
 
 export interface IExercises extends IFirestoreDoc {
-  atHome?: boolean;
-  availableTimeMin?: number;
   notes?: string;
   items: Exercise[];
-  durationMin?: number;
 }
 
 export class ExerciseSet extends SubCardAbstract implements IExerciseSet {
@@ -106,7 +102,7 @@ export class ExerciseSet extends SubCardAbstract implements IExerciseSet {
   }
 
   editSubsequentSets(parent: Exercise): void {
-    const currentIndex = parent.items.findIndex((set) => set === this);
+    const currentIndex = parent.items.findIndex(set => set === this);
     if (currentIndex === -1 || currentIndex === parent.items.length - 1) {
       return; // This set is not found or is the last set
     }
@@ -134,7 +130,7 @@ export class Exercise
   static fromJson(data: IExercise): Exercise {
     const exercise = new Exercise();
     Object.assign(exercise, data);
-    exercise.items = data.items.map((item) => ExerciseSet.fromJson(item));
+    exercise.items = data.items.map(item => ExerciseSet.fromJson(item));
     return exercise;
   }
 
@@ -185,25 +181,15 @@ export class Exercises
   implements IExercises
 {
   items: Exercise[] = [];
-  atHome?: boolean;
-  availableTimeMin?: number;
   notes?: string;
-  durationMin?: number;
 
   constructor(data: IExercises) {
     super(data, Exercise);
-    this.items = data.items.map((item) => Exercise.fromJson(item));
+    this.items = data.items.map(item => Exercise.fromJson(item));
   }
 
   getEditableFields(): IFieldMetadata[] {
     return [
-      {
-        field: "atHome",
-        label: "At Home",
-        type: "boolean",
-        keyboardType: "default",
-        converter: FieldConverters.boolean,
-      },
       {
         field: "notes",
         label: "Notes (Optional)",

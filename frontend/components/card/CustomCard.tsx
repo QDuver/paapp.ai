@@ -1,6 +1,10 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { CardAbstract, CardListAbstract, SubCardAbstract } from "../../models/Abstracts";
+import {
+  CardAbstract,
+  CardListAbstract,
+  SubCardAbstract,
+} from "../../models/Abstracts";
 import { useAppContext } from "../../contexts/AppContext";
 import SubCard from "./SubCard";
 
@@ -12,7 +16,7 @@ interface CustomCardProps {
 
 const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
   const { onUpdate, refreshCounter, showEditDialog } = useAppContext();
-  
+
   const renderSubCards = (): React.ReactNode => {
     if (!item.isExpanded) {
       return null;
@@ -20,7 +24,7 @@ const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
 
     const hasSubCards = item.items && item.items.length > 0;
     const supportsSubCards = item.createNewSubCard() !== null;
-    
+
     // Show subcards container if there are existing subcards OR if this card type supports subcards
     if (!hasSubCards && !supportsSubCards) {
       return null;
@@ -28,23 +32,24 @@ const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
 
     return (
       <View>
-        {hasSubCards && item.items!.map((subItem: SubCardAbstract, subIndex: number) => (
-          <SubCard
-            key={`${refreshCounter}-subcard-${index}-${subIndex}`}
-            subItem={subItem}
-            parentItem={item}
-            cardList={cardList}
-            index={subIndex}
-          />
-        ))}
-        
+        {hasSubCards &&
+          item.items!.map((subItem: SubCardAbstract, subIndex: number) => (
+            <SubCard
+              key={`${refreshCounter}-subcard-${index}-${subIndex}`}
+              subItem={subItem}
+              parentItem={item}
+              cardList={cardList}
+              index={subIndex}
+            />
+          ))}
+
         {supportsSubCards && (
           <TouchableOpacity
-            testID={`add-subcard-${item.name?.toLowerCase().replace(/\s+/g, '-') || 'unnamed'}`}
+            testID="add-subcard-button"
             style={styles.addSubCardButton}
             onPress={() => {
               const newSubCard = item.createNewSubCard()!;
-              
+
               if (item.shouldSkipDialogForNewSubCard()) {
                 item.items!.push(newSubCard);
                 item.isExpanded = true; // Ensure expanded to show the new item
@@ -67,13 +72,10 @@ const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
   const subtitleColor: string = "#8E8E93";
 
   return (
-    <View style={[
-      styles.card, 
-      { backgroundColor: cardBackgroundColor }
-    ]}>
-      <TouchableOpacity 
-        testID={`exercise-card-${item.name?.toLowerCase().replace(/\s+/g, '-') || 'unnamed'}`}
-        style={styles.cardHeader} 
+    <View style={[styles.card, { backgroundColor: cardBackgroundColor }]}>
+      <TouchableOpacity
+        testID="exercise-card"
+        style={styles.cardHeader}
         activeOpacity={0.7}
         onPress={() => showEditDialog(item, cardList, cardList, false)}
       >
@@ -109,9 +111,10 @@ const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
               {item.name || `Item ${index + 1}`}
             </Text>
 
-            {(item.items && item.items.length > 0) || item.createNewSubCard() !== null ? (
+            {(item.items && item.items.length > 0) ||
+            item.createNewSubCard() !== null ? (
               <TouchableOpacity
-                testID={`expand-button-${item.name?.toLowerCase().replace(/\s+/g, '-') || 'unnamed'}`}
+                testID="expand-button"
                 style={styles.expandButtonRight}
                 onPress={() => {
                   item.onToggleExpand();
@@ -222,7 +225,6 @@ const styles = StyleSheet.create({
     color: "#8E8E93",
     textAlign: "center",
   },
-
 });
 
 export default CustomCard;

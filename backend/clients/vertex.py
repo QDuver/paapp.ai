@@ -8,10 +8,9 @@ from config import is_local_environment
 
 
 class Agent:
-    def __init__(self, model):
+    def __init__(self):
         self.client = genai.Client( vertexai=True, project="final-app-429707", location="us-central1" )
-        self.model = model
-        self.output_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'agents', 'outputs')
+        self.output_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'outputs')
         os.makedirs(self.output_dir, exist_ok=True)
 
     def _generate_content(self, prompt, text_contexts=[], image_contexts=[]):
@@ -31,10 +30,10 @@ class Agent:
                 prompt += f'## {key}\n{value}\n\n ---- \n\n'
         return prompt
 
-    def call(self, si, prompt, text_contexts=[], image_contexts=[], schema=None):
+    def call(self, si, prompt, model, text_contexts=[], image_contexts=[], schema=None):
         contents = self._generate_content(prompt, text_contexts, image_contexts)
         response = self.client.models.generate_content(
-            model=self.model,
+            model=model,
             config=types.GenerateContentConfig( 
                 system_instruction=si, 
                 response_mime_type="application/json",
@@ -45,18 +44,18 @@ class Agent:
         )
         
         # Auto-save the output
-        self._save_output(si, prompt, response.text, text_contexts, image_contexts)
+        self._save_output(si, prompt, response.text, text_contexts, image_contexts, model)
         
         return response.text
 
-    def _save_output(self, system_instruction, prompt, output, text_contexts, image_contexts):
+    def _save_output(self, system_instruction, prompt, output, text_contexts, image_contexts, model):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"llm_output_{timestamp}.json"
         filepath = os.path.join(self.output_dir, filename)
         
         data = {
             "timestamp": datetime.now().isoformat(),
-            "model": self.model,
+            "model": model,
             "system_instruction": system_instruction,
             "prompt": prompt,
             "text_contexts": text_contexts,

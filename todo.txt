@@ -1,12 +1,14 @@
-- Design form routines / modes on Android
-- Run automated tests on AI scripts
-- Reordering not stable
+MVP
 - Differentiate dbs based on profile
+- Run automated tests on AI scripts
+- Custom prompts
+- User Settings
+
+POST MVP
+- Design form routines / modes on Android
 - Theme
 - Calendar Icon + Swipability
 - Pictures of meals
 - Routine type to dropdown
 - Weight input should not accept non-numeric
-- Allow tests to go through authentication
-- User Settings
-- Custom prompts
+- Reordering not stable

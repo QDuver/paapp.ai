@@ -1,12 +1,11 @@
-import React from 'react';
+import React from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
-import { CardAbstract, SubCardAbstract, CardListAbstract } from '../../models/Abstracts';
-import { useAppContext } from '../../contexts/AppContext';
+  CardAbstract,
+  SubCardAbstract,
+  CardListAbstract,
+} from "../../models/Abstracts";
+import { useAppContext } from "../../contexts/AppContext";
 
 // Type definitions for the component props
 interface SubCardProps {
@@ -16,23 +15,17 @@ interface SubCardProps {
   index: number;
 }
 
-const SubCard = ({ 
-  subItem, 
-  parentItem, 
-  cardList,
-  index, 
-}: SubCardProps) => {
+const SubCard = ({ subItem, parentItem, cardList, index }: SubCardProps) => {
   const { onUpdate, refreshCounter, showEditDialog } = useAppContext();
 
-
-  const backgroundColor: string = '#2C2C2E';
-  const textColor: string = '#FFFFFF';
-  const subtitleColor: string = '#8E8E93';
+  const backgroundColor: string = "#2C2C2E";
+  const textColor: string = "#FFFFFF";
+  const subtitleColor: string = "#8E8E93";
 
   return (
     <View style={[styles.subCard, { backgroundColor }]}>
       <TouchableOpacity
-        testID={`subcard-${parentItem.name?.toLowerCase().replace(/\s+/g, '-') || 'unnamed'}-${index}`}
+        testID="subcard"
         style={styles.subCardContent}
         onPress={() => showEditDialog(subItem, parentItem, cardList, false)}
         activeOpacity={0.7}
@@ -47,7 +40,10 @@ const SubCard = ({
         {subItem.getTags().length > 0 && (
           <View style={styles.subCardInfoRow}>
             {subItem.getTags().map((tag, tagIndex) => (
-              <Text key={tagIndex} style={[styles.subCardInfo, { color: subtitleColor }]}>
+              <Text
+                key={tagIndex}
+                style={[styles.subCardInfo, { color: subtitleColor }]}
+              >
                 {tag}
               </Text>
             ))}
@@ -64,20 +60,20 @@ const styles = StyleSheet.create({
     marginRight: 16,
     marginVertical: 4,
     borderRadius: 8,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   subCardContent: {
     padding: 12,
   },
   subCardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 4,
   },
   subCardTitle: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
     flex: 1,
   },
   subCardDescription: {
@@ -86,14 +82,14 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   subCardInfoRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 8,
   },
   subCardInfo: {
     fontSize: 11,
-    fontWeight: '500',
-    backgroundColor: 'rgba(142, 142, 147, 0.12)',
+    fontWeight: "500",
+    backgroundColor: "rgba(142, 142, 147, 0.12)",
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,

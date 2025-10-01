@@ -4,27 +4,28 @@ import json
 import requests
 
 from google.cloud import firestore
-from clients.shared import get_firestore_client
+from config import CONFIG, PROJECT
 from models import meals, routines
 from models.exercises import Exercises
 from models.routines import ROUTINE_TEMPLATE, Routines, Routine
 from models.meals import Meal, Meals
 
-
 if __name__ == "__main__":
 
+    CONFIG.USER_FS = firestore.Client(project=PROJECT, database='qd-dmppbwh0rhvv5c9klckgpgrhvdm2')    
+    Exercises().build_items()
     # routines = Routines().query()
     # Routines().delete()
     # Exercises().delete()
     # Meals().delete()
     # Meals().build_items()
-    # fs = get_firestore_client('qd-umileigiudber2rbzjguipjfys23')
-    # Routines().build_items(fs)
-    # Exercises().build_items(fs)
+    # Routines().build_items()
     # exercises = Exercises().get_unique()
-    # print(json.dumps(exercises, indent=2))
     # Meals().build_items()
-    # print(json.dumps(exercises.model_dump(), indent=2))
 
-    ex = requests.get("http://localhost:8000/routines/2025-09-29")
+    # Option 1: Use the test endpoint (no authentication required)
+    # headers = {"Authorization": "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjA1NTc3MjZmYWIxMjMxZmEyZGNjNTcyMWExMDgzZGE2ODBjNGE3M2YiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoicXVlbnRpbiBkdXZlcmdlIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FDZzhvY0tqSHBLbUo3dkJsSTkzQjJOd3lMbWVvd1VBamQtZU5DLXA1SkRpYzRmXzM4V1VWUT1zOTYtYyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS9maW5hbC1hcHAtNDI5NzA3IiwiYXVkIjoiZmluYWwtYXBwLTQyOTcwNyIsImF1dGhfdGltZSI6MTc1OTMzMDY2NSwidXNlcl9pZCI6ImRtcFBiV2gwUkhWVjVjOWtsQ2tncEdySFZEbTIiLCJzdWIiOiJkbXBQYldoMFJIVlY1YzlrbENrZ3BHckhWRG0yIiwiaWF0IjoxNzU5MzMwNjY1LCJleHAiOjE3NTkzMzQyNjUsImVtYWlsIjoidGltZWxpbmVzLmNvbnRhY3RAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZ29vZ2xlLmNvbSI6WyIxMDEwNjAzMzY5MDI0NTExNjA5MTMiXSwiZW1haWwiOlsidGltZWxpbmVzLmNvbnRhY3RAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoiZ29vZ2xlLmNvbSJ9fQ.CxauUovv9HYNNWH-AKNbR8Zob1nfh-RSE1SrMHRIJ7ylWyKWlb_eGEKif03RFklezkZAzyXhT7LW6igMvzZM-Xst2-SbgbtTD7UU-AZntDezh0kv0rBL0JJUi6jStPp2f-XTvQO9Xx1Z6ZA-FTGxdPVcP2cMKwiNn--OMXymvM2N5MQOeTjiyfl4RR4dda_P4BTcKtnmjQGfzJ7OQn1actIIUqPvnZqS75dIL64Z6ne4u5NyZCCHr4ZZtaRFDNPxSC28yI0qzgQcrDfeir7ScxgFq1ZGmnUSI318paUk-i3oPC3woQei1vIkOh5lAZcCGLPZ_w-BUiiYwuCq1SLuBg"}
+    # ex = requests.get("http://localhost:8000/routines/2025-09-30", headers=headers)
     # print(ex.json())
+    
+    # requests.get('http://localhost:8000/health')

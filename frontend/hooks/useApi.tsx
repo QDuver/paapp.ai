@@ -1,15 +1,15 @@
 import { useCallback, useRef, useState } from "react";
-import { Alert, Platform } from 'react-native';
-import { getFirebaseAuth } from '../services/Firebase';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert, Platform } from "react-native";
+import { getFirebaseAuth } from "../services/Firebase";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { FetchOptions, RequestStatusType } from "../models/Shared";
-import { DEV_CONFIG, PROD_CONFIG } from '../config/env';
+import { DEV_CONFIG, PROD_CONFIG } from "../config/env";
 
 // Base URL configuration with environment-based settings
 const getBaseUrl = (): string => {
   if (__DEV__) {
     // Development mode
-    if (Platform.OS === 'web') {
+    if (Platform.OS === "web") {
       return `http://localhost:${DEV_CONFIG.LOCAL_PORT}`;
     } else {
       // For mobile devices (both iOS and Android), use the computer's IP
@@ -21,7 +21,7 @@ const getBaseUrl = (): string => {
   }
 };
 
-function useApi<T = unknown>() {
+function useApi<T = unknown>(skipAuth: boolean = false) {
   const baseApi = getBaseUrl();
   const [data, setData] = useState<T>();
   const [status, setStatus] = useState<RequestStatusType | undefined>();
@@ -33,39 +33,37 @@ function useApi<T = unknown>() {
     // ]);
   }, []);
 
-  const getAuthHeaders = useCallback(async (): Promise<Record<string, string>> => {
+  const getAuthHeaders = useCallback(async (): Promise<
+    Record<string, string>
+  > => {
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     };
 
-    try {
-      // Get Firebase Auth token
-      const auth = getFirebaseAuth();
-      if (auth?.currentUser) {
-        const token = await auth.currentUser.getIdToken();
-        headers['Authorization'] = `Bearer ${token}`;
-      }
+    if (skipAuth) {
+      // Use hardcoded token when skipAuth is true
+      headers["Authorization"] = "Bearer umileigiudber2rbzjguipjfys23";
+      return headers;
+    }
 
-      // Get user ID from AsyncStorage for additional context
-      const userId = await AsyncStorage.getItem('userId');
-      if (userId) {
-        headers['X-User-ID'] = userId;
-      }
-    } catch (error) {
-      console.warn('Failed to get auth headers:', error);
-      // Continue without auth headers rather than failing
+    const auth = getFirebaseAuth();
+    if (auth?.currentUser) {
+      const token = await auth.currentUser.getIdToken();
+      headers["Authorization"] = `Bearer ${token}`;
     }
 
     return headers;
-  }, []);
+  }, [skipAuth]);
 
   const main = useCallback(
     async (endpoint: string, options: FetchOptions = {}) => {
-      const url = endpoint.startsWith('http') ? endpoint : `${baseApi}/${endpoint}`;
-      
+      const url = endpoint.startsWith("http")
+        ? endpoint
+        : `${baseApi}/${endpoint}`;
+
       if (inFlight.current) return;
       inFlight.current = true;
-      
+
       try {
         setStatus(RequestStatusType.LOADING);
         const authHeaders = await getAuthHeaders();
@@ -74,17 +72,17 @@ function useApi<T = unknown>() {
           ...options,
           headers: {
             ...authHeaders,
-            'Access-Control-Allow-Origin': '*',
+            "Access-Control-Allow-Origin": "*",
             ...options.headers,
           } as Record<string, string>,
         };
 
         if (options.body && !(options.body instanceof FormData)) {
-          fetchOptions.headers['Content-Type'] = 'application/json';
+          fetchOptions.headers["Content-Type"] = "application/json";
         }
 
         const response = await fetch(url, fetchOptions);
-        
+
         if (!response.ok) {
           let errorMessage = `Error: ${response.status} - ${response.statusText}`;
           try {
@@ -102,17 +100,20 @@ function useApi<T = unknown>() {
         return result;
       } catch (error: any) {
         setStatus(RequestStatusType.FAILURE);
-        console.error('API FETCH ERROR:', url, error);
-        
+        console.error("API FETCH ERROR:", url, error);
+
         // Handle specific error cases
-        if (error.message?.includes('Failed to fetch') || error.message?.includes('Network request failed')) {
-          showError('Network Error: Unable to connect to server');
-        } else if (error.message?.includes('timeout')) {
-          showError('Request timeout - please try again');
+        if (
+          error.message?.includes("Failed to fetch") ||
+          error.message?.includes("Network request failed")
+        ) {
+          showError("Network Error: Unable to connect to server");
+        } else if (error.message?.includes("timeout")) {
+          showError("Request timeout - please try again");
         } else {
-          showError(error.message || 'An unexpected error occurred');
+          showError(error.message || "An unexpected error occurred");
         }
-        
+
         throw error;
       } finally {
         inFlight.current = false;
@@ -122,31 +123,41 @@ function useApi<T = unknown>() {
   );
 
   // Helper methods for different HTTP verbs
-  const get = useCallback((endpoint: string) => 
-    main(endpoint, { method: 'GET' }), [main]);
+  const get = useCallback(
+    (endpoint: string) => main(endpoint, { method: "GET" }),
+    [main]
+  );
 
-  const post = useCallback((endpoint: string, body?: any) => 
-    main(endpoint, { 
-      method: 'POST', 
-      body: body ? JSON.stringify(body) : undefined 
-    }), [main]);
+  const post = useCallback(
+    (endpoint: string, body?: any) =>
+      main(endpoint, {
+        method: "POST",
+        body: body ? JSON.stringify(body) : undefined,
+      }),
+    [main]
+  );
 
-  const put = useCallback((endpoint: string, body?: any) => 
-    main(endpoint, { 
-      method: 'PUT', 
-      body: body ? JSON.stringify(body) : undefined 
-    }), [main]);
+  const put = useCallback(
+    (endpoint: string, body?: any) =>
+      main(endpoint, {
+        method: "PUT",
+        body: body ? JSON.stringify(body) : undefined,
+      }),
+    [main]
+  );
 
-  const del = useCallback((endpoint: string) => 
-    main(endpoint, { method: 'DELETE' }), [main]);
+  const del = useCallback(
+    (endpoint: string) => main(endpoint, { method: "DELETE" }),
+    [main]
+  );
 
-  return { 
+  return {
     get,
     post,
     put,
     delete: del,
-    data, 
-    status, 
+    data,
+    status,
     setStatus,
   };
 }

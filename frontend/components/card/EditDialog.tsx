@@ -12,14 +12,19 @@ import {
 } from "react-native";
 import { Switch } from "react-native-paper";
 import { useAppContext } from "../../contexts/AppContext";
-import { CardAbstract, CardListAbstract, IFieldMetadata } from "../../models/Abstracts";
+import {
+  CardAbstract,
+  CardListAbstract,
+  IFieldMetadata,
+} from "../../models/Abstracts";
 import AutocompleteInput from "./AutocompleteInput";
 
 const EditDialog = () => {
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
   const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
 
-  const { onUpdate, onBuildItems, dialogSettings, hideEditDialog } = useAppContext();
+  const { onUpdate, onBuildItems, dialogSettings, hideEditDialog } =
+    useAppContext();
   const { visible, item, parent, cardList, isNew } = dialogSettings;
 
   useEffect(() => {
@@ -80,18 +85,18 @@ const EditDialog = () => {
             </Text>
             <Switch
               value={!!value}
-              onValueChange={(newValue) => handleInputChange(fieldName, newValue)}
+              onValueChange={newValue => handleInputChange(fieldName, newValue)}
               thumbColor="#FFFFFF"
               trackColor={{ false: "#3A3A3C", true: "#007AFF" }}
             />
           </View>
-          {hasError && <Text style={styles.errorText}>{errors[fieldName]}</Text>}
+          {hasError && (
+            <Text style={styles.errorText}>{errors[fieldName]}</Text>
+          )}
         </View>
       );
     }
 
-    // Use AutocompleteInput for "name" field in exercises even without external suggestions
-    // because AutocompleteInput has its own internal logic for exercise suggestions
     const shouldUseAutocomplete =
       (hasSuggestions && !isMultiline) ||
       (fieldName === "name" &&
@@ -99,7 +104,7 @@ const EditDialog = () => {
         !isMultiline);
 
     return (
-      <View key={fieldName} style={styles.fieldContainer}>
+      <View key={fieldName} testID="form-field" style={styles.fieldContainer}>
         <Text style={[styles.fieldLabel, { color: "#FFFFFF" }]}>
           {fieldLabel}
         </Text>
@@ -129,7 +134,7 @@ const EditDialog = () => {
           />
         ) : (
           <TextInput
-            testID={`input-${fieldName}`}
+            testID="form-input"
             style={[
               styles.textInput,
               isMultiline && styles.multilineInput,
@@ -170,6 +175,7 @@ const EditDialog = () => {
       transparent={true}
       animationType="slide"
       onRequestClose={hideEditDialog}
+      testID="edit-dialog"
     >
       <KeyboardAvoidingView
         style={[styles.overlay, { backgroundColor: overlayColor }]}
@@ -230,11 +236,11 @@ const EditDialog = () => {
                   testID="save-button"
                   style={styles.saveButton}
                   onPress={() => {
-                    if(!(item instanceof CardListAbstract)) {
+                    if (!(item instanceof CardListAbstract)) {
                       item.onDialogSave(formData, parent);
+                      console.log("cardList", cardList);
                       onUpdate(cardList);
-                    }
-                    else{
+                    } else {
                       onBuildItems(cardList, formData);
                     }
                     hideEditDialog();

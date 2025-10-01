@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { StatusBar } from 'expo-status-bar';
+import React, { useEffect, useState } from "react";
+import { StatusBar } from "expo-status-bar";
 import {
   SafeAreaView,
   ScrollView,
@@ -7,163 +7,196 @@ import {
   Text,
   View,
   ActivityIndicator,
-  TouchableOpacity,
-  Modal,
   RefreshControl,
-} from 'react-native';
-import { Provider as PaperProvider, FAB, Appbar, Drawer } from 'react-native-paper';
-import CardList from './card/CardList';
-import UserAvatar from './auth/UserAvatar';
-import EditDialog from './card/EditDialog';
-import SideDrawer from './SideDrawer';
-import { useAppContext } from '../contexts/AppContext';
+} from "react-native";
+import {
+  Provider as PaperProvider,
+  FAB,
+  Appbar,
+  BottomNavigation,
+  Menu,
+} from "react-native-paper";
+import CardList from "./card/CardList";
+import UserAvatar from "./auth/UserAvatar";
+import EditDialog from "./card/EditDialog";
+import SettingsScreen from "./SettingsScreen";
+import { useAppContext } from "../contexts/AppContext";
+import { getFirebaseAuth } from "../services/Firebase";
+import { signOut } from "firebase/auth";
 
-interface MainAppProps { user: any }
+interface MainAppProps {
+  user: any;
+}
 
 const MainApp = ({ user }: MainAppProps) => {
   const { data, currentDate, isLoading, showEditDialog } = useAppContext();
-  
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isAuthChecking, setIsAuthChecking] = useState(true);
-  const [selectedTab, setSelectedTab] = useState(1);
-  const [drawerVisible, setDrawerVisible] = useState(false);
 
-  useEffect(() => {
-    setTimeout(() => {
-      setIsAuthChecking(false);
-      setIsLoggedIn(process.env.NODE_ENV === 'test');
-    }, 1000);
-  }, []);
+  const [navigationIndex, setNavigationIndex] = useState(1);
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
-  // Loading screen during auth check
-  if (isAuthChecking) {
+  const handleSignOut = async () => {
+    try {
+      const auth = getFirebaseAuth();
+      if (auth) {
+        await signOut(auth);
+      }
+    } catch (error) {
+      console.error("Sign out error:", error);
+    }
+    setMenuVisible(false);
+  };
+
+  const handleSettings = () => {
+    setShowSettings(true);
+    setMenuVisible(false);
+  };
+
+  // Define navigation routes
+  const routes = [
+    {
+      key: "routines",
+      title: "Routines",
+      focusedIcon: "clock",
+      unfocusedIcon: "clock-outline",
+    },
+    {
+      key: "exercises",
+      title: "Exercises",
+      focusedIcon: "dumbbell",
+      unfocusedIcon: "dumbbell",
+    },
+    {
+      key: "meals",
+      title: "Meals",
+      focusedIcon: "food-apple",
+      unfocusedIcon: "food-apple-outline",
+    },
+  ];
+
+  const renderScene = ({ route }: { route: { key: string } }) => {
+    const cardList = data?.[route.key];
+
+    const createChild = () => {
+      if (!cardList) return;
+
+      // Create new item and show dialog
+      const newItem = cardList.createChild();
+      showEditDialog(newItem, cardList, cardList, true);
+    };
+
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: '#000' }]}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color='#fff' />
-          <Text style={[styles.loadingText, { color: '#fff' }]}>
-            Loading...
-          </Text>
-        </View>
-        <StatusBar style='light' />
-      </SafeAreaView>
+      <View style={styles.sceneContainer}>
+        <ScrollView
+          style={styles.content}
+          refreshControl={
+            <RefreshControl refreshing={isLoading} tintColor="#fff" />
+          }
+        >
+          {isLoading ? (
+            <View style={styles.loadingContainer} testID="loading-container">
+              <ActivityIndicator size="large" color="#6A5ACD" />
+              <Text style={styles.loadingText} testID="loading-text">
+                Loading {route.key}...
+              </Text>
+            </View>
+          ) : cardList ? (
+            <CardList cardList={cardList} />
+          ) : (
+            <View style={styles.emptyContainer}>
+              <Text style={[styles.emptyText, { color: "#ccc" }]}>
+                No {route.key} found for {currentDate}
+              </Text>
+            </View>
+          )}
+        </ScrollView>
+
+        <EditDialog />
+
+        {!isLoading && (
+          <>
+            <FAB
+              style={styles.aiFab}
+              icon="auto-fix"
+              onPress={() => {
+                if (cardList) {
+                  showEditDialog(cardList, cardList, cardList, true);
+                }
+              }}
+              testID="ai-fab"
+            />
+
+            <FAB
+              style={styles.fab}
+              icon="plus"
+              onPress={createChild}
+              testID="add-fab"
+            />
+          </>
+        )}
+      </View>
+    );
+  };
+
+  if (showSettings) {
+    return (
+      <PaperProvider>
+        <SafeAreaView style={[styles.container, { backgroundColor: "#000" }]}>
+          <SettingsScreen onBack={() => setShowSettings(false)} />
+          <StatusBar style="light" />
+        </SafeAreaView>
+      </PaperProvider>
     );
   }
 
-  // Main app interface
-  const tabs: Array<{ id: number; name: string; key: string }> = [
-    { id: 0, name: 'Routines', key: 'routines' },
-    { id: 1, name: 'Exercises', key: 'exercises' },
-    { id: 2, name: 'Meals', key: 'meals' }
-  ];
-
-  const currentTab = tabs[selectedTab];
-  const cardList = data?.[currentTab.key];
-
-  const createChild = () => {
-    if (!cardList) return;
-    
-    // Create new item and show dialog
-    const newItem = cardList.createChild();
-    showEditDialog(newItem, cardList, cardList, true);
-  };
-
   return (
     <PaperProvider>
-      <SafeAreaView style={[styles.container, { backgroundColor: '#000' }]}>
-        {/* Side Drawer Overlay */}
-        <Modal
-          visible={drawerVisible}
-          animationType="fade"
-          transparent={true}
-          onRequestClose={() => setDrawerVisible(false)}
-        >
-          <View style={styles.drawerOverlay}>
-            <View style={styles.drawerContent}>
-              <SideDrawer
-                visible={drawerVisible}
-                onDismiss={() => setDrawerVisible(false)}
-                selectedTab={selectedTab}
-                onTabSelect={setSelectedTab}
-                currentDate={currentDate}
-                tabs={tabs}
-              />
-            </View>
-            <TouchableOpacity
-              style={styles.drawerBackdrop}
-              onPress={() => setDrawerVisible(false)}
-            />
-          </View>
-        </Modal>
-        
-        {/* Simplified Header */}
+      <SafeAreaView style={[styles.container, { backgroundColor: "#000" }]}>
+        {/* Header */}
         <Appbar.Header style={styles.appBar}>
-          <Appbar.Action 
-            icon="menu" 
-            onPress={() => setDrawerVisible(true)}
-            iconColor="#fff"
-          />
-          <Appbar.Content 
-            title="Routine Assistant" 
+          <Appbar.Content
+            title="Routine Assistant"
+            subtitle={currentDate}
             titleStyle={styles.appBarTitle}
+            subtitleStyle={styles.appBarSubtitle}
           />
-          <UserAvatar user={user} />
+          <Menu
+            visible={menuVisible}
+            onDismiss={() => setMenuVisible(false)}
+            anchor={
+              <View style={{ marginRight: 8 }}>
+                <UserAvatar user={user} onPress={() => setMenuVisible(true)} />
+              </View>
+            }
+          >
+            <Menu.Item
+              onPress={handleSettings}
+              title="Settings"
+              leadingIcon="cog-outline"
+            />
+            <Menu.Item
+              onPress={handleSignOut}
+              title="Sign Out"
+              leadingIcon="logout"
+            />
+          </Menu>
         </Appbar.Header>
 
-      {/* Content */}
-      <ScrollView
-        style={styles.content}
-        refreshControl={
-          <RefreshControl
-            refreshing={isLoading}
-            // onRefresh={loadAllData}
-            tintColor='#fff'
-          />
-        }
-      >
-        
-        {isLoading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color='#fff' />
-            <Text style={[styles.loadingText, { color: '#fff' }]}>
-              Loading {currentTab.name.toLowerCase()}...
-            </Text>
-          </View>
-        ) : cardList ? (
-          <CardList
-            cardList={cardList}
-          />
-        ) : (
-          <View style={styles.emptyContainer}>
-            <Text style={[styles.emptyText, { color: '#ccc' }]}>
-              No {currentTab.name.toLowerCase()} found for {currentDate}
-            </Text>
-          </View>
-        )}
-      </ScrollView>
+        <BottomNavigation
+          navigationState={{ index: navigationIndex, routes }}
+          onIndexChange={setNavigationIndex}
+          renderScene={renderScene}
+          barStyle={styles.bottomNavBar}
+          testID="bottom-navigation"
+          theme={{
+            colors: {
+              secondaryContainer: "#333",
+            },
+          }}
+        />
 
-      <EditDialog />
-      
-      <FAB
-        style={styles.aiFab}
-        icon="auto-fix"
-        onPress={() => {
-          if (cardList) {
-            showEditDialog(cardList, cardList, cardList, true);
-          }
-        }}
-        testID="ai-fab"
-      />
-      
-      <FAB
-        style={styles.fab}
-        icon="plus"
-        onPress={createChild}
-        testID="add-exercise-fab"
-      />
-      
-      <StatusBar style='light' />
-    </SafeAreaView>
+        <StatusBar style="light" />
+      </SafeAreaView>
     </PaperProvider>
   );
 };
@@ -172,89 +205,67 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  // New styles for the simplified header
   appBar: {
-    backgroundColor: '#000',
+    backgroundColor: "#000",
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
+    borderBottomColor: "#333",
     elevation: 0,
   },
   appBarTitle: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
-  // Drawer styles
-  drawerOverlay: {
+  appBarSubtitle: {
+    color: "#ccc",
+    fontSize: 14,
+  },
+  sceneContainer: {
     flex: 1,
-    flexDirection: 'row',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: "#000",
   },
-  drawerContent: {
-    width: 280,
-    backgroundColor: '#000',
-    borderRightWidth: 1,
-    borderRightColor: '#333',
-    height: '100%',
-  },
-  drawerBackdrop: {
-    flex: 1,
-  },
-  // Content and loading styles
   content: {
     flex: 1,
+    backgroundColor: "#000",
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
   },
   loadingText: {
     marginTop: 10,
     fontSize: 16,
+    color: "#6A5ACD",
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
   },
   emptyText: {
     fontSize: 16,
     marginBottom: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
-  // Auth styles
-  loginContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  bottomNavBar: {
+    backgroundColor: "#000",
+    borderTopWidth: 1,
+    borderTopColor: "#333",
   },
-  loginButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 20,
-  },
-  loginButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  // FAB
   aiFab: {
-    position: 'absolute',
+    position: "absolute",
     margin: 16,
     right: 0,
     bottom: 70,
     zIndex: 9999,
     elevation: 16,
-    backgroundColor: '#6A5ACD', // SlateBlue - complements the #007AFF theme
+    backgroundColor: "#6A5ACD",
   },
   fab: {
-    position: 'absolute',
+    position: "absolute",
     margin: 16,
     right: 0,
     bottom: 0,

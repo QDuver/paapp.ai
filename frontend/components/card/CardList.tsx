@@ -1,10 +1,8 @@
 import React from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-} from "react-native";
-import DraggableFlatList, { RenderItemParams } from "react-native-draggable-flatlist";
+import { StyleSheet, View, Text } from "react-native";
+import DraggableFlatList, {
+  RenderItemParams,
+} from "react-native-draggable-flatlist";
 import { CardListAbstract, CardAbstract } from "../../models/Abstracts";
 import CustomCard from "./CustomCard";
 import { useAppContext } from "../../contexts/AppContext";
@@ -16,22 +14,13 @@ interface CardListProps {
 const CardList = ({ cardList }: CardListProps) => {
   const { refreshCounter, onUpdate } = useAppContext();
 
-  const renderCard = ({ item, drag, isActive, getIndex }: RenderItemParams<CardAbstract>) => (
-    <CustomCard
-      cardList={cardList}
-      item={item}
-      index={getIndex() ?? 0}
-      drag={drag}
-      isActive={isActive}
-    />
+  const renderCard = ({
+    item,
+    isActive,
+    getIndex,
+  }: RenderItemParams<CardAbstract>) => (
+    <CustomCard cardList={cardList} item={item} index={getIndex() ?? 0} />
   );
-
-  const onDragEnd = ({ data, from, to }: { data: CardAbstract[], from: number, to: number }) => {
-    if (from !== to) {
-      cardList.reorderItems(from, to);
-      onUpdate(cardList);
-    }
-  };
 
   return (
     <View style={styles.container}>
@@ -39,7 +28,6 @@ const CardList = ({ cardList }: CardListProps) => {
         data={cardList.items}
         renderItem={renderCard}
         keyExtractor={(item, index) => `${refreshCounter}-card-${index}`}
-        onDragEnd={onDragEnd}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
         activationDistance={10}
@@ -67,15 +55,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   fabContainer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 16,
     right: 16,
     zIndex: 9999,
   },
   fab: {
-    backgroundColor: '#6200EE',
+    backgroundColor: "#6200EE",
     elevation: 16,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

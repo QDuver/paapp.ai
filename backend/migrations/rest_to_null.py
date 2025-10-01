@@ -21,5 +21,4 @@ def rest_to_null(fs):
         
         if updated:
             exercises_ref.document(doc.id).set(doc_data)
-            print(f"Updated document {doc.id}")
 
