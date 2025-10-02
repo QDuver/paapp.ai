@@ -30,7 +30,7 @@ interface AppContextType {
   currentDate: string;
   isLoading: boolean;
   refreshCounter: number;
-  onUpdate: (cardList: FirestoreDocAbstract) => void;
+  setRefreshCounter: React.Dispatch<React.SetStateAction<number>>;
   onBuildItems: (cardList: FirestoreDocAbstract, formData: { [key: string]: any }) => void;
   updateSettings: (settings: ISettings) => Promise<void>;
   dialogSettings: DialogSettings;
@@ -103,11 +103,6 @@ export const AppProvider = ({ children, skipAuth = false }: AppProviderProps) =>
     setIsLoading(status === RequestStatusType.LOADING);
   }, [status]);
 
-  const onUpdate = (cardList: FirestoreDocAbstract) => {
-    setRefreshCounter(prev => prev + 1);
-    post(`${cardList.collection}/${cardList.id}`, cardList);
-  };
-
   const onBuildItems = async (cardList: FirestoreDocAbstract, formData: { [key: string]: any }) => {
     setIsLoading(true);
     await post(`build-items/${cardList.collection}/${cardList.id}`, formData);
@@ -151,7 +146,7 @@ export const AppProvider = ({ children, skipAuth = false }: AppProviderProps) =>
     currentDate,
     isLoading,
     refreshCounter,
-    onUpdate,
+    setRefreshCounter,
     onBuildItems,
     updateSettings,
     dialogSettings,

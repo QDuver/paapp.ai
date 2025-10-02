@@ -1,4 +1,21 @@
 import { IFieldMetadata } from "../models/Abstracts";
+import { DEV_CONFIG, PROD_CONFIG } from "../config/env";
+import { Alert, Platform } from "react-native";
+
+export const getBaseUrl = (): string => {
+  if (__DEV__) {
+    // Development mode
+    if (Platform.OS === "web") {
+      return `http://localhost:${DEV_CONFIG.LOCAL_PORT}`;
+    } else {
+      // For mobile devices (both iOS and Android), use the computer's IP
+      return `http://${DEV_CONFIG.LOCAL_IP}:${DEV_CONFIG.LOCAL_PORT}`;
+    }
+  } else {
+    // Production mode
+    return PROD_CONFIG.API_URL;
+  }
+};
 
 export const fieldConverter = {
   string: (value: string) => value,
@@ -30,7 +47,7 @@ export const parseDate = (dateString: string): Date => {
 
 // Utility functions for form data handling
 export const FormDataUtils = {
-  toFormData: (instance: any, getEditableFields: () => IFieldMetadata<any>[]): { [key: string]: any } => {
+  toFormData: (instance: any, getEditableFields: () => IFieldMetadata[]): { [key: string]: any } => {
     const formData: { [key: string]: any } = {};
     getEditableFields().forEach(fieldMetadata => {
       const fieldName = fieldMetadata.field;
@@ -40,7 +57,7 @@ export const FormDataUtils = {
     return formData;
   },
 
-  fromFormData: (formData: { [key: string]: any }, getEditableFields: () => IFieldMetadata<any>[]): { [key: string]: any } => {
+  fromFormData: (formData: { [key: string]: any }, getEditableFields: () => IFieldMetadata[]): { [key: string]: any } => {
     const convertedData: { [key: string]: any } = {};
     getEditableFields().forEach(fieldMetadata => {
       const fieldName = fieldMetadata.field;

@@ -102,10 +102,6 @@ export class Meal extends CardAbstract {
     }
     return tags;
   }
-
-  createNewSubCard(): Ingredient {
-    return new Ingredient();
-  }
 }
 
 export class Meals extends FirestoreDocAbstract {

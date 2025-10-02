@@ -9,7 +9,7 @@ const EditDialog = () => {
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
   const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
 
-  const { onUpdate, onBuildItems, dialogSettings, hideEditDialog } = useAppContext();
+  const { onBuildItems, dialogSettings, hideEditDialog, setRefreshCounter } = useAppContext();
   const { visible, item, parent, cardList, isNew } = dialogSettings;
 
   useEffect(() => {
@@ -32,10 +32,7 @@ const EditDialog = () => {
       if (!confirmed) return;
     }
 
-    if (item.delete(parent)) {
-      onUpdate(cardList);
-    }
-
+    item.delete(cardList, parent);
     hideEditDialog();
   };
 
@@ -92,7 +89,7 @@ const EditDialog = () => {
             color="#FFFFFF"
             onSuggestionSelect={suggestion => {
               (item as CardAbstract).handleSuggestionSelect(suggestion);
-              item.onSave(cardList, { name: suggestion.name }, parent, isNew);
+              item.onSave(cardList, { name: suggestion.name }, parent, isNew, setRefreshCounter);
               hideEditDialog();
             }}
             fieldName={fieldName}
@@ -180,7 +177,7 @@ const EditDialog = () => {
                   style={styles.saveButton}
                   onPress={() => {
                     if (!(item instanceof FirestoreDocAbstract)) {
-                      item.onSave(cardList, formData, parent, isNew);
+                      item.onSave(cardList, formData, parent, isNew, setRefreshCounter);
                     } else {
                       onBuildItems(cardList, formData);
                     }

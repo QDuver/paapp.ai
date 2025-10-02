@@ -1,4 +1,4 @@
-import { FormDataUtils } from "../utils/utils";
+import { FormDataUtils, getBaseUrl } from "../utils/utils";
 
 export interface IUnique {
   name: string;
@@ -35,7 +35,13 @@ export abstract class DialogableAbstract {
     return FormDataUtils.fromFormData(formData, () => this.getEditableFields());
   }
 
-  onSave(fsDoc: FirestoreDocAbstract, formData: { [key: string]: any }, parent: any, isNew: boolean): void {
+  onSave(
+    fsDoc: FirestoreDocAbstract,
+    formData: { [key: string]: any },
+    parent: any,
+    isNew: boolean,
+    setRefreshCounter: React.Dispatch<React.SetStateAction<number>>
+  ): void {
     const data = FormDataUtils.fromFormData(formData, () => this.getEditableFields());
     const editableFields = this.getEditableFields();
     editableFields.forEach(fieldMetadata => {
@@ -49,19 +55,19 @@ export abstract class DialogableAbstract {
     if (parent && isNew) {
       parent.items.push(this);
     }
-
+    console.log("onSave", this, parent, isNew);
+    setRefreshCounter(prev => prev + 1);
     fsDoc.onSave();
   }
 
-  delete(parent: FirestoreDocAbstract | CardAbstract): boolean {
+  delete(fsDoc: FirestoreDocAbstract, parent: FirestoreDocAbstract | CardAbstract) {
     if (parent.items && Array.isArray(parent.items)) {
       const itemIndex = parent.items.findIndex((item: any) => item === this);
       if (itemIndex !== -1) {
         parent.items.splice(itemIndex, 1);
-        return true;
+        fsDoc.onSave();
       }
     }
-    return false;
   }
 }
 
@@ -75,9 +81,11 @@ export abstract class CardAbstract extends DialogableAbstract {
   isExpanded: boolean;
   canAddItems: boolean;
   items: SubCardAbstract[];
+  ChildModel: any;
 
   constructor(data, ChildModel) {
     super(data);
+    this.ChildModel = ChildModel;
     this.isExpanded = !this.isCompleted;
     this.items = data?.items?.map(item => new ChildModel(item)) || [];
   }
@@ -86,17 +94,19 @@ export abstract class CardAbstract extends DialogableAbstract {
     return [];
   }
 
-  onComplete() {
+  onComplete(fsDoc: FirestoreDocAbstract) {
     this.isCompleted = !this.isCompleted;
     if (this.isCompleted) {
       this.isExpanded = false;
     }
+    fsDoc.onSave();
   }
 
-  onToggleExpand() {
+  onToggleExpand(fsDoc: FirestoreDocAbstract) {
     if ((this.items && this.items.length > 0) || this.createNewSubCard() !== null) {
       this.isExpanded = !this.isExpanded;
     }
+    fsDoc.onSave();
   }
 
   handleSuggestionSelect(suggestion: IUnique): void {
@@ -109,10 +119,10 @@ export abstract class CardAbstract extends DialogableAbstract {
   }
 
   createNewSubCard(): SubCardAbstract | null {
-    return null;
+    return new this.ChildModel();
   }
 
-  shouldSkipDialogForNewSubCard(): boolean {
+  skipDialogForNewChild(): boolean {
     return false;
   }
 }
@@ -129,11 +139,22 @@ export abstract class FirestoreDocAbstract extends DialogableAbstract {
     this.items = data.items.map(item => new ChildModel(item));
   }
 
+  get apiUrl(): string {
+    return `${getBaseUrl()}/${this.collection}/${this.id}`;
+  }
+
   createCard(): CardAbstract {
     return new this.ChildModel();
   }
 
-  onSave() {
+  async onSave() {
     console.log("SAVING FS DOC");
+    await fetch(this.apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(this.toFormData()),
+    });
   }
 }

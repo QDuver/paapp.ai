@@ -1,21 +1,17 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import {
-  CardAbstract,
-  FirestoreDocAbstract,
-  SubCardAbstract,
-} from "../../models/Abstracts";
+import { CardAbstract, FirestoreDocAbstract, SubCardAbstract } from "../../models/Abstracts";
 import { useAppContext } from "../../contexts/AppContext";
 import SubCard from "./SubCard";
 
 interface CustomCardProps {
-  cardList: FirestoreDocAbstract<any>; // Add this
+  cardList: FirestoreDocAbstract;
   item: CardAbstract;
   index: number;
 }
 
 const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
-  const { onUpdate, refreshCounter, showEditDialog } = useAppContext();
+  const { refreshCounter, setRefreshCounter, showEditDialog } = useAppContext();
 
   const renderSubCards = (): React.ReactNode => {
     if (!item.isExpanded) {
@@ -48,12 +44,9 @@ const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
             testID="add-subcard-button"
             style={styles.addSubCardButton}
             onPress={() => {
-              const newSubCard = item.createNewSubCard()!;
-
-              if (item.shouldSkipDialogForNewSubCard()) {
-                item.items!.push(newSubCard);
-                item.isExpanded = true; // Ensure expanded to show the new item
-                onUpdate(cardList);
+              const newSubCard = item.createNewSubCard();
+              if (item.skipDialogForNewChild()) {
+                newSubCard.onSave(cardList, newSubCard.toFormData(), item, true, setRefreshCounter);
               } else {
                 showEditDialog(newSubCard, item, cardList, true);
               }
@@ -91,8 +84,7 @@ const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
                 },
               ]}
               onPress={() => {
-                item.onComplete();
-                onUpdate(cardList);
+                item.onComplete(cardList);
               }}
             >
               <Text
@@ -107,31 +99,23 @@ const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
               </Text>
             </TouchableOpacity>
 
-            <Text style={[styles.title, { color: textColor }]}>
-              {item.name || `Item ${index + 1}`}
-            </Text>
+            <Text style={[styles.title, { color: textColor }]}>{item.name || `Item ${index + 1}`}</Text>
 
-            {(item.items && item.items.length > 0) ||
-            item.createNewSubCard() !== null ? (
+            {(item.items && item.items.length > 0) || item.createNewSubCard() !== null ? (
               <TouchableOpacity
                 testID="expand-button"
                 style={styles.expandButtonRight}
                 onPress={() => {
-                  item.onToggleExpand();
-                  onUpdate(cardList);
+                  item.onToggleExpand(cardList);
                 }}
               >
-                <Text style={[styles.expandText, { color: subtitleColor }]}>
-                  {item.isExpanded ? "▼" : "▶"}
-                </Text>
+                <Text style={[styles.expandText, { color: subtitleColor }]}>{item.isExpanded ? "▼" : "▶"}</Text>
               </TouchableOpacity>
             ) : null}
           </View>
 
           {((item as any).description || (item as any).instructions) && (
-            <Text style={[styles.description, { color: subtitleColor }]}>
-              {(item as any).description || (item as any).instructions}
-            </Text>
+            <Text style={[styles.description, { color: subtitleColor }]}>{(item as any).description || (item as any).instructions}</Text>
           )}
         </View>
       </TouchableOpacity>

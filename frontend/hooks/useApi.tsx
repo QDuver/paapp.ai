@@ -1,25 +1,10 @@
 import { useCallback, useRef, useState } from "react";
-import { Alert, Platform } from "react-native";
 import { getFirebaseAuth } from "../services/Firebase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { FetchOptions, RequestStatusType } from "../models/Shared";
-import { DEV_CONFIG, PROD_CONFIG } from "../config/env";
+import { getBaseUrl } from "../utils/utils";
 
 // Base URL configuration with environment-based settings
-const getBaseUrl = (): string => {
-  if (__DEV__) {
-    // Development mode
-    if (Platform.OS === "web") {
-      return `http://localhost:${DEV_CONFIG.LOCAL_PORT}`;
-    } else {
-      // For mobile devices (both iOS and Android), use the computer's IP
-      return `http://${DEV_CONFIG.LOCAL_IP}:${DEV_CONFIG.LOCAL_PORT}`;
-    }
-  } else {
-    // Production mode
-    return PROD_CONFIG.API_URL;
-  }
-};
 
 function useApi<T = unknown>(skipAuth: boolean = false) {
   const baseApi = getBaseUrl();
@@ -33,9 +18,7 @@ function useApi<T = unknown>(skipAuth: boolean = false) {
     // ]);
   }, []);
 
-  const getAuthHeaders = useCallback(async (): Promise<
-    Record<string, string>
-  > => {
+  const getAuthHeaders = useCallback(async (): Promise<Record<string, string>> => {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
@@ -57,9 +40,7 @@ function useApi<T = unknown>(skipAuth: boolean = false) {
 
   const main = useCallback(
     async (endpoint: string, options: FetchOptions = {}) => {
-      const url = endpoint.startsWith("http")
-        ? endpoint
-        : `${baseApi}/${endpoint}`;
+      const url = endpoint.startsWith("http") ? endpoint : `${baseApi}/${endpoint}`;
 
       if (inFlight.current) return;
       inFlight.current = true;
@@ -103,10 +84,7 @@ function useApi<T = unknown>(skipAuth: boolean = false) {
         console.error("API FETCH ERROR:", url, error);
 
         // Handle specific error cases
-        if (
-          error.message?.includes("Failed to fetch") ||
-          error.message?.includes("Network request failed")
-        ) {
+        if (error.message?.includes("Failed to fetch") || error.message?.includes("Network request failed")) {
           showError("Network Error: Unable to connect to server");
         } else if (error.message?.includes("timeout")) {
           showError("Request timeout - please try again");
@@ -123,10 +101,7 @@ function useApi<T = unknown>(skipAuth: boolean = false) {
   );
 
   // Helper methods for different HTTP verbs
-  const get = useCallback(
-    (endpoint: string) => main(endpoint, { method: "GET" }),
-    [main]
-  );
+  const get = useCallback((endpoint: string) => main(endpoint, { method: "GET" }), [main]);
 
   const post = useCallback(
     (endpoint: string, body?: any) =>
@@ -146,10 +121,7 @@ function useApi<T = unknown>(skipAuth: boolean = false) {
     [main]
   );
 
-  const del = useCallback(
-    (endpoint: string) => main(endpoint, { method: "DELETE" }),
-    [main]
-  );
+  const del = useCallback((endpoint: string) => main(endpoint, { method: "DELETE" }), [main]);
 
   return {
     get,

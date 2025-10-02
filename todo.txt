@@ -1,14 +1,12 @@
 MVP
-- Differentiate dbs based on profile
 - Run automated tests on AI scripts
-- Custom prompts
-- User Settings
+- Design form routines / modes on Android
 
 POST MVP
-- Design form routines / modes on Android
 - Theme
 - Calendar Icon + Swipability
 - Routine type to dropdown
 - Weight input should not accept non-numeric
 - Reordering not stable
 - Hypertrophy vs. Strength (for me only)
+- Feedback as navigation

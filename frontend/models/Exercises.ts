@@ -51,8 +51,14 @@ export class ExerciseSet extends SubCardAbstract {
     ];
   }
 
-  onSave(fsDoc: FirestoreDocAbstract, formData: { [key: string]: any }, parent: Exercise, isNew: boolean): void {
-    super.onSave(fsDoc, formData, parent, isNew);
+  onSave(
+    fsDoc: FirestoreDocAbstract,
+    formData: { [key: string]: any },
+    parent: Exercise,
+    isNew: boolean,
+    setRefreshCounter: React.Dispatch<React.SetStateAction<number>>
+  ): void {
+    super.onSave(fsDoc, formData, parent, isNew, setRefreshCounter);
 
     if (parent) {
       this.editSubsequentSets(parent);
@@ -108,7 +114,7 @@ export class Exercise extends CardAbstract {
     return newSet;
   }
 
-  shouldSkipDialogForNewSubCard(): boolean {
+  skipDialogForNewChild(): boolean {
     return this.items && this.items.length > 0;
   }
 }
