@@ -17,18 +17,18 @@ Routine Assistant mobile app (Expo managed workflow) showing daily routines, exe
 - Entry: `index.js` -> `App.js` -> wraps UI with `AppProvider` (from `contexts/AppContext.tsx`).
 - TypeScript is partially adopted; TS models + hooks coexist with JS entry files.
 - Env config: `config/env.ts` provides `DEV_CONFIG` (LOCAL_IP, LOCAL_PORT) & `PROD_CONFIG`.
-- Firebase initialization in `services/Firebase.ts` (lazy; only call once). Auth tokens + optional `userId` (AsyncStorage) are injected into every API call.
+- Firebase initialization in `services/Firebase.ts` (lazy; only call once). Auth tokens are automatically injected into every API call.
 
 ## 3. Data Flow & State Pattern
 
 ```
-useApi() -> fetch JSON -> AppContext maps plain objects to model classes (Routines, Exercises, Meals) -> components consume class instances.
+apiClient -> fetch JSON -> AppContext maps plain objects to model classes (Routines, Exercises, Meals) -> components consume class instances.
 ```
 
 - Central context value: `{ data, currentDate, isLoading, refreshCounter, onUpdate }`.
-- Changing `currentDate` triggers refetch (`get(quentin-duverge/routines/${currentDate})`).
+- Changing `currentDate` triggers refetch (`apiClient.get(routines/${currentDate})`).
 - `refreshCounter` increments after `onUpdate` to force re-render list keying.
-- Updates: `onUpdate(cardList)` posts the entire cardList object to `quentin-duverge/${collection}/${id}`.
+- Updates: `onUpdate(cardList)` posts the entire cardList object to `${collection}/${id}`.
 
 ## 4. Models & Mutability Conventions
 
@@ -38,13 +38,14 @@ useApi() -> fetch JSON -> AppContext maps plain objects to model classes (Routin
 - Editable fields enumerated via `getEditableFields()`; forms should restrict to these keys.
 - Tag logic lives on model instance (`Routine.getTags()` returns derived labels like `"15 min"`). Reuse rather than recomputing in UI.
 
-## 5. API Layer (`hooks/useApi.tsx`)
+## 5. API Layer (`utils/apiClient.ts`)
 
-- Single hook returning verb helpers: `{ get, post, put, delete, data, status }`.
-- Prevents concurrent duplicate requests via `inFlight` ref (silent ignore if already loading).
-- Auto attaches: `Authorization: Bearer <FirebaseToken>` when user signed in, `X-User-ID` from AsyncStorage.
+- Standalone utility module providing: `{ get, post, put, delete }` methods.
+- Can be used anywhere in the app (React components, models, services) without requiring hooks.
+- Auto attaches: `Authorization: Bearer <FirebaseToken>` when user signed in.
 - Base URL selection logic differs on `__DEV__` + platform (web = localhost; native = LOCAL_IP). Always reuse `getBaseUrl()` pattern when adding new fetch code.
-- Error strategy: sets `status=FAILURE`, logs, suppressed UI alert (placeholder `showError`). If adding UI error handling, prefer enhancing this hook instead of scattering alerts.
+- Error handling: throws errors with detailed messages; consuming code should handle with try/catch.
+- Supports optional `skipAuth` parameter for unauthenticated requests.
 
 ## 6. UI Component Patterns
 
@@ -99,7 +100,7 @@ Before committing new feature code:
 
 - Uses `useAppContext()` for date & loading state.
 - Leverages model methods instead of duplicating logic.
-- API calls centralized through `useApi` (do not call fetch directly).
+- API calls centralized through `apiClient` (do not call fetch directly).
 - Respects environment URL selection.
 
 ---

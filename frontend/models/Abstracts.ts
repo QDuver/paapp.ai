@@ -1,4 +1,5 @@
 import { FormDataUtils, getBaseUrl } from "../utils/utils";
+import { apiClient } from "../utils/apiClient";
 
 export interface IUnique {
   name: string;
@@ -148,13 +149,6 @@ export abstract class FirestoreDocAbstract extends DialogableAbstract {
   }
 
   async onSave() {
-    console.log("SAVING FS DOC");
-    await fetch(this.apiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(this.toFormData()),
-    });
+    await apiClient.post(this.apiUrl, this);
   }
 }

@@ -1,13 +1,11 @@
 import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import useApi from "../hooks/useApi";
 import { Exercises } from "../models/Exercises";
-// import { Meals } from "../models/Meals";
 import { DialogableAbstract, CardAbstract, FirestoreDocAbstract, IUnique } from "../models/Abstracts";
 import { Meals } from "../models/Meals";
 import { Routines } from "../models/Routines";
-import { RequestStatusType } from "../models/Shared";
 import { ISettings } from "../models/Settings";
 import { getCurrentDate } from "../utils/utils";
+import { apiClient } from "../utils/apiClient";
 
 interface DataType {
   routines: Routines;
@@ -51,18 +49,6 @@ interface AppProviderProps {
 }
 
 export const AppProvider = ({ children, skipAuth = false }: AppProviderProps) => {
-  const {
-    get,
-    data: apiData,
-    status,
-  } = useApi<{
-    routines: Routines;
-    exercises: Exercises;
-    meals: Meals;
-    uniqueExercises: IUnique[];
-  }>(skipAuth);
-  const { post } = useApi(skipAuth);
-  const { get: getSettings, post: postSettings } = useApi<ISettings>(skipAuth);
   const [data, setData] = useState<DataType>();
   const [settings, setSettings] = useState<ISettings | null>(null);
   const [currentDate, setCurrentDate] = useState<string>(getCurrentDate());
@@ -77,42 +63,65 @@ export const AppProvider = ({ children, skipAuth = false }: AppProviderProps) =>
   });
 
   useEffect(() => {
-    getSettings("settings/settings").then(response => {
+    const fetchSettings = async () => {
+      const response = await apiClient.get<ISettings>("settings/settings", { skipAuth });
       if (response) {
         setSettings(response);
       }
-    });
-  }, []);
+    };
+    fetchSettings();
+  }, [skipAuth]);
 
   useEffect(() => {
-    get(`routines/${currentDate}`);
-  }, [currentDate]);
+    const fetchRoutines = async () => {
+      setIsLoading(true);
+      const response = await apiClient.get<{
+        routines: Routines;
+        exercises: Exercises;
+        meals: Meals;
+        uniqueExercises: IUnique[];
+      }>(`routines/${currentDate}`, { skipAuth });
 
-  useEffect(() => {
-    if (!apiData) return;
-
-    setData({
-      routines: new Routines(apiData.routines),
-      exercises: new Exercises(apiData.exercises),
-      meals: new Meals(apiData.meals),
-      uniqueExercises: apiData.uniqueExercises || [],
-    });
-  }, [apiData]);
-
-  useEffect(() => {
-    setIsLoading(status === RequestStatusType.LOADING);
-  }, [status]);
+      if (response) {
+        setData({
+          routines: new Routines(response.routines),
+          exercises: new Exercises(response.exercises),
+          meals: new Meals(response.meals),
+          uniqueExercises: response.uniqueExercises || [],
+        });
+      }
+      setIsLoading(false);
+    };
+    fetchRoutines();
+  }, [currentDate, skipAuth]);
 
   const onBuildItems = async (cardList: FirestoreDocAbstract, formData: { [key: string]: any }) => {
     setIsLoading(true);
-    await post(`build-items/${cardList.collection}/${cardList.id}`, formData);
-    await get(`routines/${currentDate}`);
+    await apiClient.post(`build-items/${cardList.collection}/${cardList.id}`, formData, { skipAuth });
+
+    const response = await apiClient.get<{
+      routines: Routines;
+      exercises: Exercises;
+      meals: Meals;
+      uniqueExercises: IUnique[];
+    }>(`routines/${currentDate}`, { skipAuth });
+
+    if (response) {
+      setData({
+        routines: new Routines(response.routines),
+        exercises: new Exercises(response.exercises),
+        meals: new Meals(response.meals),
+        uniqueExercises: response.uniqueExercises || [],
+      });
+    }
     setIsLoading(false);
   };
 
   const updateSettings = async (newSettings: ISettings) => {
-    await postSettings("settings/settings", newSettings);
-    setSettings(newSettings);
+    const success = await apiClient.post("settings/settings", newSettings, { skipAuth });
+    if (success) {
+      setSettings(newSettings);
+    }
   };
 
   const showEditDialog = (
