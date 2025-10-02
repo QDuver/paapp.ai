@@ -1,12 +1,5 @@
-import {
-  CardAbstract,
-  CardListAbstract,
-  IEntity,
-  IFirestoreDoc,
-  SubCardAbstract,
-  IFieldMetadata,
-  FieldConverters,
-} from "./Abstracts";
+import { fieldConverter } from "../utils/utils";
+import { CardAbstract, CardListAbstract, IEntity, IFirestoreDoc, SubCardAbstract, IFieldMetadata } from "./Abstracts";
 
 export interface IIngredient {
   name: string;
@@ -52,9 +45,30 @@ export class Ingredient extends SubCardAbstract implements IIngredient {
 
   getEditableFields(): IFieldMetadata[] {
     return [
-      { field: "name", label: "Ingredient Name", type: "string", keyboardType: "default", converter: FieldConverters.string, placeholder: "e.g., Chicken breast, Rice, Broccoli" },
-      { field: "quantity", label: "Quantity", type: "number", keyboardType: "number-pad", converter: FieldConverters.number, placeholder: "0" },
-      { field: "calories", label: "Calories", type: "number", keyboardType: "number-pad", converter: FieldConverters.number, placeholder: "0" },
+      {
+        field: "name",
+        label: "Ingredient Name",
+        type: "string",
+        keyboardType: "default",
+        converter: fieldConverter.string,
+        placeholder: "e.g., Chicken breast, Rice, Broccoli",
+      },
+      {
+        field: "quantity",
+        label: "Quantity",
+        type: "number",
+        keyboardType: "number-pad",
+        converter: fieldConverter.number,
+        placeholder: "0",
+      },
+      {
+        field: "calories",
+        label: "Calories",
+        type: "number",
+        keyboardType: "number-pad",
+        converter: fieldConverter.number,
+        placeholder: "0",
+      },
     ];
   }
 
@@ -78,15 +92,37 @@ export class Meal extends CardAbstract implements IMeal {
   static fromJson(data: IMeal): Meal {
     const meal = new Meal();
     Object.assign(meal, data);
-    meal.items = (data.items || []).map((item) => Ingredient.fromJson(item));
+    meal.items = (data.items || []).map(item => Ingredient.fromJson(item));
     return meal;
   }
 
   getEditableFields(): IFieldMetadata[] {
     return [
-      { field: "name", label: "Meal Name", type: "string", keyboardType: "default", converter: FieldConverters.string, placeholder: "e.g., Breakfast, Lunch, Dinner" },
-      { field: "instructions", label: "Instructions", type: "string", keyboardType: "default", multiline: true, converter: FieldConverters.string, placeholder: "Describe how to prepare this meal..." },
-      { field: "calories", label: "Calories", type: "number", keyboardType: "number-pad", converter: FieldConverters.number, placeholder: "0" },
+      {
+        field: "name",
+        label: "Meal Name",
+        type: "string",
+        keyboardType: "default",
+        converter: fieldConverter.string,
+        placeholder: "e.g., Breakfast, Lunch, Dinner",
+      },
+      {
+        field: "instructions",
+        label: "Instructions",
+        type: "string",
+        keyboardType: "default",
+        multiline: true,
+        converter: fieldConverter.string,
+        placeholder: "Describe how to prepare this meal...",
+      },
+      {
+        field: "calories",
+        label: "Calories",
+        type: "number",
+        keyboardType: "number-pad",
+        converter: fieldConverter.number,
+        placeholder: "0",
+      },
     ];
   }
 
@@ -110,7 +146,20 @@ export class Meals extends CardListAbstract<Meal> implements IMeals {
 
   constructor(data: IMeals) {
     super(data, Meal);
-    this.items = (data.items || []).map((item) => Meal.fromJson(item));
+    this.items = (data.items || []).map(item => Meal.fromJson(item));
+  }
+
+  getEditableFields(): IFieldMetadata[] {
+    return [
+      {
+        field: "notes",
+        label: "Notes (Optional)",
+        type: "string",
+        keyboardType: "default",
+        converter: fieldConverter.string,
+        multiline: true,
+        placeholder: "e.g., Ingredients left in the fridge, budget, any other notes...",
+      },
+    ];
   }
 }
-    

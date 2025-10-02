@@ -10,6 +10,7 @@ from models import meals, exercises
 from models.routines import Routine, Routines
 from models.exercises import Exercises
 from models.meals import Meals
+from models.settings import Settings
 from models.users import User
 import time
 
@@ -19,6 +20,7 @@ COLLECTION_CLASS_MAPPING = {
     'exercises': Exercises,
     'meals': Meals,
     'routines': Routines,
+    'settings': Settings,
 }
 
 
@@ -61,14 +63,11 @@ def get_routine(day: str, user: User = Depends(User.from_firebase_token)):
 
 @app.get("/{collection}/{document}")
 def get_document(collection: str, document: str, user: User = Depends(User.from_firebase_token)):
-    return CONFIG.USER_FS.collection(collection).document(document).get().to_dict() 
+    model_class = get_model_class(collection)
+    instance = model_class(id=document)
+    return instance.query()
 
 @app.post("/{collection}/{document}")
-def overwrite(collection: str, document: str, request: dict, user: User = Depends(User.from_firebase_token)):
-    CONFIG.USER_FS.collection(collection).document(document).set(request)
-    return {"status": "success"}
-
-@app.post("format/{collection}/{document}")
 def overwrite_with_format(collection: str, document: str, request: dict, user: User = Depends(User.from_firebase_token)):
     model_class = get_model_class(collection)
     validated_data = model_class(**request)
@@ -77,8 +76,8 @@ def overwrite_with_format(collection: str, document: str, request: dict, user: U
 
 
 @app.post("/build-items/{collection}/{id}")
-def build_items(collection: str, id: str, request: dict, user: User = Depends(User.from_firebase_token)):
+def build_with_ai(collection: str, id: str, request: dict, user: User = Depends(User.from_firebase_token)):
     model_class = get_model_class(collection)
     instance = model_class(id=id)
-    instance = instance.build_items(**request)
+    instance = instance.build_with_ai(**request)
     return instance.model_dump()

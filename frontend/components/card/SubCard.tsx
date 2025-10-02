@@ -1,10 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import {
-  CardAbstract,
-  SubCardAbstract,
-  CardListAbstract,
-} from "../../models/Abstracts";
+import { CardAbstract, SubCardAbstract, CardListAbstract } from "../../models/Abstracts";
 import { useAppContext } from "../../contexts/AppContext";
 
 // Type definitions for the component props
@@ -16,7 +12,7 @@ interface SubCardProps {
 }
 
 const SubCard = ({ subItem, parentItem, cardList, index }: SubCardProps) => {
-  const { onUpdate, refreshCounter, showEditDialog } = useAppContext();
+  const { showEditDialog } = useAppContext();
 
   const backgroundColor: string = "#2C2C2E";
   const textColor: string = "#FFFFFF";
@@ -31,19 +27,14 @@ const SubCard = ({ subItem, parentItem, cardList, index }: SubCardProps) => {
         activeOpacity={0.7}
       >
         <View style={styles.subCardHeader}>
-          <Text style={[styles.subCardTitle, { color: textColor }]}>
-            {subItem.name || `Set ${index + 1}`}
-          </Text>
+          <Text style={[styles.subCardTitle, { color: textColor }]}>{subItem.name || `Set ${index + 1}`}</Text>
         </View>
 
         {/* Sub-card specific info */}
         {subItem.getTags().length > 0 && (
           <View style={styles.subCardInfoRow}>
             {subItem.getTags().map((tag, tagIndex) => (
-              <Text
-                key={tagIndex}
-                style={[styles.subCardInfo, { color: subtitleColor }]}
-              >
+              <Text key={tagIndex} style={[styles.subCardInfo, { color: subtitleColor }]}>
                 {tag}
               </Text>
             ))}

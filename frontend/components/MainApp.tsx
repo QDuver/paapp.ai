@@ -16,13 +16,14 @@ import {
   BottomNavigation,
   Menu,
 } from "react-native-paper";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import CardList from "./card/CardList";
 import UserAvatar from "./auth/UserAvatar";
 import EditDialog from "./card/EditDialog";
-import SettingsScreen from "./SettingsScreen";
 import { useAppContext } from "../contexts/AppContext";
 import { getFirebaseAuth } from "../services/Firebase";
 import { signOut } from "firebase/auth";
+import Settings from "./Settings";
 
 interface MainAppProps {
   user: any;
@@ -34,6 +35,28 @@ const MainApp = ({ user }: MainAppProps) => {
   const [navigationIndex, setNavigationIndex] = useState(1);
   const [menuVisible, setMenuVisible] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+
+  // Load persisted view state on mount
+  useEffect(() => {
+    const loadViewState = async () => {
+      const savedView = await AsyncStorage.getItem("@current_view");
+      if (savedView === "settings") {
+        setShowSettings(true);
+      }
+    };
+    loadViewState();
+  }, []);
+
+  // Persist view state when it changes
+  useEffect(() => {
+    const saveViewState = async () => {
+      await AsyncStorage.setItem(
+        "@current_view",
+        showSettings ? "settings" : "main"
+      );
+    };
+    saveViewState();
+  }, [showSettings]);
 
   const handleSignOut = async () => {
     try {
@@ -115,16 +138,18 @@ const MainApp = ({ user }: MainAppProps) => {
 
         {!isLoading && (
           <>
-            <FAB
-              style={styles.aiFab}
-              icon="auto-fix"
-              onPress={() => {
-                if (cardList) {
-                  showEditDialog(cardList, cardList, cardList, true);
-                }
-              }}
-              testID="ai-fab"
-            />
+            {route.key !== "routines" && (
+              <FAB
+                style={styles.aiFab}
+                icon="auto-fix"
+                onPress={() => {
+                  if (cardList) {
+                    showEditDialog(cardList, cardList, cardList, true);
+                  }
+                }}
+                testID="ai-fab"
+              />
+            )}
 
             <FAB
               style={styles.fab}
@@ -142,7 +167,7 @@ const MainApp = ({ user }: MainAppProps) => {
     return (
       <PaperProvider>
         <SafeAreaView style={[styles.container, { backgroundColor: "#000" }]}>
-          <SettingsScreen onBack={() => setShowSettings(false)} />
+          <Settings onBack={() => setShowSettings(false)} />
           <StatusBar style="light" />
         </SafeAreaView>
       </PaperProvider>

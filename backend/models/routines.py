@@ -10,15 +10,6 @@ from models.abstracts import Entity, FirestoreDoc
 
 
 today = datetime.datetime.now().strftime("%Y-%m-%d")
-ROUTINE_TEMPLATE = [
-    {"name": "1/2L of water"},
-    {"name": 'Journaling / Coding', "durationMin": 60},
-    {"name": 'Exercises', "routineType": 'exercises'},
-    {"name": 'Meal', "routineType": 'meals'},
-    {"name": 'Running', "durationMin": 45},
-    {"name": 'Meal', "routineType": 'meals'},
-]
-
 
 class Routine(Entity):
     name: str
@@ -29,9 +20,13 @@ class Routine(Entity):
 
 
 class Routines(FirestoreDoc):
+    collection: str = 'routines'
     wakeupTime: Optional[str] = datetime.datetime.now().strftime("%H:%M")
-    items: List[Routine] = []
-
-    def build_items(self):
-        self.items = [Routine(**item) for item in ROUTINE_TEMPLATE]
-        self.save()
+    items: List[Routine] = [
+    Routine(name="1/2L of water"),
+    Routine(name='Journaling / Coding', durationMin=60),
+    Routine(name='Exercises', routineType='exercises'),
+    Routine(name='Meal', routineType='meals'),
+    Routine(name='Running', durationMin=45),
+    Routine(name='Meal', routineType='meals'),
+]

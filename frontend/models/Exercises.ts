@@ -1,12 +1,5 @@
-import {
-  CardAbstract,
-  CardListAbstract,
-  IEntity,
-  IFirestoreDoc,
-  SubCardAbstract,
-  IFieldMetadata,
-  FieldConverters,
-} from "./Abstracts";
+import { fieldConverter } from "../utils/utils";
+import { CardAbstract, CardListAbstract, IEntity, FirestoreDoc, SubCardAbstract, IFieldMetadata } from "./Abstracts";
 
 export interface IExerciseUnique {
   name: string;
@@ -27,7 +20,7 @@ export interface IExercise extends IEntity {
   items: IExerciseSet[];
 }
 
-export interface IExercises extends IFirestoreDoc {
+export interface IExercises extends FirestoreDoc {
   notes?: string;
   items: Exercise[];
 }
@@ -63,7 +56,7 @@ export class ExerciseSet extends SubCardAbstract implements IExerciseSet {
         label: "Weight (kg)",
         type: "number",
         keyboardType: "number-pad",
-        converter: FieldConverters.number,
+        converter: fieldConverter.number,
         placeholder: "0",
       },
       {
@@ -71,7 +64,7 @@ export class ExerciseSet extends SubCardAbstract implements IExerciseSet {
         label: "Repetitions",
         type: "number",
         keyboardType: "number-pad",
-        converter: FieldConverters.number,
+        converter: fieldConverter.number,
         placeholder: "0",
       },
       {
@@ -79,7 +72,7 @@ export class ExerciseSet extends SubCardAbstract implements IExerciseSet {
         label: "Duration (s)",
         type: "number",
         keyboardType: "number-pad",
-        converter: FieldConverters.number,
+        converter: fieldConverter.number,
         placeholder: "0",
       },
       {
@@ -87,7 +80,7 @@ export class ExerciseSet extends SubCardAbstract implements IExerciseSet {
         label: "Rest (s)",
         type: "number",
         keyboardType: "number-pad",
-        converter: FieldConverters.number,
+        converter: fieldConverter.number,
         placeholder: "0",
       },
     ];
@@ -117,10 +110,7 @@ export class ExerciseSet extends SubCardAbstract implements IExerciseSet {
   }
 }
 
-export class Exercise
-  extends CardAbstract<IExerciseUnique>
-  implements IExercise
-{
+export class Exercise extends CardAbstract<IExerciseUnique> implements IExercise {
   items: ExerciseSet[] = [];
 
   constructor() {
@@ -141,7 +131,7 @@ export class Exercise
         label: "Exercise Name",
         type: "string",
         keyboardType: "default",
-        converter: FieldConverters.string,
+        converter: fieldConverter.string,
         suggestions: [],
         placeholder: "e.g., Push-ups, Squats, Deadlifts",
       },
@@ -176,10 +166,7 @@ export class Exercise
   }
 }
 
-export class Exercises
-  extends CardListAbstract<Exercise>
-  implements IExercises
-{
+export class Exercises extends CardListAbstract<Exercise> {
   items: Exercise[] = [];
   notes?: string;
 
@@ -195,7 +182,7 @@ export class Exercises
         label: "Notes (Optional)",
         type: "string",
         keyboardType: "default",
-        converter: FieldConverters.string,
+        converter: fieldConverter.string,
         multiline: true,
         placeholder: "Add any additional notes about this workout session...",
       },

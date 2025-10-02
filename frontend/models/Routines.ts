@@ -1,11 +1,5 @@
-import {
-  CardAbstract,
-  CardListAbstract,
-  IEntity,
-  IFirestoreDoc,
-  IFieldMetadata,
-  FieldConverters,
-} from "./Abstracts";
+import { fieldConverter } from "../utils/utils";
+import { CardAbstract, CardListAbstract, IEntity, IFirestoreDoc, IFieldMetadata } from "./Abstracts";
 
 export type RoutineType = "other" | "exercises" | "meals";
 
@@ -39,9 +33,30 @@ export class Routine extends CardAbstract implements IRoutine {
 
   getEditableFields(): IFieldMetadata[] {
     return [
-      { field: "name", label: "Name", type: "string", keyboardType: "default", converter: FieldConverters.string, placeholder: "Enter routine name" },
-      { field: "durationMin", label: "Duration (min)", type: "number", keyboardType: "number-pad", converter: FieldConverters.number, placeholder: "0" },
-      { field: "routineType", label: "Routine Type", type: "string", keyboardType: "default", converter: FieldConverters.string, placeholder: "e.g., Morning, Evening, Work" },
+      {
+        field: "name",
+        label: "Name",
+        type: "string",
+        keyboardType: "default",
+        converter: fieldConverter.string,
+        placeholder: "Enter routine name",
+      },
+      {
+        field: "durationMin",
+        label: "Duration (min)",
+        type: "number",
+        keyboardType: "number-pad",
+        converter: fieldConverter.number,
+        placeholder: "0",
+      },
+      {
+        field: "routineType",
+        label: "Routine Type",
+        type: "string",
+        keyboardType: "default",
+        converter: fieldConverter.string,
+        placeholder: "e.g., Morning, Evening, Work",
+      },
     ];
   }
 
@@ -59,6 +74,10 @@ export class Routines extends CardListAbstract<Routine> implements IRoutines {
 
   constructor(data: IRoutines) {
     super(data, Routine);
-    this.items = (data.items || []).map((item) => Routine.fromJson(item));
+    this.items = (data.items || []).map(item => Routine.fromJson(item));
+  }
+
+  getEditableFields(): IFieldMetadata[] {
+    return [];
   }
 }

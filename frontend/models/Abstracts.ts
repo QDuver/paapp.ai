@@ -1,13 +1,17 @@
 import useApi from "../hooks/useApi";
 import { FormDataUtils } from "../utils/utils";
 
+// Exercises / FirestoreDoc / DialogableAbstract
+// Exercise / CardAbstract / DialogableAbstract
+// ExerciseSet / SubCardAbstract / DialogableAbstract
+
 export interface IEntity {
   name: string;
   items?: any[];
   isCompleted: boolean;
 }
 
-export interface IFirestoreDoc {
+export abstract class FirestoreDoc {
   id: string;
   collection: string;
   items: any[];
@@ -17,34 +21,15 @@ export interface IFieldMetadata<T = string> {
   field: string;
   label: string;
   type: "string" | "number" | "boolean";
-  keyboardType?:
-    | "default"
-    | "number-pad"
-    | "numeric"
-    | "email-address"
-    | "phone-pad";
+  keyboardType?: "default" | "number-pad" | "numeric" | "email-address" | "phone-pad";
   multiline?: boolean;
   placeholder?: string;
   converter?: (value: string) => any;
   suggestions?: T[];
 }
 
-// Standard field converters
-export const FieldConverters = {
-  string: (value: string) => value,
-  number: (value: string) => {
-    const numValue = Number(value);
-    return isNaN(numValue) ? 0 : numValue;
-  },
-  boolean: (value: string) => value === "true",
-};
-
-export abstract class BaseEditableEntity<T = string> {
-  constructor() {
-    // Default constructor - subclasses set their own defaults
-  }
-
-  static fromJson(data: any): BaseEditableEntity<any> {
+export abstract class DialogableAbstract<T = string> {
+  static fromJson(data: any): DialogableAbstract<any> {
     const instance = new (this as any)();
     Object.assign(instance, data);
     return instance;
@@ -65,9 +50,7 @@ export abstract class BaseEditableEntity<T = string> {
   }
 
   onDialogSave(formData: { [key: string]: any }, parent: any): void {
-    const data = FormDataUtils.fromFormData(formData, () =>
-      this.getEditableFields()
-    );
+    const data = FormDataUtils.fromFormData(formData, () => this.getEditableFields());
     const editableFields = this.getEditableFields();
     editableFields.forEach(fieldMetadata => {
       const fieldName = fieldMetadata.field;
@@ -77,10 +60,9 @@ export abstract class BaseEditableEntity<T = string> {
       }
     });
 
-    if (parent) { //new Items
-      (parent as any).items.push(this);
+    if (parent) {
+      parent.items.push(this);
     }
-
   }
 
   delete(parent: CardListAbstract<any> | CardAbstract): boolean {
@@ -94,27 +76,13 @@ export abstract class BaseEditableEntity<T = string> {
 
     return false;
   }
-
-  handleSuggestionSelect(suggestion: any): void {
-    return null;
-  }
 }
 
-export abstract class SubCardAbstract<
-  T = string,
-> extends BaseEditableEntity<T> {
+export abstract class SubCardAbstract<T = string> extends DialogableAbstract<T> {
   abstract get name(): string;
-
-  constructor() {
-    super();
-  }
-
-  getEditableFields(): IFieldMetadata<T>[] {
-    return [];
-  }
 }
 
-export abstract class CardAbstract<T = string> extends BaseEditableEntity<T> {
+export abstract class CardAbstract<T = string> extends DialogableAbstract<T> {
   name: string = "";
   isCompleted: boolean = false;
   isExpanded: boolean = true;
@@ -138,10 +106,7 @@ export abstract class CardAbstract<T = string> extends BaseEditableEntity<T> {
   }
 
   onToggleExpand() {
-    if (
-      (this.items && this.items.length > 0) ||
-      this.createNewSubCard() !== null
-    ) {
+    if ((this.items && this.items.length > 0) || this.createNewSubCard() !== null) {
       this.isExpanded = !this.isExpanded;
     }
   }
@@ -155,9 +120,7 @@ export abstract class CardAbstract<T = string> extends BaseEditableEntity<T> {
   }
 }
 
-export abstract class CardListAbstract<
-  T extends CardAbstract<any>,
-> extends BaseEditableEntity {
+export abstract class CardListAbstract<T extends CardAbstract<any>> extends DialogableAbstract {
   items: T[] = [];
   collection: string;
   id: string;
