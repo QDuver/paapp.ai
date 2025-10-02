@@ -2,14 +2,14 @@ import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import {
   CardAbstract,
-  CardListAbstract,
+  FirestoreDocAbstract,
   SubCardAbstract,
 } from "../../models/Abstracts";
 import { useAppContext } from "../../contexts/AppContext";
 import SubCard from "./SubCard";
 
 interface CustomCardProps {
-  cardList: CardListAbstract<any>; // Add this
+  cardList: FirestoreDocAbstract<any>; // Add this
   item: CardAbstract;
   index: number;
 }

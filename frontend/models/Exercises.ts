@@ -1,41 +1,12 @@
 import { fieldConverter } from "../utils/utils";
-import { CardAbstract, CardListAbstract, IEntity, FirestoreDoc, SubCardAbstract, IFieldMetadata } from "./Abstracts";
-
-export interface IExerciseUnique {
-  name: string;
-  items: IExerciseSet[];
-}
-
-export interface IExerciseSet {
-  name: string;
-  weightKg?: number;
-  repetitions?: number;
-  duration?: number;
-  rest?: number;
-}
-
-export interface IExercise extends IEntity {
-  name: string;
-  isCompleted: boolean;
-  items: IExerciseSet[];
-}
-
-export interface IExercises extends FirestoreDoc {
-  notes?: string;
-  items: Exercise[];
-}
-
-export class ExerciseSet extends SubCardAbstract implements IExerciseSet {
+import { CardAbstract, FirestoreDocAbstract, IFieldMetadata, IUnique, SubCardAbstract } from "./Abstracts";
+export class ExerciseSet extends SubCardAbstract {
   weightKg?: number;
   repetitions?: number;
   duration?: number;
   rest?: number;
 
-  constructor() {
-    super();
-  }
-
-  static fromJson(data: IExerciseSet): ExerciseSet {
+  static fromJson(data): ExerciseSet {
     const exerciseSet = new ExerciseSet();
     Object.assign(exerciseSet, data);
     return exerciseSet;
@@ -86,8 +57,8 @@ export class ExerciseSet extends SubCardAbstract implements IExerciseSet {
     ];
   }
 
-  onDialogSave(rawData: { [key: string]: any }, parent: any): void {
-    super.onDialogSave(rawData, parent);
+  onSave(rawData: { [key: string]: any }, parent: any, isNew: boolean): void {
+    super.onSave(rawData, parent, isNew);
 
     if (parent) {
       this.editSubsequentSets(parent);
@@ -110,21 +81,21 @@ export class ExerciseSet extends SubCardAbstract implements IExerciseSet {
   }
 }
 
-export class Exercise extends CardAbstract<IExerciseUnique> implements IExercise {
+export class Exercise extends CardAbstract<ExerciseSet> {
   items: ExerciseSet[] = [];
 
   constructor() {
     super();
   }
 
-  static fromJson(data: IExercise): Exercise {
+  static fromJson(data): Exercise {
     const exercise = new Exercise();
     Object.assign(exercise, data);
     exercise.items = data.items.map(item => ExerciseSet.fromJson(item));
     return exercise;
   }
 
-  getEditableFields(): IFieldMetadata<IExerciseUnique>[] {
+  getEditableFields(): IFieldMetadata<ExerciseSet>[] {
     return [
       {
         field: "name",
@@ -155,24 +126,13 @@ export class Exercise extends CardAbstract<IExerciseUnique> implements IExercise
   shouldSkipDialogForNewSubCard(): boolean {
     return this.items && this.items.length > 0;
   }
-
-  handleSuggestionSelect(suggestion: IExerciseUnique): void {
-    this.name = suggestion.name;
-    this.items = suggestion.items.map((setData: IExerciseSet) => {
-      const exerciseSet = this.createNewSubCard();
-      Object.assign(exerciseSet, setData);
-      return exerciseSet;
-    });
-  }
 }
 
-export class Exercises extends CardListAbstract<Exercise> {
-  items: Exercise[] = [];
+export class Exercises extends FirestoreDocAbstract<Exercise> {
   notes?: string;
 
-  constructor(data: IExercises) {
+  constructor(data) {
     super(data, Exercise);
-    this.items = data.items.map(item => Exercise.fromJson(item));
   }
 
   getEditableFields(): IFieldMetadata[] {

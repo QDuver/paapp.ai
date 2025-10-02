@@ -1,30 +1,15 @@
 import React, { useEffect, useState } from "react";
-import {
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Switch } from "react-native-paper";
 import { useAppContext } from "../../contexts/AppContext";
-import {
-  CardAbstract,
-  CardListAbstract,
-  IFieldMetadata,
-} from "../../models/Abstracts";
+import { CardAbstract, FirestoreDocAbstract, IFieldMetadata } from "../../models/Abstracts";
 import AutocompleteInput from "./AutocompleteInput";
 
 const EditDialog = () => {
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
   const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
 
-  const { onUpdate, onBuildItems, dialogSettings, hideEditDialog } =
-    useAppContext();
+  const { onUpdate, onBuildItems, dialogSettings, hideEditDialog } = useAppContext();
   const { visible, item, parent, cardList, isNew } = dialogSettings;
 
   useEffect(() => {
@@ -43,9 +28,7 @@ const EditDialog = () => {
 
   const handleDelete = () => {
     if (Platform.OS === "web") {
-      const confirmed = window.confirm(
-        "Are you sure you want to delete this item?"
-      );
+      const confirmed = window.confirm("Are you sure you want to delete this item?");
       if (!confirmed) return;
     }
 
@@ -59,18 +42,10 @@ const EditDialog = () => {
   const renderField = (fieldMetadata: IFieldMetadata) => {
     if (!cardList) return null;
 
-    const {
-      field: fieldName,
-      label: fieldLabel,
-      type: fieldType,
-      keyboardType,
-      multiline,
-      suggestions,
-    } = fieldMetadata;
+    const { field: fieldName, label: fieldLabel, type: fieldType, keyboardType, multiline, suggestions } = fieldMetadata;
 
     const value = formData[fieldName];
-    const displayValue =
-      value === null || value === undefined ? "" : value.toString();
+    const displayValue = value === null || value === undefined ? "" : value.toString();
     const hasError = !!errors[fieldName];
     const isMultiline = multiline || false;
     const hasSuggestions = suggestions && suggestions.length > 0;
@@ -80,9 +55,7 @@ const EditDialog = () => {
       return (
         <View key={fieldName} style={styles.fieldContainer}>
           <View style={styles.toggleContainer}>
-            <Text style={[styles.fieldLabel, { color: "#FFFFFF", flex: 1 }]}>
-              {fieldLabel}
-            </Text>
+            <Text style={[styles.fieldLabel, { color: "#FFFFFF", flex: 1 }]}>{fieldLabel}</Text>
             <Switch
               value={!!value}
               onValueChange={newValue => handleInputChange(fieldName, newValue)}
@@ -90,24 +63,17 @@ const EditDialog = () => {
               trackColor={{ false: "#3A3A3C", true: "#007AFF" }}
             />
           </View>
-          {hasError && (
-            <Text style={styles.errorText}>{errors[fieldName]}</Text>
-          )}
+          {hasError && <Text style={styles.errorText}>{errors[fieldName]}</Text>}
         </View>
       );
     }
 
     const shouldUseAutocomplete =
-      (hasSuggestions && !isMultiline) ||
-      (fieldName === "name" &&
-        cardList?.collection === "exercises" &&
-        !isMultiline);
+      (hasSuggestions && !isMultiline) || (fieldName === "name" && cardList?.collection === "exercises" && !isMultiline);
 
     return (
       <View key={fieldName} testID="form-field" style={styles.fieldContainer}>
-        <Text style={[styles.fieldLabel, { color: "#FFFFFF" }]}>
-          {fieldLabel}
-        </Text>
+        <Text style={[styles.fieldLabel, { color: "#FFFFFF" }]}>{fieldLabel}</Text>
 
         {shouldUseAutocomplete ? (
           <AutocompleteInput
@@ -125,8 +91,8 @@ const EditDialog = () => {
             backgroundColor="#2C2C2E"
             color="#FFFFFF"
             onSuggestionSelect={suggestion => {
-              item.handleSuggestionSelect(suggestion);
-              item.onDialogSave({ name: suggestion.name }, parent);
+              (item as CardAbstract).handleSuggestionSelect(suggestion);
+              item.onSave({ name: suggestion.name }, parent, isNew);
               onUpdate(cardList);
               hideEditDialog();
             }}
@@ -170,36 +136,20 @@ const EditDialog = () => {
   const overlayColor = "rgba(0,0,0,0.7)";
 
   return (
-    <Modal
-      visible={visible}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={hideEditDialog}
-      testID="edit-dialog"
-    >
+    <Modal visible={visible} transparent={true} animationType="slide" onRequestClose={hideEditDialog} testID="edit-dialog">
       <KeyboardAvoidingView
         style={[styles.overlay, { backgroundColor: overlayColor }]}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <View
-          style={[
-            styles.modalContainer,
-            { backgroundColor: modalBackgroundColor },
-          ]}
-        >
+        <View style={[styles.modalContainer, { backgroundColor: modalBackgroundColor }]}>
           <View style={styles.header}>
             <Text style={[styles.title, { color: "#FFFFFF" }]}>Edit Item</Text>
           </View>
 
-          <ScrollView
-            style={styles.formContainer}
-            showsVerticalScrollIndicator={false}
-          >
+          <ScrollView style={styles.formContainer} showsVerticalScrollIndicator={false}>
             {(() => {
               const editableFields = item.getEditableFields();
-              const filteredFields = editableFields.filter(
-                fieldMetadata => isNew || formData[fieldMetadata.field] != null
-              );
+              const filteredFields = editableFields.filter(fieldMetadata => isNew || formData[fieldMetadata.field] != null);
               return filteredFields.map(renderField);
             })()}
           </ScrollView>
@@ -207,11 +157,7 @@ const EditDialog = () => {
           <View style={styles.actionContainer}>
             <View style={styles.actionRow}>
               {!isNew && (
-                <TouchableOpacity
-                  testID="delete-button"
-                  style={[styles.deleteButton]}
-                  onPress={handleDelete}
-                >
+                <TouchableOpacity testID="delete-button" style={[styles.deleteButton]} onPress={handleDelete}>
                   <Text style={styles.deleteButtonText}>Delete</Text>
                 </TouchableOpacity>
               )}
@@ -227,17 +173,15 @@ const EditDialog = () => {
                   ]}
                   onPress={hideEditDialog}
                 >
-                  <Text style={[styles.cancelButtonText, { color: "#FFFFFF" }]}>
-                    Cancel
-                  </Text>
+                  <Text style={[styles.cancelButtonText, { color: "#FFFFFF" }]}>Cancel</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   testID="save-button"
                   style={styles.saveButton}
                   onPress={() => {
-                    if (!(item instanceof CardListAbstract)) {
-                      item.onDialogSave(formData, parent);
+                    if (!(item instanceof FirestoreDocAbstract)) {
+                      item.onSave(formData, parent, isNew);
                       console.log("cardList", cardList);
                       onUpdate(cardList);
                     } else {

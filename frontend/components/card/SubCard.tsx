@@ -1,13 +1,13 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { CardAbstract, SubCardAbstract, CardListAbstract } from "../../models/Abstracts";
+import { CardAbstract, SubCardAbstract, FirestoreDocAbstract } from "../../models/Abstracts";
 import { useAppContext } from "../../contexts/AppContext";
 
 // Type definitions for the component props
 interface SubCardProps {
   subItem: SubCardAbstract;
   parentItem: CardAbstract;
-  cardList: CardListAbstract<any>;
+  cardList: FirestoreDocAbstract<any>;
   index: number;
 }
 

@@ -1,11 +1,11 @@
-import { IFirestoreDoc } from "./Abstracts";
+import { FirestoreDocAbstract } from "./Abstracts";
 
 export interface IModule {
   enabled: boolean;
   prompt?: string;
 }
 
-export interface ISettings extends IFirestoreDoc {
+export interface ISettings extends FirestoreDocAbstract<any> {
   routines: IModule;
   exercises: IModule;
   meals: IModule;

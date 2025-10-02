@@ -1,19 +1,7 @@
-import useApi from "../hooks/useApi";
 import { FormDataUtils } from "../utils/utils";
 
-// Exercises / FirestoreDoc / DialogableAbstract
-// Exercise / CardAbstract / DialogableAbstract
-// ExerciseSet / SubCardAbstract / DialogableAbstract
-
-export interface IEntity {
+export interface IUnique {
   name: string;
-  items?: any[];
-  isCompleted: boolean;
-}
-
-export abstract class FirestoreDoc {
-  id: string;
-  collection: string;
   items: any[];
 }
 
@@ -49,7 +37,7 @@ export abstract class DialogableAbstract<T = string> {
     return FormDataUtils.fromFormData(formData, () => this.getEditableFields());
   }
 
-  onDialogSave(formData: { [key: string]: any }, parent: any): void {
+  onSave(formData: { [key: string]: any }, parent: any, isNew: boolean): void {
     const data = FormDataUtils.fromFormData(formData, () => this.getEditableFields());
     const editableFields = this.getEditableFields();
     editableFields.forEach(fieldMetadata => {
@@ -60,12 +48,12 @@ export abstract class DialogableAbstract<T = string> {
       }
     });
 
-    if (parent) {
+    if (parent && isNew) {
       parent.items.push(this);
     }
   }
 
-  delete(parent: CardListAbstract<any> | CardAbstract): boolean {
+  delete(parent: FirestoreDocAbstract<any> | CardAbstract): boolean {
     if (parent.items && Array.isArray(parent.items)) {
       const itemIndex = parent.items.findIndex(item => item === this);
       if (itemIndex !== -1) {
@@ -92,6 +80,7 @@ export abstract class CardAbstract<T = string> extends DialogableAbstract<T> {
 
   constructor() {
     super();
+    this.isExpanded = !this.isCompleted;
   }
 
   getEditableFields(): IFieldMetadata<T>[] {
@@ -111,28 +100,38 @@ export abstract class CardAbstract<T = string> extends DialogableAbstract<T> {
     }
   }
 
+  handleSuggestionSelect(suggestion: IUnique): void {
+    this.name = suggestion.name;
+    this.items = suggestion.items.map((data: SubCardAbstract) => {
+      const subCard = this.createNewSubCard();
+      Object.assign(subCard, data);
+      return subCard;
+    });
+  }
+
   createNewSubCard(): SubCardAbstract | null {
-    return null; // Base implementation returns null (no subcards supported)
+    return null;
   }
 
   shouldSkipDialogForNewSubCard(): boolean {
-    return false; // Base implementation always shows dialog
+    return false;
   }
 }
 
-export abstract class CardListAbstract<T extends CardAbstract<any>> extends DialogableAbstract {
+export abstract class FirestoreDocAbstract<T> extends DialogableAbstract {
   items: T[] = [];
   collection: string;
   id: string;
-  private childConstructor: new () => T;
+  childModel: any;
 
-  constructor(data: any, childConstructor: new () => T) {
+  constructor(data, childModel) {
     super();
+    this.childModel = childModel;
     Object.assign(this, data);
-    this.childConstructor = childConstructor;
+    this.items = data.items.map(item => childModel.fromJson(item));
   }
 
-  createChild(): T {
-    return new this.childConstructor();
+  createCard(): T {
+    return new this.childModel();
   }
 }

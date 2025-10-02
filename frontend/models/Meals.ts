@@ -1,34 +1,12 @@
 import { fieldConverter } from "../utils/utils";
-import { CardAbstract, CardListAbstract, IEntity, IFirestoreDoc, SubCardAbstract, IFieldMetadata } from "./Abstracts";
+import { CardAbstract, FirestoreDocAbstract, IFieldMetadata, SubCardAbstract } from "./Abstracts";
 
-export interface IIngredient {
-  name: string;
-  quantity: number;
-  calories: number;
-}
-
-export interface IMeal extends IEntity {
-  name: string;
-  instructions?: string;
-  calories?: number;
-  items?: IIngredient[];
-}
-
-export interface IMeals extends IFirestoreDoc {
-  items: IMeal[];
-  notes?: string;
-}
-
-export class Ingredient extends SubCardAbstract implements IIngredient {
+export class Ingredient extends SubCardAbstract {
   private _name: string = "";
   quantity: number = 0.0;
   calories: number = 0;
 
-  constructor() {
-    super();
-  }
-
-  static fromJson(data: IIngredient): Ingredient {
+  static fromJson(data): Ingredient {
     const ingredient = new Ingredient();
     Object.assign(ingredient, data);
     ingredient._name = data.name;
@@ -80,7 +58,7 @@ export class Ingredient extends SubCardAbstract implements IIngredient {
   }
 }
 
-export class Meal extends CardAbstract implements IMeal {
+export class Meal extends CardAbstract {
   items: Ingredient[] = [];
   instructions: string = "";
   calories: number = 0;
@@ -89,7 +67,7 @@ export class Meal extends CardAbstract implements IMeal {
     super();
   }
 
-  static fromJson(data: IMeal): Meal {
+  static fromJson(data): Meal {
     const meal = new Meal();
     Object.assign(meal, data);
     meal.items = (data.items || []).map(item => Ingredient.fromJson(item));
@@ -140,13 +118,11 @@ export class Meal extends CardAbstract implements IMeal {
   }
 }
 
-export class Meals extends CardListAbstract<Meal> implements IMeals {
-  items: Meal[] = [];
+export class Meals extends FirestoreDocAbstract<Meal> {
   notes: string = "";
 
-  constructor(data: IMeals) {
+  constructor(data) {
     super(data, Meal);
-    this.items = (data.items || []).map(item => Meal.fromJson(item));
   }
 
   getEditableFields(): IFieldMetadata[] {

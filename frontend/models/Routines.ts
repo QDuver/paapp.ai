@@ -1,22 +1,9 @@
 import { fieldConverter } from "../utils/utils";
-import { CardAbstract, CardListAbstract, IEntity, IFirestoreDoc, IFieldMetadata } from "./Abstracts";
+import { CardAbstract, FirestoreDocAbstract, IFieldMetadata } from "./Abstracts";
 
 export type RoutineType = "other" | "exercises" | "meals";
 
-export interface IRoutine extends IEntity {
-  name: string;
-  isCompleted: boolean;
-  durationMin: number;
-  routineType: RoutineType;
-  ref: string;
-}
-
-export interface IRoutines extends IFirestoreDoc {
-  wakeupTime?: string;
-  items: IRoutine[];
-}
-
-export class Routine extends CardAbstract implements IRoutine {
+export class Routine extends CardAbstract {
   durationMin: number = 0;
   routineType: RoutineType = "other";
   ref: string = "";
@@ -25,7 +12,7 @@ export class Routine extends CardAbstract implements IRoutine {
     super();
   }
 
-  static fromJson(data: IRoutine): Routine {
+  static fromJson(data): Routine {
     const routine = new Routine();
     Object.assign(routine, data);
     return routine;
@@ -68,13 +55,11 @@ export class Routine extends CardAbstract implements IRoutine {
   }
 }
 
-export class Routines extends CardListAbstract<Routine> implements IRoutines {
-  items: Routine[] = [];
+export class Routines extends FirestoreDocAbstract<Routine> {
   wakeupTime: string = "";
 
-  constructor(data: IRoutines) {
+  constructor(data) {
     super(data, Routine);
-    this.items = (data.items || []).map(item => Routine.fromJson(item));
   }
 
   getEditableFields(): IFieldMetadata[] {

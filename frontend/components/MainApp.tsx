@@ -1,21 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import {
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  ActivityIndicator,
-  RefreshControl,
-} from "react-native";
-import {
-  Provider as PaperProvider,
-  FAB,
-  Appbar,
-  BottomNavigation,
-  Menu,
-} from "react-native-paper";
+import { SafeAreaView, ScrollView, StyleSheet, Text, View, ActivityIndicator, RefreshControl } from "react-native";
+import { Provider as PaperProvider, FAB, Appbar, BottomNavigation, Menu } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CardList from "./card/CardList";
 import UserAvatar from "./auth/UserAvatar";
@@ -24,6 +10,7 @@ import { useAppContext } from "../contexts/AppContext";
 import { getFirebaseAuth } from "../services/Firebase";
 import { signOut } from "firebase/auth";
 import Settings from "./Settings";
+import { CardAbstract, FirestoreDocAbstract } from "../models/Abstracts";
 
 interface MainAppProps {
   user: any;
@@ -50,10 +37,7 @@ const MainApp = ({ user }: MainAppProps) => {
   // Persist view state when it changes
   useEffect(() => {
     const saveViewState = async () => {
-      await AsyncStorage.setItem(
-        "@current_view",
-        showSettings ? "settings" : "main"
-      );
+      await AsyncStorage.setItem("@current_view", showSettings ? "settings" : "main");
     };
     saveViewState();
   }, [showSettings]);
@@ -98,24 +82,17 @@ const MainApp = ({ user }: MainAppProps) => {
   ];
 
   const renderScene = ({ route }: { route: { key: string } }) => {
-    const cardList = data?.[route.key];
+    const cardList: FirestoreDocAbstract<CardAbstract> = data?.[route.key];
 
-    const createChild = () => {
+    const createCard = () => {
       if (!cardList) return;
-
-      // Create new item and show dialog
-      const newItem = cardList.createChild();
+      const newItem = cardList.createCard();
       showEditDialog(newItem, cardList, cardList, true);
     };
 
     return (
       <View style={styles.sceneContainer}>
-        <ScrollView
-          style={styles.content}
-          refreshControl={
-            <RefreshControl refreshing={isLoading} tintColor="#fff" />
-          }
-        >
+        <ScrollView style={styles.content} refreshControl={<RefreshControl refreshing={isLoading} tintColor="#fff" />}>
           {isLoading ? (
             <View style={styles.loadingContainer} testID="loading-container">
               <ActivityIndicator size="large" color="#6A5ACD" />
@@ -151,12 +128,7 @@ const MainApp = ({ user }: MainAppProps) => {
               />
             )}
 
-            <FAB
-              style={styles.fab}
-              icon="plus"
-              onPress={createChild}
-              testID="add-fab"
-            />
+            <FAB style={styles.fab} icon="plus" onPress={createCard} testID="add-fab" />
           </>
         )}
       </View>
@@ -194,16 +166,8 @@ const MainApp = ({ user }: MainAppProps) => {
               </View>
             }
           >
-            <Menu.Item
-              onPress={handleSettings}
-              title="Settings"
-              leadingIcon="cog-outline"
-            />
-            <Menu.Item
-              onPress={handleSignOut}
-              title="Sign Out"
-              leadingIcon="logout"
-            />
+            <Menu.Item onPress={handleSettings} title="Settings" leadingIcon="cog-outline" />
+            <Menu.Item onPress={handleSignOut} title="Sign Out" leadingIcon="logout" />
           </Menu>
         </Appbar.Header>
 

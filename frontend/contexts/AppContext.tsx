@@ -1,26 +1,26 @@
 import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import useApi from "../hooks/useApi";
-import { Exercises, IExercises, IExerciseUnique } from "../models/Exercises";
+import { Exercises } from "../models/Exercises";
 // import { Meals } from "../models/Meals";
-import { DialogableAbstract, CardAbstract, CardListAbstract } from "../models/Abstracts";
-import { IMeals, Meals } from "../models/Meals";
-import { IRoutines, Routines } from "../models/Routines";
+import { DialogableAbstract, CardAbstract, FirestoreDocAbstract, IUnique } from "../models/Abstracts";
+import { Meals } from "../models/Meals";
+import { Routines } from "../models/Routines";
 import { RequestStatusType } from "../models/Shared";
 import { ISettings } from "../models/Settings";
 import { getCurrentDate } from "../utils/utils";
 
 interface DataType {
-  routines: Routines | null;
-  exercises: Exercises | null /*  */;
-  meals: Meals | null;
-  uniqueExercises: IExerciseUnique[];
+  routines: Routines;
+  exercises: Exercises;
+  meals: Meals;
+  uniqueExercises: IUnique[];
 }
 
 interface DialogSettings {
   visible: boolean;
   item: DialogableAbstract | null;
-  parent: CardListAbstract<any> | CardAbstract | null;
-  cardList: CardListAbstract<any> | null;
+  parent: FirestoreDocAbstract<any> | CardAbstract | null;
+  cardList: FirestoreDocAbstract<any> | null;
   isNew: boolean;
 }
 
@@ -30,14 +30,14 @@ interface AppContextType {
   currentDate: string;
   isLoading: boolean;
   refreshCounter: number;
-  onUpdate: (cardList: CardListAbstract<any>) => void;
-  onBuildItems: (cardList: CardListAbstract<any>, formData: { [key: string]: any }) => void;
+  onUpdate: (cardList: FirestoreDocAbstract<any>) => void;
+  onBuildItems: (cardList: FirestoreDocAbstract<any>, formData: { [key: string]: any }) => void;
   updateSettings: (settings: ISettings) => Promise<void>;
   dialogSettings: DialogSettings;
   showEditDialog: (
     item: DialogableAbstract,
-    parent: CardListAbstract<any> | CardAbstract,
-    cardList: CardListAbstract<any>,
+    parent: FirestoreDocAbstract<any> | CardAbstract,
+    cardList: FirestoreDocAbstract<any>,
     isNew?: boolean
   ) => void;
   hideEditDialog: () => void;
@@ -56,10 +56,10 @@ export const AppProvider = ({ children, skipAuth = false }: AppProviderProps) =>
     data: apiData,
     status,
   } = useApi<{
-    routines: IRoutines;
-    exercises: IExercises;
-    meals: IMeals;
-    uniqueExercises: IExerciseUnique[];
+    routines: Routines;
+    exercises: Exercises;
+    meals: Meals;
+    uniqueExercises: IUnique[];
   }>(skipAuth);
   const { post } = useApi(skipAuth);
   const { get: getSettings, post: postSettings } = useApi<ISettings>(skipAuth);
@@ -103,12 +103,12 @@ export const AppProvider = ({ children, skipAuth = false }: AppProviderProps) =>
     setIsLoading(status === RequestStatusType.LOADING);
   }, [status]);
 
-  const onUpdate = (cardList: CardListAbstract<any>) => {
+  const onUpdate = (cardList: FirestoreDocAbstract<any>) => {
     setRefreshCounter(prev => prev + 1);
     post(`${cardList.collection}/${cardList.id}`, cardList);
   };
 
-  const onBuildItems = async (cardList: CardListAbstract<any>, formData: { [key: string]: any }) => {
+  const onBuildItems = async (cardList: FirestoreDocAbstract<any>, formData: { [key: string]: any }) => {
     setIsLoading(true);
     await post(`build-items/${cardList.collection}/${cardList.id}`, formData);
     await get(`routines/${currentDate}`);
@@ -122,8 +122,8 @@ export const AppProvider = ({ children, skipAuth = false }: AppProviderProps) =>
 
   const showEditDialog = (
     item: DialogableAbstract,
-    parent: CardListAbstract<any> | CardAbstract,
-    cardList: CardListAbstract<any>,
+    parent: FirestoreDocAbstract<any> | CardAbstract,
+    cardList: FirestoreDocAbstract<any>,
     isNew: boolean = false
   ) => {
     setDialogSettings({

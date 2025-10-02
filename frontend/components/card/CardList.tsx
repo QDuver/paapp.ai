@@ -3,12 +3,12 @@ import { StyleSheet, View, Text } from "react-native";
 import DraggableFlatList, {
   RenderItemParams,
 } from "react-native-draggable-flatlist";
-import { CardListAbstract, CardAbstract } from "../../models/Abstracts";
+import { FirestoreDocAbstract, CardAbstract } from "../../models/Abstracts";
 import CustomCard from "./CustomCard";
 import { useAppContext } from "../../contexts/AppContext";
 
 interface CardListProps {
-  cardList: CardListAbstract<any>;
+  cardList: FirestoreDocAbstract<any>;
 }
 
 const CardList = ({ cardList }: CardListProps) => {
