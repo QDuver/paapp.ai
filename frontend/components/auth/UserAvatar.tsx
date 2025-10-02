@@ -13,7 +13,6 @@ interface UserAvatarProps {
 }
 
 const UserAvatar = ({ user, size = 36, onPress }: UserAvatarProps) => {
-  console.log("user", user);
   const [imageError, setImageError] = React.useState(false);
 
   const initials = useMemo(() => {
@@ -40,9 +39,7 @@ const UserAvatar = ({ user, size = 36, onPress }: UserAvatarProps) => {
         alignItems: "center",
       }}
     >
-      <Text style={{ color: "#fff", fontSize: size * 0.45, fontWeight: "600" }}>
-        {initials}
-      </Text>
+      <Text style={{ color: "#fff", fontSize: size * 0.45, fontWeight: "600" }}>{initials}</Text>
     </View>
   );
 
@@ -59,11 +56,7 @@ const UserAvatar = ({ user, size = 36, onPress }: UserAvatarProps) => {
 
   if (onPress) {
     return (
-      <TouchableOpacity
-        onPress={onPress}
-        activeOpacity={0.7}
-        style={{ padding: 2 }}
-      >
+      <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={{ padding: 2 }}>
         {content}
       </TouchableOpacity>
     );

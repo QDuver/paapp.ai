@@ -6,17 +6,6 @@ export type RoutineType = "other" | "exercises" | "meals";
 export class Routine extends CardAbstract {
   durationMin: number = 0;
   routineType: RoutineType = "other";
-  ref: string = "";
-
-  constructor() {
-    super();
-  }
-
-  static fromJson(data): Routine {
-    const routine = new Routine();
-    Object.assign(routine, data);
-    return routine;
-  }
 
   getEditableFields(): IFieldMetadata[] {
     return [
@@ -55,7 +44,7 @@ export class Routine extends CardAbstract {
   }
 }
 
-export class Routines extends FirestoreDocAbstract<Routine> {
+export class Routines extends FirestoreDocAbstract {
   wakeupTime: string = "";
 
   constructor(data) {

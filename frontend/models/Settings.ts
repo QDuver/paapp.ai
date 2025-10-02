@@ -5,7 +5,7 @@ export interface IModule {
   prompt?: string;
 }
 
-export interface ISettings extends FirestoreDocAbstract<any> {
+export interface ISettings extends FirestoreDocAbstract {
   routines: IModule;
   exercises: IModule;
   meals: IModule;

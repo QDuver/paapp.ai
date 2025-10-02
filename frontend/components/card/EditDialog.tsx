@@ -92,8 +92,7 @@ const EditDialog = () => {
             color="#FFFFFF"
             onSuggestionSelect={suggestion => {
               (item as CardAbstract).handleSuggestionSelect(suggestion);
-              item.onSave({ name: suggestion.name }, parent, isNew);
-              onUpdate(cardList);
+              item.onSave(cardList, { name: suggestion.name }, parent, isNew);
               hideEditDialog();
             }}
             fieldName={fieldName}
@@ -181,9 +180,7 @@ const EditDialog = () => {
                   style={styles.saveButton}
                   onPress={() => {
                     if (!(item instanceof FirestoreDocAbstract)) {
-                      item.onSave(formData, parent, isNew);
-                      console.log("cardList", cardList);
-                      onUpdate(cardList);
+                      item.onSave(cardList, formData, parent, isNew);
                     } else {
                       onBuildItems(cardList, formData);
                     }

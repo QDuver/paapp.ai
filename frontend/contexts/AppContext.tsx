@@ -19,8 +19,8 @@ interface DataType {
 interface DialogSettings {
   visible: boolean;
   item: DialogableAbstract | null;
-  parent: FirestoreDocAbstract<any> | CardAbstract | null;
-  cardList: FirestoreDocAbstract<any> | null;
+  parent: FirestoreDocAbstract | CardAbstract | null;
+  cardList: FirestoreDocAbstract | null;
   isNew: boolean;
 }
 
@@ -30,14 +30,14 @@ interface AppContextType {
   currentDate: string;
   isLoading: boolean;
   refreshCounter: number;
-  onUpdate: (cardList: FirestoreDocAbstract<any>) => void;
-  onBuildItems: (cardList: FirestoreDocAbstract<any>, formData: { [key: string]: any }) => void;
+  onUpdate: (cardList: FirestoreDocAbstract) => void;
+  onBuildItems: (cardList: FirestoreDocAbstract, formData: { [key: string]: any }) => void;
   updateSettings: (settings: ISettings) => Promise<void>;
   dialogSettings: DialogSettings;
   showEditDialog: (
     item: DialogableAbstract,
-    parent: FirestoreDocAbstract<any> | CardAbstract,
-    cardList: FirestoreDocAbstract<any>,
+    parent: FirestoreDocAbstract | CardAbstract,
+    cardList: FirestoreDocAbstract,
     isNew?: boolean
   ) => void;
   hideEditDialog: () => void;
@@ -103,12 +103,12 @@ export const AppProvider = ({ children, skipAuth = false }: AppProviderProps) =>
     setIsLoading(status === RequestStatusType.LOADING);
   }, [status]);
 
-  const onUpdate = (cardList: FirestoreDocAbstract<any>) => {
+  const onUpdate = (cardList: FirestoreDocAbstract) => {
     setRefreshCounter(prev => prev + 1);
     post(`${cardList.collection}/${cardList.id}`, cardList);
   };
 
-  const onBuildItems = async (cardList: FirestoreDocAbstract<any>, formData: { [key: string]: any }) => {
+  const onBuildItems = async (cardList: FirestoreDocAbstract, formData: { [key: string]: any }) => {
     setIsLoading(true);
     await post(`build-items/${cardList.collection}/${cardList.id}`, formData);
     await get(`routines/${currentDate}`);
@@ -122,8 +122,8 @@ export const AppProvider = ({ children, skipAuth = false }: AppProviderProps) =>
 
   const showEditDialog = (
     item: DialogableAbstract,
-    parent: FirestoreDocAbstract<any> | CardAbstract,
-    cardList: FirestoreDocAbstract<any>,
+    parent: FirestoreDocAbstract | CardAbstract,
+    cardList: FirestoreDocAbstract,
     isNew: boolean = false
   ) => {
     setDialogSettings({

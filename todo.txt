@@ -8,7 +8,7 @@ POST MVP
 - Design form routines / modes on Android
 - Theme
 - Calendar Icon + Swipability
-- Pictures of meals
 - Routine type to dropdown
 - Weight input should not accept non-numeric
 - Reordering not stable
+- Hypertrophy vs. Strength (for me only)

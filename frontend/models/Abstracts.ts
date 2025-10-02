@@ -5,7 +5,7 @@ export interface IUnique {
   items: any[];
 }
 
-export interface IFieldMetadata<T = string> {
+export interface IFieldMetadata {
   field: string;
   label: string;
   type: "string" | "number" | "boolean";
@@ -13,17 +13,15 @@ export interface IFieldMetadata<T = string> {
   multiline?: boolean;
   placeholder?: string;
   converter?: (value: string) => any;
-  suggestions?: T[];
+  suggestions?: [];
 }
 
-export abstract class DialogableAbstract<T = string> {
-  static fromJson(data: any): DialogableAbstract<any> {
-    const instance = new (this as any)();
-    Object.assign(instance, data);
-    return instance;
+export abstract class DialogableAbstract {
+  constructor(data: any = {}) {
+    Object.assign(this, data);
   }
 
-  abstract getEditableFields(): IFieldMetadata<T>[];
+  abstract getEditableFields(): IFieldMetadata[];
 
   getTags(): string[] {
     return [];
@@ -37,7 +35,7 @@ export abstract class DialogableAbstract<T = string> {
     return FormDataUtils.fromFormData(formData, () => this.getEditableFields());
   }
 
-  onSave(formData: { [key: string]: any }, parent: any, isNew: boolean): void {
+  onSave(fsDoc: FirestoreDocAbstract, formData: { [key: string]: any }, parent: any, isNew: boolean): void {
     const data = FormDataUtils.fromFormData(formData, () => this.getEditableFields());
     const editableFields = this.getEditableFields();
     editableFields.forEach(fieldMetadata => {
@@ -51,39 +49,40 @@ export abstract class DialogableAbstract<T = string> {
     if (parent && isNew) {
       parent.items.push(this);
     }
+
+    fsDoc.onSave();
   }
 
-  delete(parent: FirestoreDocAbstract<any> | CardAbstract): boolean {
+  delete(parent: FirestoreDocAbstract | CardAbstract): boolean {
     if (parent.items && Array.isArray(parent.items)) {
-      const itemIndex = parent.items.findIndex(item => item === this);
+      const itemIndex = parent.items.findIndex((item: any) => item === this);
       if (itemIndex !== -1) {
         parent.items.splice(itemIndex, 1);
         return true;
       }
     }
-
     return false;
   }
 }
 
-export abstract class SubCardAbstract<T = string> extends DialogableAbstract<T> {
+export abstract class SubCardAbstract extends DialogableAbstract {
   abstract get name(): string;
 }
 
-export abstract class CardAbstract<T = string> extends DialogableAbstract<T> {
-  name: string = "";
-  isCompleted: boolean = false;
-  isExpanded: boolean = true;
-  canAddItems: boolean = true;
-  items: SubCardAbstract[] = [];
-  id?: string;
+export abstract class CardAbstract extends DialogableAbstract {
+  name: string;
+  isCompleted: boolean;
+  isExpanded: boolean;
+  canAddItems: boolean;
+  items: SubCardAbstract[];
 
-  constructor() {
-    super();
+  constructor(data, ChildModel) {
+    super(data);
     this.isExpanded = !this.isCompleted;
+    this.items = data?.items?.map(item => new ChildModel(item)) || [];
   }
 
-  getEditableFields(): IFieldMetadata<T>[] {
+  getEditableFields(): IFieldMetadata[] {
     return [];
   }
 
@@ -118,20 +117,23 @@ export abstract class CardAbstract<T = string> extends DialogableAbstract<T> {
   }
 }
 
-export abstract class FirestoreDocAbstract<T> extends DialogableAbstract {
-  items: T[] = [];
+export abstract class FirestoreDocAbstract extends DialogableAbstract {
+  items: [] = [];
   collection: string;
   id: string;
-  childModel: any;
+  ChildModel: any;
 
-  constructor(data, childModel) {
-    super();
-    this.childModel = childModel;
-    Object.assign(this, data);
-    this.items = data.items.map(item => childModel.fromJson(item));
+  constructor(data, ChildModel) {
+    super(data);
+    this.ChildModel = ChildModel;
+    this.items = data.items.map(item => new ChildModel(item));
   }
 
-  createCard(): T {
-    return new this.childModel();
+  createCard(): CardAbstract {
+    return new this.ChildModel();
+  }
+
+  onSave() {
+    console.log("SAVING FS DOC");
   }
 }

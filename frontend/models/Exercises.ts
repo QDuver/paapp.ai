@@ -1,16 +1,10 @@
 import { fieldConverter } from "../utils/utils";
-import { CardAbstract, FirestoreDocAbstract, IFieldMetadata, IUnique, SubCardAbstract } from "./Abstracts";
+import { CardAbstract, FirestoreDocAbstract, IFieldMetadata, SubCardAbstract } from "./Abstracts";
 export class ExerciseSet extends SubCardAbstract {
   weightKg?: number;
   repetitions?: number;
   duration?: number;
   rest?: number;
-
-  static fromJson(data): ExerciseSet {
-    const exerciseSet = new ExerciseSet();
-    Object.assign(exerciseSet, data);
-    return exerciseSet;
-  }
 
   get name(): string {
     const parts: string[] = [];
@@ -57,8 +51,8 @@ export class ExerciseSet extends SubCardAbstract {
     ];
   }
 
-  onSave(rawData: { [key: string]: any }, parent: any, isNew: boolean): void {
-    super.onSave(rawData, parent, isNew);
+  onSave(fsDoc: FirestoreDocAbstract, formData: { [key: string]: any }, parent: Exercise, isNew: boolean): void {
+    super.onSave(fsDoc, formData, parent, isNew);
 
     if (parent) {
       this.editSubsequentSets(parent);
@@ -72,7 +66,7 @@ export class ExerciseSet extends SubCardAbstract {
     }
 
     for (let i = currentIndex + 1; i < parent.items.length; i++) {
-      const subsequentSet = parent.items[i];
+      const subsequentSet = parent.items[i] as ExerciseSet;
       subsequentSet.weightKg = this.weightKg;
       subsequentSet.repetitions = this.repetitions;
       subsequentSet.duration = this.duration;
@@ -81,21 +75,12 @@ export class ExerciseSet extends SubCardAbstract {
   }
 }
 
-export class Exercise extends CardAbstract<ExerciseSet> {
-  items: ExerciseSet[] = [];
-
-  constructor() {
-    super();
+export class Exercise extends CardAbstract {
+  constructor(data) {
+    super(data, ExerciseSet);
   }
 
-  static fromJson(data): Exercise {
-    const exercise = new Exercise();
-    Object.assign(exercise, data);
-    exercise.items = data.items.map(item => ExerciseSet.fromJson(item));
-    return exercise;
-  }
-
-  getEditableFields(): IFieldMetadata<ExerciseSet>[] {
+  getEditableFields(): IFieldMetadata[] {
     return [
       {
         field: "name",
@@ -113,7 +98,7 @@ export class Exercise extends CardAbstract<ExerciseSet> {
     const newSet = new ExerciseSet();
 
     if (this.items && this.items.length > 0) {
-      const lastSet = this.items[this.items.length - 1];
+      const lastSet = this.items[this.items.length - 1] as ExerciseSet;
       newSet.weightKg = lastSet.weightKg;
       newSet.repetitions = lastSet.repetitions;
       newSet.duration = lastSet.duration;
@@ -128,10 +113,11 @@ export class Exercise extends CardAbstract<ExerciseSet> {
   }
 }
 
-export class Exercises extends FirestoreDocAbstract<Exercise> {
+export class Exercises extends FirestoreDocAbstract {
   notes?: string;
 
   constructor(data) {
+    console.log("data Exercises", data);
     super(data, Exercise);
   }
 

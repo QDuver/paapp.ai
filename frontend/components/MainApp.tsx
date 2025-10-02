@@ -82,7 +82,7 @@ const MainApp = ({ user }: MainAppProps) => {
   ];
 
   const renderScene = ({ route }: { route: { key: string } }) => {
-    const cardList: FirestoreDocAbstract<CardAbstract> = data?.[route.key];
+    const cardList: FirestoreDocAbstract = data?.[route.key];
 
     const createCard = () => {
       if (!cardList) return;
