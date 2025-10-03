@@ -121,9 +121,9 @@ export class Exercise extends CardAbstract {
 
 export class Exercises extends FirestoreDocAbstract {
   notes?: string;
+  collection = "exercises";
 
   constructor(data) {
-    console.log("data Exercises", data);
     super(data, Exercise);
   }
 

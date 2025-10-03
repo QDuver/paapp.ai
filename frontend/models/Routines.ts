@@ -46,12 +46,9 @@ export class Routine extends CardAbstract {
 
 export class Routines extends FirestoreDocAbstract {
   wakeupTime: string = "";
+  collection = "routines";
 
   constructor(data) {
     super(data, Routine);
-  }
-
-  getEditableFields(): IFieldMetadata[] {
-    return [];
   }
 }

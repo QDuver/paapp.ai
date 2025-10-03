@@ -3,7 +3,7 @@ import { Exercises } from "../models/Exercises";
 import { DialogableAbstract, CardAbstract, FirestoreDocAbstract, IUnique } from "../models/Abstracts";
 import { Meals } from "../models/Meals";
 import { Routines } from "../models/Routines";
-import { ISettings } from "../models/Settings";
+import { Settings } from "../models/Settings";
 import { getCurrentDate } from "../utils/utils";
 import { apiClient } from "../utils/apiClient";
 
@@ -12,6 +12,7 @@ interface DataType {
   exercises: Exercises;
   meals: Meals;
   uniqueExercises: IUnique[];
+  settings: Settings;
 }
 
 interface DialogSettings {
@@ -24,13 +25,11 @@ interface DialogSettings {
 
 interface AppContextType {
   data: DataType | undefined;
-  settings: ISettings | null;
-  currentDate: string;
+  settings: Settings | null;
   isLoading: boolean;
   refreshCounter: number;
   setRefreshCounter: React.Dispatch<React.SetStateAction<number>>;
   onBuildItems: (cardList: FirestoreDocAbstract, formData: { [key: string]: any }) => void;
-  updateSettings: (settings: ISettings) => Promise<void>;
   dialogSettings: DialogSettings;
   showEditDialog: (
     item: DialogableAbstract,
@@ -45,13 +44,10 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 interface AppProviderProps {
   children: ReactNode;
-  skipAuth?: boolean;
 }
 
-export const AppProvider = ({ children, skipAuth = false }: AppProviderProps) => {
+export const AppProvider = ({ children }: AppProviderProps) => {
   const [data, setData] = useState<DataType>();
-  const [settings, setSettings] = useState<ISettings | null>(null);
-  const [currentDate, setCurrentDate] = useState<string>(getCurrentDate());
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [refreshCounter, setRefreshCounter] = useState<number>(0);
   const [dialogSettings, setDialogSettings] = useState<DialogSettings>({
@@ -63,48 +59,33 @@ export const AppProvider = ({ children, skipAuth = false }: AppProviderProps) =>
   });
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      const response = await apiClient.get<ISettings>("settings/settings", { skipAuth });
-      if (response) {
-        setSettings(response);
-      }
+    const fetchData = async () => {
+      const settings = await Settings.fromApi();
+      const routines = await Routines.fromApi();
+      const exercises = await Exercises.fromApi();
+      const meals = await Meals.fromApi();
+      setData({
+        routines,
+        exercises,
+        meals,
+        uniqueExercises: [],
+        settings,
+      });
     };
-    fetchSettings();
-  }, [skipAuth]);
+    fetchData();
+  }, []);
 
-  useEffect(() => {
-    const fetchRoutines = async () => {
-      setIsLoading(true);
-      const response = await apiClient.get<{
-        routines: Routines;
-        exercises: Exercises;
-        meals: Meals;
-        uniqueExercises: IUnique[];
-      }>(`routines/${currentDate}`, { skipAuth });
-
-      if (response) {
-        setData({
-          routines: new Routines(response.routines),
-          exercises: new Exercises(response.exercises),
-          meals: new Meals(response.meals),
-          uniqueExercises: response.uniqueExercises || [],
-        });
-      }
-      setIsLoading(false);
-    };
-    fetchRoutines();
-  }, [currentDate, skipAuth]);
 
   const onBuildItems = async (cardList: FirestoreDocAbstract, formData: { [key: string]: any }) => {
     setIsLoading(true);
-    await apiClient.post(`build-items/${cardList.collection}/${cardList.id}`, formData, { skipAuth });
+    await apiClient.post(`build-items/${cardList.collection}/${cardList.id}`, formData);
 
     const response = await apiClient.get<{
-      routines: Routines;
-      exercises: Exercises;
-      meals: Meals;
+      routines: any;
+      exercises: any;
+      meals: any;
       uniqueExercises: IUnique[];
-    }>(`routines/${currentDate}`, { skipAuth });
+    }>(`routines/${getCurrentDate()}`);
 
     if (response) {
       setData({
@@ -115,13 +96,6 @@ export const AppProvider = ({ children, skipAuth = false }: AppProviderProps) =>
       });
     }
     setIsLoading(false);
-  };
-
-  const updateSettings = async (newSettings: ISettings) => {
-    const success = await apiClient.post("settings/settings", newSettings, { skipAuth });
-    if (success) {
-      setSettings(newSettings);
-    }
   };
 
   const showEditDialog = (
@@ -152,12 +126,10 @@ export const AppProvider = ({ children, skipAuth = false }: AppProviderProps) =>
   const contextValue: AppContextType = {
     data,
     settings,
-    currentDate,
     isLoading,
     refreshCounter,
     setRefreshCounter,
     onBuildItems,
-    updateSettings,
     dialogSettings,
     showEditDialog,
     hideEditDialog,

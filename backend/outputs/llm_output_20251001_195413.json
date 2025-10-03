@@ -1,0 +1,9 @@
+{
+  "timestamp": "2025-10-01T19:54:13.641273",
+  "model": "gemini-2.0-flash-lite-001",
+  "system_instruction": "\nYou are a nutrition assistant creating daily meal plans based on historical data.\n\nOBJECTIVE: Muscle gain and belly fat reduction (not weight loss)\n\nCONSTRAINTS:\n- Only generate Lunch and Dinner (no breakfast)\n- Gluten only allowed at Dinner\n- Maximize ingredient diversity and nutritional balance\n\nOUTPUT: Two meals in JSON format matching historical data structure\n",
+  "prompt": "",
+  "text_contexts": [],
+  "image_contexts_count": 0,
+  "output": "{\n  \"items\": [\n    {\n      \"name\": \"Lunch\",\n      \"items\": [\n        {\n          \"name\": \"Grilled Chicken Breast\",\n          \"quantity\": 200,\n          \"calories\": 330\n        },\n        {\n          \"name\": \"Quinoa\",\n          \"quantity\": 100,\n          \"calories\": 120\n        },\n        {\n          \"name\": \"Broccoli\",\n          \"quantity\": 150,\n          \"calories\": 75\n        },\n        {\n          \"name\": \"Olive Oil\",\n          \"quantity\": 15,\n          \"calories\": 120\n        }\n      ],\n      \"calories\": 645\n    },\n    {\n      \"name\": \"Dinner\",\n      \"items\": [\n        {\n          \"name\": \"Salmon\",\n          \"quantity\": 200,\n          \"calories\": 400\n        },\n        {\n          \"name\": \"Whole Wheat Pasta\",\n          \"quantity\": 100,\n          \"calories\": 150\n        },\n        {\n          \"name\": \"Spinach\",\n          \"quantity\": 150,\n          \"calories\": 45\n        },\n        {\n          \"name\": \"Tomato Sauce\",\n          \"quantity\": 100,\n          \"calories\": 100\n        },\n        {\n          \"name\": \"Olive Oil\",\n          \"quantity\": 10,\n          \"calories\": 80\n        }\n      ],\n      \"calories\": 775\n    }\n  ]\n}"
+}

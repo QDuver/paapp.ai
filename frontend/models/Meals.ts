@@ -1,4 +1,4 @@
-import { fieldConverter } from "../utils/utils";
+import { fieldConverter, getCurrentDate } from "../utils/utils";
 import { CardAbstract, FirestoreDocAbstract, IFieldMetadata, SubCardAbstract } from "./Abstracts";
 
 export class Ingredient extends SubCardAbstract {
@@ -60,7 +60,7 @@ export class Meal extends CardAbstract {
   instructions: string = "";
   calories: number = 0;
 
-  constructor(data: any = {}) {
+  constructor(data) {
     super(data, Ingredient);
   }
 
@@ -106,6 +106,7 @@ export class Meal extends CardAbstract {
 
 export class Meals extends FirestoreDocAbstract {
   notes: string = "";
+  collection = "meals";
 
   constructor(data) {
     super(data, Meal);

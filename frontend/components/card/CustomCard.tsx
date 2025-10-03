@@ -21,7 +21,6 @@ const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
     const hasSubCards = item.items && item.items.length > 0;
     const supportsSubCards = item.createNewSubCard() !== null;
 
-    // Show subcards container if there are existing subcards OR if this card type supports subcards
     if (!hasSubCards && !supportsSubCards) {
       return null;
     }

@@ -47,25 +47,17 @@ app.add_middleware(
 
 @app.get("/warmup")
 def warmup_user_connection(user: User = Depends(User.from_firebase_token)):
-    start_time = time.time()
     CONFIG.USER_FS.collection('_warmup').document('_warmup').get()
-    elapsed = time.time() - start_time
-    return {"status": "warm", "time": elapsed}
+    return True
 
-
-@app.get("/routines/{day}")
-def get_routine(day: str, user: User = Depends(User.from_firebase_token)):
-    routines = Routines(id=day).query()
-    exercises = Exercises(id=day).query()
-    uniqueExercises = exercises.get_unique()
-    meals = Meals(id=day).query()
-    return {"routines": routines, "exercises": exercises, "uniqueExercises": uniqueExercises, "meals": meals}
+@app.get("/unique/{collection}")
+def get_document(collection: str, user: User = Depends(User.from_firebase_token)):
+    return get_model_class(collection)().get_unique()
+    
 
 @app.get("/{collection}/{document}")
 def get_document(collection: str, document: str, user: User = Depends(User.from_firebase_token)):
-    model_class = get_model_class(collection)
-    instance = model_class(id=document)
-    return instance.query()
+    return get_model_class(collection)(id=document).query()
 
 @app.post("/{collection}/{document}")
 def overwrite_with_format(collection: str, document: str, request: dict, user: User = Depends(User.from_firebase_token)):

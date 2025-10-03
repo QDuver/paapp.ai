@@ -1,5 +1,6 @@
-import { FormDataUtils, getBaseUrl } from "../utils/utils";
+import { FormDataUtils, getBaseUrl, getCurrentDate } from "../utils/utils";
 import { apiClient } from "../utils/apiClient";
+import { get } from "lodash";
 
 export interface IUnique {
   name: string;
@@ -22,7 +23,9 @@ export abstract class DialogableAbstract {
     Object.assign(this, data);
   }
 
-  abstract getEditableFields(): IFieldMetadata[];
+  getEditableFields(): IFieldMetadata[] {
+    return [];
+  }
 
   getTags(): string[] {
     return [];
@@ -120,6 +123,7 @@ export abstract class CardAbstract extends DialogableAbstract {
   }
 
   createNewSubCard(): SubCardAbstract | null {
+    if (!this.ChildModel) return null;
     return new this.ChildModel();
   }
 
@@ -130,14 +134,21 @@ export abstract class CardAbstract extends DialogableAbstract {
 
 export abstract class FirestoreDocAbstract extends DialogableAbstract {
   items: [] = [];
-  collection: string;
-  id: string;
+  abstract collection: string;
+  id: string = getCurrentDate();
   ChildModel: any;
 
   constructor(data, ChildModel) {
     super(data);
+    if (!ChildModel) return;
     this.ChildModel = ChildModel;
     this.items = data.items.map(item => new ChildModel(item));
+  }
+
+  static async fromApi<T extends FirestoreDocAbstract>(this: new (data?: any) => T): Promise<T> {
+    const tempInstance = new this();
+    const response = await apiClient.get(`${tempInstance.collection}/${tempInstance.id}`);
+    return new this(response);
   }
 
   get apiUrl(): string {

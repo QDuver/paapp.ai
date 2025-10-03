@@ -1,5 +1,7 @@
 MVP
 - Run automated tests on AI scripts
+- Make sure DB gets created on first load
+- Deploy to Android
 - Design form routines / modes on Android
 
 POST MVP

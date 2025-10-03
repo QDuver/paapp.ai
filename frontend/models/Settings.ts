@@ -1,12 +1,18 @@
-import { FirestoreDocAbstract } from "./Abstracts";
+import { FirestoreDocAbstract, IFieldMetadata } from "./Abstracts";
 
 export interface IModule {
   enabled: boolean;
   prompt?: string;
 }
 
-export interface ISettings extends FirestoreDocAbstract {
+export class Settings extends FirestoreDocAbstract {
+  collection = "settings";
+  id = "settings";
   routines: IModule;
   exercises: IModule;
   meals: IModule;
+
+  constructor(data) {
+    super(data, null);
+  }
 }

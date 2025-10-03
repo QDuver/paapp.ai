@@ -6,18 +6,18 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import CardList from "./card/CardList";
 import UserAvatar from "./auth/UserAvatar";
 import EditDialog from "./card/EditDialog";
-import { useAppContext } from "../contexts/AppContext";
 import { getFirebaseAuth } from "../services/Firebase";
 import { signOut } from "firebase/auth";
-import Settings from "./Settings";
 import { CardAbstract, FirestoreDocAbstract } from "../models/Abstracts";
+import { SettingsPage } from "./SettingsPage";
+import { useAppContext } from "../contexts/AppContext";
 
 interface MainAppProps {
   user: any;
 }
 
 const MainApp = ({ user }: MainAppProps) => {
-  const { data, currentDate, isLoading, showEditDialog } = useAppContext();
+  const { data, isLoading, showEditDialog } = useAppContext();
 
   const [navigationIndex, setNavigationIndex] = useState(1);
   const [menuVisible, setMenuVisible] = useState(false);
@@ -104,9 +104,7 @@ const MainApp = ({ user }: MainAppProps) => {
             <CardList cardList={cardList} />
           ) : (
             <View style={styles.emptyContainer}>
-              <Text style={[styles.emptyText, { color: "#ccc" }]}>
-                No {route.key} found for {currentDate}
-              </Text>
+              <Text style={[styles.emptyText, { color: "#ccc" }]}>No {route.key} found</Text>
             </View>
           )}
         </ScrollView>
@@ -139,7 +137,7 @@ const MainApp = ({ user }: MainAppProps) => {
     return (
       <PaperProvider>
         <SafeAreaView style={[styles.container, { backgroundColor: "#000" }]}>
-          <Settings onBack={() => setShowSettings(false)} />
+          <SettingsPage onBack={() => setShowSettings(false)} />
           <StatusBar style="light" />
         </SafeAreaView>
       </PaperProvider>
@@ -151,12 +149,7 @@ const MainApp = ({ user }: MainAppProps) => {
       <SafeAreaView style={[styles.container, { backgroundColor: "#000" }]}>
         {/* Header */}
         <Appbar.Header style={styles.appBar}>
-          <Appbar.Content
-            title="Routine Assistant"
-            subtitle={currentDate}
-            titleStyle={styles.appBarTitle}
-            subtitleStyle={styles.appBarSubtitle}
-          />
+          <Appbar.Content title="Routine Assistant" titleStyle={styles.appBarTitle} />
           <Menu
             visible={menuVisible}
             onDismiss={() => setMenuVisible(false)}

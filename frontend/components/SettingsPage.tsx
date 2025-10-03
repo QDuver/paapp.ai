@@ -1,15 +1,8 @@
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
-import {
-  Appbar,
-  List,
-  TextInput,
-  Button,
-  Card,
-  Switch,
-} from "react-native-paper";
+import { Appbar, List, TextInput, Button, Card, Switch } from "react-native-paper";
 import { useAppContext } from "../contexts/AppContext";
-import { ISettings } from "../models/Settings";
+import { Settings } from "../models/Settings";
 
 interface SettingsProps {
   onBack: () => void;
@@ -17,45 +10,10 @@ interface SettingsProps {
 
 type ModuleKey = "routines" | "exercises" | "meals";
 
-const Settings = ({ onBack }: SettingsProps) => {
-  const { settings, updateSettings } = useAppContext();
-  const [localSettings, setLocalSettings] = useState<ISettings | null>(
-    settings
-  );
+export const SettingsPage = ({ onBack }: SettingsProps) => {
+  const { settings } = useAppContext();
+  const [localSettings, setLocalSettings] = useState<Settings | null>(settings);
   const [editingModule, setEditingModule] = useState<ModuleKey | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-
-  const saveSettings = async () => {
-    if (!localSettings) return;
-    setIsSaving(true);
-    await updateSettings(localSettings);
-    setIsSaving(false);
-    setEditingModule(null);
-  };
-
-  const toggleModule = async (module: ModuleKey) => {
-    if (!localSettings) return;
-    const updatedSettings = {
-      ...localSettings,
-      [module]: {
-        ...localSettings[module],
-        enabled: !localSettings[module].enabled,
-      },
-    };
-    setLocalSettings(updatedSettings);
-    await updateSettings(updatedSettings);
-  };
-
-  const updatePrompt = (module: ModuleKey, prompt: string) => {
-    if (!localSettings) return;
-    setLocalSettings({
-      ...localSettings,
-      [module]: {
-        ...localSettings[module],
-        prompt,
-      },
-    });
-  };
 
   const renderModuleSection = (module: ModuleKey, title: string) => {
     if (!localSettings) return null;
@@ -75,7 +33,7 @@ const Settings = ({ onBack }: SettingsProps) => {
                 right={() => (
                   <Switch
                     value={moduleData.enabled}
-                    onValueChange={() => toggleModule(module)}
+                    // onValueChange={() => toggleModule(module)}
                     color="#6A5ACD"
                   />
                 )}
@@ -90,7 +48,7 @@ const Settings = ({ onBack }: SettingsProps) => {
                   multiline
                   numberOfLines={10}
                   value={moduleData.prompt || ""}
-                  onChangeText={text => updatePrompt(module, text)}
+                  // onChangeText={text => updatePrompt(module, text)}
                   editable={isEditing}
                   style={styles.textInput}
                   outlineColor="#333"
@@ -101,12 +59,7 @@ const Settings = ({ onBack }: SettingsProps) => {
                 />
                 <View style={styles.buttonContainer}>
                   {!isEditing ? (
-                    <Button
-                      mode="contained"
-                      onPress={() => setEditingModule(module)}
-                      style={styles.button}
-                      buttonColor="#6A5ACD"
-                    >
+                    <Button mode="contained" onPress={() => setEditingModule(module)} style={styles.button} buttonColor="#6A5ACD">
                       Edit
                     </Button>
                   ) : (
@@ -124,9 +77,7 @@ const Settings = ({ onBack }: SettingsProps) => {
                       </Button>
                       <Button
                         mode="contained"
-                        onPress={saveSettings}
-                        loading={isSaving}
-                        disabled={isSaving}
+                        // onPress={settings.onSave()}
                         style={styles.button}
                         buttonColor="#6A5ACD"
                       >
@@ -216,5 +167,3 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
 });
-
-export default Settings;
