@@ -59,7 +59,6 @@ export abstract class DialogableAbstract {
     if (parent && isNew) {
       parent.items.push(this);
     }
-    console.log("onSave", this, parent, isNew);
     setRefreshCounter(prev => prev + 1);
     fsDoc.onSave();
   }
@@ -140,19 +139,25 @@ export abstract class FirestoreDocAbstract extends DialogableAbstract {
 
   constructor(data, ChildModel) {
     super(data);
-    if (!ChildModel) return;
+    if (!ChildModel || !data) return;
     this.ChildModel = ChildModel;
     this.items = data.items.map(item => new ChildModel(item));
   }
 
   static async fromApi<T extends FirestoreDocAbstract>(this: new (data?: any) => T): Promise<T> {
-    const tempInstance = new this();
-    const response = await apiClient.get(`${tempInstance.collection}/${tempInstance.id}`);
+    const t = new this();
+    const response = await apiClient.get(t.apiUrl);
+    return new this(response);
+  }
+
+  static async buildWithAi<T extends FirestoreDocAbstract>(this: new (data?: any) => T, formData: { [key: string]: any }): Promise<T> {
+    const t = new this();
+    const response = await apiClient.post(`build-with-ai/${t.apiUrl}`, formData);
     return new this(response);
   }
 
   get apiUrl(): string {
-    return `${getBaseUrl()}/${this.collection}/${this.id}`;
+    return `${this.collection}/${this.id}`;
   }
 
   createCard(): CardAbstract {

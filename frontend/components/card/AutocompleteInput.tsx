@@ -8,6 +8,7 @@ import {
   FlatList,
 } from "react-native";
 import { useAppContext } from "../../contexts/AppContext";
+import { useDialogContext } from "../../contexts/DialogContext";
 
 interface AutocompleteInputProps {
   value: string;
@@ -53,7 +54,8 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<any[]>([]);
 
-  const { data, dialogSettings } = useAppContext();
+  const { data } = useAppContext();
+  const { dialogSettings } = useDialogContext();
 
   // Determine suggestions based on field name and context
   const suggestions = useMemo(() => {

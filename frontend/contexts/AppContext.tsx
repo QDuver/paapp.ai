@@ -1,11 +1,15 @@
 import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { FirestoreDocAbstract, IUnique } from "../models/Abstracts";
 import { Exercises } from "../models/Exercises";
-import { DialogableAbstract, CardAbstract, FirestoreDocAbstract, IUnique } from "../models/Abstracts";
 import { Meals } from "../models/Meals";
 import { Routines } from "../models/Routines";
 import { Settings } from "../models/Settings";
-import { getCurrentDate } from "../utils/utils";
 import { apiClient } from "../utils/apiClient";
+
+const modelMap = {
+  exercises: Exercises,
+  meals: Meals
+};
 
 interface DataType {
   routines: Routines;
@@ -15,29 +19,12 @@ interface DataType {
   settings: Settings;
 }
 
-interface DialogSettings {
-  visible: boolean;
-  item: DialogableAbstract | null;
-  parent: FirestoreDocAbstract | CardAbstract | null;
-  cardList: FirestoreDocAbstract | null;
-  isNew: boolean;
-}
-
 interface AppContextType {
   data: DataType | undefined;
-  settings: Settings | null;
   isLoading: boolean;
   refreshCounter: number;
   setRefreshCounter: React.Dispatch<React.SetStateAction<number>>;
-  onBuildItems: (cardList: FirestoreDocAbstract, formData: { [key: string]: any }) => void;
-  dialogSettings: DialogSettings;
-  showEditDialog: (
-    item: DialogableAbstract,
-    parent: FirestoreDocAbstract | CardAbstract,
-    cardList: FirestoreDocAbstract,
-    isNew?: boolean
-  ) => void;
-  hideEditDialog: () => void;
+  onBuildWithAi: (cardList: FirestoreDocAbstract, formData: { [key: string]: any }) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -50,89 +37,48 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   const [data, setData] = useState<DataType>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [refreshCounter, setRefreshCounter] = useState<number>(0);
-  const [dialogSettings, setDialogSettings] = useState<DialogSettings>({
-    visible: false,
-    item: null,
-    parent: null,
-    cardList: null,
-    isNew: false,
-  });
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
+
       const settings = await Settings.fromApi();
       const routines = await Routines.fromApi();
       const exercises = await Exercises.fromApi();
       const meals = await Meals.fromApi();
+      const uniqueExercises = await apiClient.get<IUnique[]>(`unique/exercises`);
       setData({
         routines,
         exercises,
         meals,
-        uniqueExercises: [],
+        uniqueExercises,
         settings,
       });
+      setIsLoading(false);
     };
     fetchData();
   }, []);
 
 
-  const onBuildItems = async (cardList: FirestoreDocAbstract, formData: { [key: string]: any }) => {
+  const onBuildWithAi = async (cardList: FirestoreDocAbstract, formData: { [key: string]: any }) => {
     setIsLoading(true);
-    await apiClient.post(`build-items/${cardList.collection}/${cardList.id}`, formData);
-
-    const response = await apiClient.get<{
-      routines: any;
-      exercises: any;
-      meals: any;
-      uniqueExercises: IUnique[];
-    }>(`routines/${getCurrentDate()}`);
-
-    if (response) {
-      setData({
-        routines: new Routines(response.routines),
-        exercises: new Exercises(response.exercises),
-        meals: new Meals(response.meals),
-        uniqueExercises: response.uniqueExercises || [],
-      });
-    }
+    
+    const ModelClass = modelMap[cardList.collection];
+    const instance = await ModelClass.buildWithAi(formData);
+    
+    setData(prevData => ({
+      ...prevData,
+      [cardList.collection]: instance
+    }));
     setIsLoading(false);
-  };
-
-  const showEditDialog = (
-    item: DialogableAbstract,
-    parent: FirestoreDocAbstract | CardAbstract,
-    cardList: FirestoreDocAbstract,
-    isNew: boolean = false
-  ) => {
-    setDialogSettings({
-      visible: true,
-      item,
-      parent,
-      cardList,
-      isNew,
-    });
-  };
-
-  const hideEditDialog = () => {
-    setDialogSettings({
-      visible: false,
-      item: null,
-      parent: null,
-      cardList: null,
-      isNew: false,
-    });
   };
 
   const contextValue: AppContextType = {
     data,
-    settings,
     isLoading,
     refreshCounter,
     setRefreshCounter,
-    onBuildItems,
-    dialogSettings,
-    showEditDialog,
-    hideEditDialog,
+    onBuildWithAi,
   };
 
   return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;
@@ -150,3 +96,4 @@ export const useAppContext = (): AppContextType => {
 };
 
 export { AppContext };
+

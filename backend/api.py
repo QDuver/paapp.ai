@@ -48,7 +48,7 @@ app.add_middleware(
 @app.get("/warmup")
 def warmup_user_connection(user: User = Depends(User.from_firebase_token)):
     CONFIG.USER_FS.collection('_warmup').document('_warmup').get()
-    return True
+    return {}
 
 @app.get("/unique/{collection}")
 def get_document(collection: str, user: User = Depends(User.from_firebase_token)):
@@ -67,7 +67,7 @@ def overwrite_with_format(collection: str, document: str, request: dict, user: U
     CONFIG.USER_FS.collection(collection).document(document).set(data)
 
 
-@app.post("/build-items/{collection}/{id}")
+@app.post("/build-with-ai/{collection}/{id}")
 def build_with_ai(collection: str, id: str, request: dict, user: User = Depends(User.from_firebase_token)):
     model_class = get_model_class(collection)
     instance = model_class(id=id)

@@ -3,6 +3,7 @@ import { ActivityIndicator, View, Text } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MainApp from "./components/MainApp";
 import { AppProvider } from "./contexts/AppContext";
+import { DialogProvider } from "./contexts/DialogContext";
 import LoginScreen from "./components/auth/LoginScreen";
 import { onAuthStateChanged } from "firebase/auth";
 import { getFirebaseAuth } from "./services/Firebase";
@@ -117,7 +118,9 @@ export default function App() {
 
   return (
     <AppProvider skipAuth={skipAuth}>
-      <MainApp user={user} />
+      <DialogProvider>
+        <MainApp user={user} />
+      </DialogProvider>
     </AppProvider>
   );
 }

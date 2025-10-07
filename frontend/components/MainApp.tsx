@@ -11,13 +11,15 @@ import { signOut } from "firebase/auth";
 import { CardAbstract, FirestoreDocAbstract } from "../models/Abstracts";
 import { SettingsPage } from "./SettingsPage";
 import { useAppContext } from "../contexts/AppContext";
+import { useDialogContext } from "../contexts/DialogContext";
 
 interface MainAppProps {
   user: any;
 }
 
 const MainApp = ({ user }: MainAppProps) => {
-  const { data, isLoading, showEditDialog } = useAppContext();
+  const { data, isLoading } = useAppContext();
+  const { showEditDialog } = useDialogContext();
 
   const [navigationIndex, setNavigationIndex] = useState(1);
   const [menuVisible, setMenuVisible] = useState(false);

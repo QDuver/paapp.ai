@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Switch } from "react-native-paper";
 import { useAppContext } from "../../contexts/AppContext";
+import { useDialogContext } from "../../contexts/DialogContext";
 import { CardAbstract, FirestoreDocAbstract, IFieldMetadata } from "../../models/Abstracts";
 import AutocompleteInput from "./AutocompleteInput";
 
@@ -9,7 +10,8 @@ const EditDialog = () => {
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
   const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
 
-  const { onBuildItems, dialogSettings, hideEditDialog, setRefreshCounter } = useAppContext();
+  const { onBuildWithAi, setRefreshCounter } = useAppContext();
+  const { dialogSettings, hideEditDialog } = useDialogContext();
   const { visible, item, parent, cardList, isNew } = dialogSettings;
 
   useEffect(() => {
@@ -179,7 +181,7 @@ const EditDialog = () => {
                     if (!(item instanceof FirestoreDocAbstract)) {
                       item.onSave(cardList, formData, parent, isNew, setRefreshCounter);
                     } else {
-                      onBuildItems(cardList, formData);
+                      onBuildWithAi(cardList, formData);
                     }
                     hideEditDialog();
                   }}

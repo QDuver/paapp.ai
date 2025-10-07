@@ -1,18 +1,18 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { CardAbstract, SubCardAbstract, FirestoreDocAbstract } from "../../models/Abstracts";
-import { useAppContext } from "../../contexts/AppContext";
+import { useDialogContext } from "../../contexts/DialogContext";
 
 // Type definitions for the component props
 interface SubCardProps {
   subItem: SubCardAbstract;
   parentItem: CardAbstract;
-  cardList: FirestoreDocAbstract<any>;
+  cardList: FirestoreDocAbstract;
   index: number;
 }
 
 const SubCard = ({ subItem, parentItem, cardList, index }: SubCardProps) => {
-  const { showEditDialog } = useAppContext();
+  const { showEditDialog } = useDialogContext();
 
   const backgroundColor: string = "#2C2C2E";
   const textColor: string = "#FFFFFF";

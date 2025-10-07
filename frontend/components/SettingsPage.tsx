@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { Appbar, List, TextInput, Button, Card, Switch } from "react-native-paper";
 import { useAppContext } from "../contexts/AppContext";
-import { Settings } from "../models/Settings";
+import { Settings, SettingsModule } from "../models/Settings";
 
 interface SettingsProps {
   onBack: () => void;
@@ -11,44 +11,37 @@ interface SettingsProps {
 type ModuleKey = "routines" | "exercises" | "meals";
 
 export const SettingsPage = ({ onBack }: SettingsProps) => {
-  const { settings } = useAppContext();
-  const [localSettings, setLocalSettings] = useState<Settings | null>(settings);
+  const { data, setRefreshCounter } = useAppContext();
   const [editingModule, setEditingModule] = useState<ModuleKey | null>(null);
+  const [editingText, setEditingText] = useState<string>("");
 
-  const renderModuleSection = (module: ModuleKey, title: string) => {
-    if (!localSettings) return null;
+  const renderModuleSection = (moduleKey: ModuleKey, title: string) => {
+    if (!data?.settings) return null;
 
-    const moduleData = localSettings[module];
-    const isEditing = editingModule === module;
+    const module: SettingsModule = data.settings[moduleKey];
+    const isEditing = editingModule === moduleKey;
 
     return (
-      <View key={module}>
-        <List.Subheader style={styles.subheader}>{title}</List.Subheader>
+      <View key={moduleKey}>
         <Card style={styles.card}>
           <Card.Content>
-            <View style={styles.toggleContainer}>
-              <List.Item
-                title="Enabled"
-                titleStyle={styles.toggleTitle}
-                right={() => (
-                  <Switch
-                    value={moduleData.enabled}
-                    // onValueChange={() => toggleModule(module)}
-                    color="#6A5ACD"
-                  />
-                )}
-                style={styles.toggleItem}
+            <View style={styles.headerContainer}>
+              <List.Subheader style={styles.moduleTitle}>{title}</List.Subheader>
+              <Switch
+                value={module.enabled}
+                onValueChange={() => module.onSave(data.settings, "enabled", !module.enabled, setRefreshCounter)}
+                color="#6A5ACD"
               />
             </View>
 
-            {moduleData.enabled && (
+            {module.enabled && (
               <>
                 <TextInput
                   mode="outlined"
                   multiline
                   numberOfLines={10}
-                  value={moduleData.prompt || ""}
-                  // onChangeText={text => updatePrompt(module, text)}
+                  value={isEditing ? editingText : (module.prompt || "")}
+                  onChangeText={setEditingText}
                   editable={isEditing}
                   style={styles.textInput}
                   outlineColor="#333"
@@ -59,17 +52,14 @@ export const SettingsPage = ({ onBack }: SettingsProps) => {
                 />
                 <View style={styles.buttonContainer}>
                   {!isEditing ? (
-                    <Button mode="contained" onPress={() => setEditingModule(module)} style={styles.button} buttonColor="#6A5ACD">
+                    <Button mode="contained" onPress={() => { setEditingText(module.prompt || ""); setEditingModule(moduleKey); }} style={styles.button} buttonColor="#6A5ACD">
                       Edit
                     </Button>
                   ) : (
                     <>
                       <Button
                         mode="outlined"
-                        onPress={() => {
-                          setEditingModule(null);
-                          setLocalSettings(settings);
-                        }}
+                        onPress={() => { setEditingModule(null); }}
                         style={styles.button}
                         textColor="#fff"
                       >
@@ -77,7 +67,7 @@ export const SettingsPage = ({ onBack }: SettingsProps) => {
                       </Button>
                       <Button
                         mode="contained"
-                        // onPress={settings.onSave()}
+                        onPress={() => { module.onSave(data.settings, "prompt", editingText, setRefreshCounter); setEditingModule(null); }}
                         style={styles.button}
                         buttonColor="#6A5ACD"
                       >
@@ -131,31 +121,29 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
-  subheader: {
-    color: "#6A5ACD",
-    fontSize: 14,
-    fontWeight: "600",
-    marginTop: 16,
-  },
   card: {
     backgroundColor: "#111",
     marginHorizontal: 16,
-    marginVertical: 8,
+    marginVertical: 12,
+    borderRadius: 12,
   },
-  toggleContainer: {
-    marginBottom: 8,
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
   },
-  toggleItem: {
-    backgroundColor: "transparent",
-    paddingHorizontal: 0,
-  },
-  toggleTitle: {
-    color: "#fff",
-    fontSize: 16,
+  moduleTitle: {
+    color: "#6A5ACD",
+    fontSize: 18,
+    fontWeight: "700",
+    margin: 0,
+    padding: 0,
   },
   textInput: {
     backgroundColor: "#000",
     minHeight: 200,
+    marginTop: 8,
   },
   buttonContainer: {
     flexDirection: "row",

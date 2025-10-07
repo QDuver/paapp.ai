@@ -2,6 +2,7 @@ import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { CardAbstract, FirestoreDocAbstract, SubCardAbstract } from "../../models/Abstracts";
 import { useAppContext } from "../../contexts/AppContext";
+import { useDialogContext } from "../../contexts/DialogContext";
 import SubCard from "./SubCard";
 
 interface CustomCardProps {
@@ -11,7 +12,8 @@ interface CustomCardProps {
 }
 
 const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
-  const { refreshCounter, setRefreshCounter, showEditDialog } = useAppContext();
+  const { refreshCounter, setRefreshCounter } = useAppContext();
+  const { showEditDialog } = useDialogContext();
 
   const renderSubCards = (): React.ReactNode => {
     if (!item.isExpanded) {
