@@ -112,6 +112,16 @@ export class Meals extends FirestoreDocAbstract {
     super(data, Meal);
   }
 
+  static getUIMetadata() {
+    return {
+      key: "meals",
+      title: "Meals",
+      focusedIcon: "food-apple",
+      unfocusedIcon: "food-apple-outline",
+      generateButton: true,
+    };
+  }
+
   getEditableFields(): IFieldMetadata[] {
     return [
       {

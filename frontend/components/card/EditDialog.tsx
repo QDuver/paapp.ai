@@ -39,6 +39,14 @@ const EditDialog = () => {
     hideEditDialog();
   };
 
+  const getSectionColor = () => {
+    const collection = cardList?.collection;
+    if (collection === "routines") return theme.colors.sections.routines.accent;
+    if (collection === "exercises") return theme.colors.sections.exercises.accent;
+    if (collection === "meals") return theme.colors.sections.meals.accent;
+    return theme.colors.buttonPrimary;
+  };
+
   const renderField = (fieldMetadata: IFieldMetadata) => {
     if (!cardList) return null;
 
@@ -61,6 +69,7 @@ const EditDialog = () => {
             <Switch
               value={!!value}
               onValueChange={newValue => handleInputChange(fieldName, newValue)}
+              color={getSectionColor()}
             />
           </View>
           {hasError && (
@@ -77,15 +86,11 @@ const EditDialog = () => {
 
     return (
       <View key={fieldName} testID="form-field" style={styles.fieldContainer}>
-        <Text variant="bodyLarge" style={styles.fieldLabel}>
-          {fieldLabel}
-        </Text>
-
         {shouldUseAutocomplete ? (
           <AutocompleteInput
             value={displayValue}
             onChangeText={text => handleInputChange(fieldName, text)}
-            placeholder={`Enter ${fieldLabel}`}
+            placeholder={fieldLabel}
             placeholderTextColor={theme.colors.textMuted}
             suggestions={suggestions}
             style={[styles.textInput]}
@@ -110,7 +115,7 @@ const EditDialog = () => {
             style={[styles.textInput, isMultiline && styles.multilineInput]}
             value={displayValue}
             onChangeText={text => handleInputChange(fieldName, text)}
-            placeholder={`Enter ${fieldLabel}`}
+            placeholder={fieldLabel}
             placeholderTextColor={theme.colors.textMuted}
             keyboardType={keyboardType || "default"}
             inputMode={fieldType === "number" ? "numeric" : "text"}
@@ -119,7 +124,7 @@ const EditDialog = () => {
             numberOfLines={isMultiline ? 3 : 1}
             error={hasError}
             outlineColor={theme.colors.border}
-            activeOutlineColor={theme.colors.buttonPrimary}
+            activeOutlineColor={getSectionColor()}
           />
         )}
 
@@ -136,6 +141,8 @@ const EditDialog = () => {
     return null;
   }
 
+  const sectionColor = getSectionColor();
+
   return (
     <Portal>
       <Modal 
@@ -148,13 +155,12 @@ const EditDialog = () => {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.keyboardView}
         >
-          <View style={styles.header}>
-            <Text variant="titleLarge" style={styles.title}>
-              Edit Item
+          <View style={styles.titleContainer}>
+            <View style={[styles.titleAccent, { backgroundColor: sectionColor }]} />
+            <Text variant="titleMedium" style={styles.title}>
+              {isNew ? "New Item" : "Edit Item"}
             </Text>
           </View>
-
-          <Divider />
 
           <ScrollView style={styles.formContainer} showsVerticalScrollIndicator={false}>
             {(() => {
@@ -163,8 +169,6 @@ const EditDialog = () => {
               return filteredFields.map(renderField);
             })()}
           </ScrollView>
-
-          <Divider />
 
           <View style={styles.actionContainer}>
             <View style={styles.actionRow}>
@@ -182,9 +186,9 @@ const EditDialog = () => {
               <View style={styles.rightActions}>
                 <Button
                   testID="cancel-button"
-                  mode="outlined"
+                  mode="text"
+                  textColor={theme.colors.textSecondary}
                   onPress={hideEditDialog}
-                  style={styles.cancelButton}
                 >
                   Cancel
                 </Button>
@@ -200,7 +204,7 @@ const EditDialog = () => {
                     }
                     hideEditDialog();
                   }}
-                  buttonColor={theme.colors.buttonPrimary}
+                  buttonColor={sectionColor}
                 >
                   Save
                 </Button>
@@ -218,33 +222,50 @@ const styles = StyleSheet.create({
     ...commonStyles.modalContainer,
     margin: theme.spacing.lg,
     maxHeight: "90%",
-    borderRadius: theme.borderRadius.xl,
+    borderRadius: theme.borderRadius.xxl,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
   },
   keyboardView: {
     flex: 1,
   },
-  header: {
-    padding: theme.spacing.xl,
+  titleContainer: {
+    paddingTop: theme.spacing.xl,
+    paddingHorizontal: theme.spacing.xxl,
+    paddingBottom: theme.spacing.md,
+  },
+  titleAccent: {
+    width: 32,
+    height: 3,
+    borderRadius: theme.borderRadius.xs,
+    marginBottom: theme.spacing.sm,
   },
   title: {
-    textAlign: "center",
     fontWeight: theme.typography.weights.semibold,
+    fontSize: theme.typography.sizes.lg,
+    color: theme.colors.text,
   },
   formContainer: {
     flex: 1,
-    padding: theme.spacing.xl,
+    padding: theme.spacing.xxl,
+    paddingTop: theme.spacing.md,
   },
   fieldContainer: {
-    marginBottom: theme.spacing.xl,
+    marginBottom: theme.spacing.lg,
   },
   toggleContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    paddingVertical: theme.spacing.xs,
   },
   fieldLabel: {
     fontWeight: theme.typography.weights.medium,
-    marginBottom: theme.spacing.sm,
+    fontSize: theme.typography.sizes.md,
+    color: theme.colors.text,
   },
   textInput: {
     backgroundColor: theme.colors.modalSecondary,
@@ -255,9 +276,11 @@ const styles = StyleSheet.create({
   errorText: {
     color: theme.colors.error,
     marginTop: theme.spacing.xs,
+    fontSize: theme.typography.sizes.sm,
   },
   actionContainer: {
-    padding: theme.spacing.xl,
+    padding: theme.spacing.xxl,
+    paddingTop: theme.spacing.md,
   },
   actionRow: {
     flexDirection: "row",
@@ -267,9 +290,6 @@ const styles = StyleSheet.create({
   rightActions: {
     flexDirection: "row",
     gap: theme.spacing.md,
-  },
-  cancelButton: {
-    borderColor: theme.colors.border,
   },
 });
 

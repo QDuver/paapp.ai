@@ -43,7 +43,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContainer: {
-    paddingVertical: theme.spacing.sm,
+    paddingVertical: theme.spacing.md,
+    paddingBottom: theme.spacing.xxl,
   },
   emptyContainer: {
     flex: 1,
@@ -63,8 +64,7 @@ const styles = StyleSheet.create({
   },
   fab: {
     backgroundColor: theme.colors.accent,
-    elevation: 16,
-    ...theme.shadows.card,
+    ...theme.shadows.fab,
   },
 });
 

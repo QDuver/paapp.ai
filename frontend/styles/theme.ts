@@ -1,45 +1,74 @@
 export const theme = {
   colors: {
     // Background colors
-    primary: '#F5F5F5',
+    primary: '#F3F3F8',
     secondary: '#FFFFFF',
     tertiary: '#FAFAFA',
+    cardCompleted: '#F8F9FA',
     
     // Accent colors
-    accent: '#6200EE',
+    accent: '#5E5CE6',
+    accentLight: '#E8E7FF',
     
     // Text colors
-    text: '#202124',
-    textSecondary: '#5F6368',
-    textMuted: '#80868B',
+    text: '#1C1C1E',
+    textSecondary: '#6D6D72',
+    textMuted: '#8E8E93',
+    textDisabled: '#C7C7CC',
     
     // UI colors
-    border: '#DADCE0',
+    border: '#E5E5EA',
+    borderLight: '#F2F2F7',
     modalBackground: '#FFFFFF',
     modalSecondary: '#F8F9FA',
-    buttonPrimary: '#1A73E8',
+    buttonPrimary: '#5E5CE6',
     
     // Status colors
-    error: '#D93025',
-    warning: '#F9AB00',
-    success: '#1E8E3E',
+    error: '#FF3B30',
+    warning: '#FF9500',
+    success: '#34C759',
     
     // Icon backgrounds (subtle, colorful)
     iconBackgrounds: {
-      blue: '#E8F0FE',
-      purple: '#F3E8FD',
-      green: '#E6F4EA',
-      orange: '#FEF7E0',
-      red: '#FCE8E6',
+      blue: '#E3F2FD',
+      purple: '#F3E5F5',
+      green: '#E8F5E9',
+      orange: '#FFF3E0',
+      red: '#FFEBEE',
+      teal: '#E0F2F1',
+      indigo: '#E8EAF6',
+      pink: '#FCE4EC',
     },
     
     // Icon colors
     iconColors: {
-      blue: '#1967D2',
-      purple: '#8E24AA',
-      green: '#1E8E3E',
-      orange: '#F9AB00',
-      red: '#D93025',
+      blue: '#2196F3',
+      purple: '#9C27B0',
+      green: '#4CAF50',
+      orange: '#FF9800',
+      red: '#F44336',
+      teal: '#009688',
+      indigo: '#3F51B5',
+      pink: '#E91E63',
+    },
+    
+    // Section-specific theme colors
+    sections: {
+      routines: {
+        icon: '#FF9800',
+        iconBackground: '#FFF3E0',
+        accent: '#FF9800',
+      },
+      exercises: {
+        icon: '#4CAF50',
+        iconBackground: '#E8F5E9',
+        accent: '#4CAF50',
+      },
+      meals: {
+        icon: '#F44336',
+        iconBackground: '#FFEBEE',
+        accent: '#F44336',
+      },
     },
   },
   
@@ -49,23 +78,29 @@ export const theme = {
     md: 12,
     lg: 16,
     xl: 20,
-    xxl: 32,
+    xxl: 24,
+    xxxl: 32,
   },
   
   borderRadius: {
+    xs: 4,
     sm: 8,
-    md: 16,
-    lg: 20,
-    xl: 24,
+    md: 12,
+    lg: 16,
+    xl: 20,
+    xxl: 24,
+    round: 999,
   },
   
   typography: {
     sizes: {
-      xs: 12,
-      sm: 14,
-      md: 16,
-      lg: 18,
-      xl: 22,
+      xs: 11,
+      sm: 13,
+      md: 15,
+      lg: 17,
+      xl: 20,
+      xxl: 24,
+      xxxl: 28,
     },
     weights: {
       normal: '400',
@@ -78,10 +113,24 @@ export const theme = {
   shadows: {
     card: {
       shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.08,
-      shadowRadius: 2,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 8,
       elevation: 2,
+    },
+    cardHover: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 12,
+      elevation: 4,
+    },
+    fab: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.15,
+      shadowRadius: 8,
+      elevation: 8,
     },
   },
 } as const;
@@ -94,21 +143,19 @@ export const commonStyles = {
   },
   
   appBar: {
-    backgroundColor: theme.colors.primary,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
+    backgroundColor: theme.colors.secondary,
     elevation: 0,
   },
   
   card: {
     backgroundColor: theme.colors.secondary,
-    borderRadius: theme.borderRadius.md,
+    borderRadius: theme.borderRadius.lg,
     ...theme.shadows.card,
   },
   
   modalContainer: {
     backgroundColor: theme.colors.modalBackground,
-    borderTopLeftRadius: theme.borderRadius.xl,
-    borderTopRightRadius: theme.borderRadius.xl,
+    borderTopLeftRadius: theme.borderRadius.xxl,
+    borderTopRightRadius: theme.borderRadius.xxl,
   },
 } as const;

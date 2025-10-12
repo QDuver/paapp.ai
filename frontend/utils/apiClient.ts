@@ -39,7 +39,6 @@ async function request<T = unknown>(endpoint: string, options: FetchOptions & Ap
       ...fetchOptions,
       headers: {
         ...authHeaders,
-        "Access-Control-Allow-Origin": "*",
         ...fetchOptions.headers,
       } as Record<string, string>,
     };

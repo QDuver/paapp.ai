@@ -17,9 +17,16 @@ const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
   const { refreshCounter, setRefreshCounter } = useAppContext();
   const { showEditDialog } = useDialogContext();
 
-  const cardBackgroundColor = item.isCompleted ? theme.colors.modalSecondary : theme.colors.secondary;
+  const cardBackgroundColor = item.isCompleted ? theme.colors.cardCompleted : theme.colors.secondary;
   const hasSubCards = (item.items && item.items.length > 0) || item.createNewSubCard() !== null;
   const description = (item as any).description || (item as any).instructions;
+  const titleOpacity = item.isCompleted ? 0.5 : 1;
+  const descriptionOpacity = item.isCompleted ? 0.4 : 0.7;
+  
+  // Get section color based on collection
+  const sectionKey = cardList.collection as 'routines' | 'exercises' | 'meals';
+  const sectionColor = theme.colors.sections[sectionKey]?.icon || theme.colors.accent;
+  const sectionBgColor = theme.colors.sections[sectionKey]?.iconBackground || theme.colors.iconBackgrounds.blue;
 
   const handleCheckbox = (e?: any) => {
     e?.stopPropagation?.();
@@ -54,18 +61,21 @@ const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
           onPress={handleToggleExpand}
           onLongPress={() => showEditDialog(item, cardList, cardList, false)}
           style={[styles.accordionItem, { backgroundColor: cardBackgroundColor }]}
-          titleStyle={styles.accordionTitle}
-          descriptionStyle={styles.accordionDescription}
+          titleStyle={[styles.accordionTitle, { opacity: titleOpacity }]}
+          descriptionStyle={[styles.accordionDescription, { opacity: descriptionOpacity }]}
           left={props => (
             <Pressable 
               onPress={handleCheckbox} 
-              style={styles.radioContainer}
+              style={styles.iconContainer}
               hitSlop={8}
             >
-              <Checkbox
-                status={item.isCompleted ? "checked" : "unchecked"}
-                color={theme.colors.success}
-              />
+              <View style={[styles.iconCircle, { backgroundColor: sectionBgColor }]}>
+                <MaterialCommunityIcons 
+                  name={item.isCompleted ? "check" : cardList.collection === 'routines' ? "clock-outline" : cardList.collection === 'exercises' ? "dumbbell" : "food-apple-outline"}
+                  size={20} 
+                  color={sectionColor}
+                />
+              </View>
             </Pressable>
           )}
           right={props => (
@@ -79,11 +89,17 @@ const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
                   <MaterialCommunityIcons 
                     name="plus-circle-outline" 
                     size={24} 
-                    color={theme.colors.buttonPrimary}
+                    color={sectionColor}
                   />
                 </Pressable>
               )}
-              <List.Icon {...props} icon={item.isExpanded ? "chevron-up" : "chevron-down"} />
+              <View style={styles.chevronContainer}>
+                <MaterialCommunityIcons 
+                  name={item.isExpanded ? "chevron-up" : "chevron-down"}
+                  size={24} 
+                  color={theme.colors.textSecondary}
+                />
+              </View>
             </View>
           )}
         >
@@ -121,11 +137,14 @@ const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
       titleStyle={styles.listItemTitle}
       descriptionStyle={styles.listItemDescription}
       left={() => (
-        <Pressable onPress={handleCheckbox} hitSlop={8}>
-          <Checkbox
-            status={item.isCompleted ? "checked" : "unchecked"}
-            color={theme.colors.success}
-          />
+        <Pressable onPress={handleCheckbox} hitSlop={8} style={styles.iconContainer}>
+          <View style={[styles.iconCircle, { backgroundColor: sectionBgColor }]}>
+            <MaterialCommunityIcons 
+              name={item.isCompleted ? "check" : cardList.collection === 'routines' ? "clock-outline" : cardList.collection === 'exercises' ? "dumbbell" : "food-apple-outline"}
+              size={20} 
+              color={sectionColor}
+            />
+          </View>
         </Pressable>
       )}
     />
@@ -134,78 +153,106 @@ const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
 
 const styles = StyleSheet.create({
   card: {
-    marginVertical: theme.spacing.xs,
+    marginVertical: theme.spacing.sm,
     marginHorizontal: theme.spacing.lg,
     overflow: "hidden",
+    borderRadius: theme.borderRadius.lg,
+    ...theme.shadows.card,
   },
   accordionItem: {
-    paddingLeft: 0,
+    paddingLeft: theme.spacing.xs,
+    paddingVertical: theme.spacing.xs,
+  },
+  iconContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: theme.spacing.sm,
+  },
+  iconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: theme.borderRadius.round,
+    justifyContent: "center",
+    alignItems: "center",
   },
   radioContainer: {
     justifyContent: "center",
     alignItems: "center",
-    marginLeft: 8,
+    marginLeft: theme.spacing.sm,
   },
   rightContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginRight: -8,
+    marginRight: -4,
   },
   accordionTitle: {
     fontWeight: theme.typography.weights.semibold,
     fontSize: theme.typography.sizes.lg,
     color: theme.colors.text,
+    letterSpacing: -0.3,
   },
   accordionDescription: {
     fontSize: theme.typography.sizes.sm,
-    color: theme.colors.textMuted,
+    color: theme.colors.textSecondary,
+    marginTop: 2,
   },
   subCard: {
-    paddingLeft: theme.spacing.lg,
+    paddingLeft: theme.spacing.xxl,
     paddingRight: theme.spacing.lg,
-    paddingVertical: theme.spacing.sm,
+    paddingVertical: theme.spacing.md,
     backgroundColor: "transparent",
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border || "rgba(0, 0, 0, 0.08)",
-    minHeight: 56,
+    borderBottomColor: theme.colors.borderLight,
+    minHeight: 60,
   },
   subCardLast: {
     borderBottomWidth: 0,
+    paddingBottom: theme.spacing.lg,
   },
   subCardTitle: {
     fontSize: theme.typography.sizes.md,
     fontWeight: theme.typography.weights.medium,
     color: theme.colors.text,
     marginLeft: theme.spacing.sm,
+    letterSpacing: -0.2,
   },
   subCardDescription: {
     fontSize: theme.typography.sizes.sm,
-    color: theme.colors.textMuted,
+    color: theme.colors.textSecondary,
     marginLeft: theme.spacing.sm,
-    marginTop: 2,
+    marginTop: 3,
   },
   listItem: {
-    marginVertical: theme.spacing.xs,
+    marginVertical: theme.spacing.sm,
     marginHorizontal: theme.spacing.lg,
-    borderRadius: theme.borderRadius.md,
+    borderRadius: theme.borderRadius.lg,
+    backgroundColor: theme.colors.secondary,
+    paddingVertical: theme.spacing.xs,
     ...theme.shadows.card,
   },
   listItemTitle: {
     fontWeight: theme.typography.weights.semibold,
     fontSize: theme.typography.sizes.lg,
     color: theme.colors.text,
+    letterSpacing: -0.3,
   },
   listItemDescription: {
     fontSize: theme.typography.sizes.sm,
-    color: theme.colors.textMuted,
+    color: theme.colors.textSecondary,
+    marginTop: 2,
   },
   iconButton: {
     margin: 0,
   },
   addButton: {
-    padding: 8,
+    padding: theme.spacing.sm,
     justifyContent: "center",
     alignItems: "center",
+  },
+  chevronContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: theme.spacing.sm,
   },
 });
 

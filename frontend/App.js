@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, View, Text } from "react-native";
-import { PaperProvider } from "react-native-paper";
+import { ActivityIndicator, View, Text, Platform } from "react-native";
+import { PaperProvider, MD3LightTheme } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MainApp from "./components/MainApp";
 import { AppProvider } from "./contexts/AppContext";
@@ -8,6 +8,25 @@ import { DialogProvider } from "./contexts/DialogContext";
 import LoginScreen from "./components/auth/LoginScreen";
 import { onAuthStateChanged } from "firebase/auth";
 import { getFirebaseAuth } from "./services/Firebase";
+import { theme } from "./styles/theme";
+
+// Load icon fonts CSS for web
+if (Platform.OS === 'web') {
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = '/fonts.css';
+  document.head.appendChild(link);
+}
+
+const paperTheme = {
+  ...MD3LightTheme,
+  colors: {
+    ...MD3LightTheme.colors,
+    primary: theme.colors.accent,
+    background: theme.colors.primary,
+    surface: theme.colors.secondary,
+  },
+};
 
 export default function App() {
   const [isFirebaseInitialized, setIsFirebaseInitialized] = useState(false);
@@ -22,9 +41,7 @@ export default function App() {
         if (typeof window !== "undefined" && window.location) {
           const urlParams = new URLSearchParams(window.location.search);
           const pathname = window.location.pathname;
-          const shouldSkipAuth =
-            urlParams.get("skipAuth") === "true" ||
-            pathname.includes("skipAuth=true");
+          const shouldSkipAuth = urlParams.get("skipAuth") === "true" || pathname.includes("skipAuth=true");
 
           if (shouldSkipAuth) {
             setSkipAuth(true);
@@ -36,9 +53,7 @@ export default function App() {
         }
 
         // Import and initialize Firebase first
-        const { default: initializeFirebase } = await import(
-          "./services/Firebase"
-        );
+        const { default: initializeFirebase } = await import("./services/Firebase");
         await initializeFirebase();
         setIsFirebaseInitialized(true);
         const auth = getFirebaseAuth();
@@ -59,23 +74,19 @@ export default function App() {
               // Warmup the backend connection - wait for it to complete
               try {
                 const token = await u.getIdToken();
-                const { DEV_CONFIG, PROD_CONFIG } = await import(
-                  "./config/env"
-                );
+                const { DEV_CONFIG, PROD_CONFIG } = await import("./config/env");
                 const baseUrl = __DEV__
                   ? typeof window !== "undefined" && window.location
                     ? `http://localhost:${DEV_CONFIG.LOCAL_PORT}`
                     : `http://${DEV_CONFIG.LOCAL_IP}:${DEV_CONFIG.LOCAL_PORT}`
                   : PROD_CONFIG.API_URL;
 
-                const response = await fetch(`${baseUrl}/warmup`, {
+                await fetch(`${baseUrl}/warmup`, {
                   headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json",
                   },
                 });
-                const data = await response.json();
-                console.log("[WARMUP] Backend warmed up:", data);
               } catch (error) {
                 console.error("[WARMUP] Error:", error);
               }
@@ -115,14 +126,15 @@ export default function App() {
     );
   }
 
-  if (!user) return (
-    <PaperProvider>
-      <LoginScreen />
-    </PaperProvider>
-  );
+  if (!user)
+    return (
+      <PaperProvider theme={paperTheme}>
+        <LoginScreen />
+      </PaperProvider>
+    );
 
   return (
-    <PaperProvider>
+    <PaperProvider theme={paperTheme}>
       <AppProvider skipAuth={skipAuth}>
         <DialogProvider>
           <MainApp user={user} />

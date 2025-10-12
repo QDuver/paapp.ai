@@ -105,11 +105,19 @@ export const SettingsPage = ({ onBack }: SettingsProps) => {
 
 const styles = StyleSheet.create({
   container: commonStyles.container,
-  appBar: commonStyles.appBar,
+  appBar: {
+    ...commonStyles.appBar,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
   appBarTitle: {
     color: theme.colors.text,
-    fontSize: theme.typography.sizes.xl,
+    fontSize: theme.typography.sizes.xxl,
     fontWeight: theme.typography.weights.bold,
+    letterSpacing: -0.5,
   },
   content: {
     flex: 1,
@@ -117,8 +125,9 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: theme.colors.secondary,
     marginHorizontal: theme.spacing.lg,
-    marginVertical: theme.spacing.md,
-    borderRadius: theme.borderRadius.md,
+    marginVertical: theme.spacing.sm,
+    borderRadius: theme.borderRadius.lg,
+    ...theme.shadows.card,
   },
   headerContainer: {
     flexDirection: "row",
@@ -127,16 +136,18 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.lg,
   },
   moduleTitle: {
-    color: theme.colors.accent,
+    color: theme.colors.text,
     fontSize: theme.typography.sizes.lg,
     fontWeight: theme.typography.weights.bold,
     margin: 0,
     padding: 0,
+    letterSpacing: -0.3,
   },
   textInput: {
     backgroundColor: theme.colors.primary,
     minHeight: 200,
     marginTop: theme.spacing.sm,
+    fontSize: theme.typography.sizes.sm,
   },
   buttonContainer: {
     flexDirection: "row",

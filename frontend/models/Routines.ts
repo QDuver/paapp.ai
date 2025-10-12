@@ -51,4 +51,14 @@ export class Routines extends FirestoreDocAbstract {
   constructor(data) {
     super(data, Routine);
   }
+
+  static getUIMetadata() {
+    return {
+      key: "routines",
+      title: "Routines",
+      focusedIcon: "clock",
+      unfocusedIcon: "clock-outline",
+      generateButton: false,
+    };
+  }
 }

@@ -127,6 +127,16 @@ export class Exercises extends FirestoreDocAbstract {
     super(data, Exercise);
   }
 
+  static getUIMetadata() {
+    return {
+      key: "exercises",
+      title: "Exercises",
+      focusedIcon: "dumbbell",
+      unfocusedIcon: "dumbbell",
+      generateButton: true,
+    };
+  }
+
   getEditableFields(): IFieldMetadata[] {
     return [
       {

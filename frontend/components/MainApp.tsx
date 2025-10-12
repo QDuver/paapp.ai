@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView, ScrollView, StyleSheet, Text, View, ActivityIndicator, RefreshControl } from "react-native";
-import { Provider as PaperProvider, FAB, Appbar, BottomNavigation, Menu } from "react-native-paper";
+import { FAB, Appbar, BottomNavigation, Menu, Icon, MD3Colors } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CardList from "./card/CardList";
 import UserAvatar from "./auth/UserAvatar";
@@ -13,6 +13,9 @@ import { SettingsPage } from "./SettingsPage";
 import { useAppContext } from "../contexts/AppContext";
 import { useDialogContext } from "../contexts/DialogContext";
 import { theme, commonStyles } from "../styles/theme";
+import { Routines } from "../models/Routines";
+import { Exercises } from "../models/Exercises";
+import { Meals } from "../models/Meals";
 
 interface MainAppProps {
   user: any;
@@ -26,7 +29,6 @@ const MainApp = ({ user }: MainAppProps) => {
   const [menuVisible, setMenuVisible] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
-  // Load persisted view state on mount
   useEffect(() => {
     const loadViewState = async () => {
       const savedView = await AsyncStorage.getItem("@current_view");
@@ -37,7 +39,6 @@ const MainApp = ({ user }: MainAppProps) => {
     loadViewState();
   }, []);
 
-  // Persist view state when it changes
   useEffect(() => {
     const saveViewState = async () => {
       await AsyncStorage.setItem("@current_view", showSettings ? "settings" : "main");
@@ -46,14 +47,10 @@ const MainApp = ({ user }: MainAppProps) => {
   }, [showSettings]);
 
   const handleSignOut = async () => {
-    try {
       const auth = getFirebaseAuth();
       if (auth) {
         await signOut(auth);
       }
-    } catch (error) {
-      console.error("Sign out error:", error);
-    }
     setMenuVisible(false);
   };
 
@@ -62,30 +59,15 @@ const MainApp = ({ user }: MainAppProps) => {
     setMenuVisible(false);
   };
 
-  // Define navigation routes
-  const routes = [
-    {
-      key: "routines",
-      title: "Routines",
-      focusedIcon: "clock",
-      unfocusedIcon: "clock-outline",
-    },
-    {
-      key: "exercises",
-      title: "Exercises",
-      focusedIcon: "dumbbell",
-      unfocusedIcon: "dumbbell",
-    },
-    {
-      key: "meals",
-      title: "Meals",
-      focusedIcon: "food-apple",
-      unfocusedIcon: "food-apple-outline",
-    },
-  ];
+  const routes = [Routines, Exercises, Meals].map(ModelClass => ({
+    ...ModelClass.getUIMetadata(),
+    color: theme.colors.sections[ModelClass.getUIMetadata().key as 'routines' | 'exercises' | 'meals']?.accent || theme.colors.accent,
+  }));
 
   const renderScene = ({ route }: { route: { key: string } }) => {
     const cardList: FirestoreDocAbstract = data?.[route.key];
+    const sectionColor = theme.colors.sections[route.key as 'routines' | 'exercises' | 'meals']?.accent || theme.colors.accent;
+    const currentRoute = routes.find(r => r.key === route.key);
 
     const createCard = () => {
       if (!cardList) return;
@@ -95,10 +77,10 @@ const MainApp = ({ user }: MainAppProps) => {
 
     return (
       <View style={styles.sceneContainer}>
-        <ScrollView style={styles.content} refreshControl={<RefreshControl refreshing={isLoading} tintColor={theme.colors.accent} />}>
+        <ScrollView style={styles.content} refreshControl={<RefreshControl refreshing={isLoading} tintColor={sectionColor} />}>
           {isLoading ? (
             <View style={styles.loadingContainer} testID="loading-container">
-              <ActivityIndicator size="large" color={theme.colors.accent} />
+              <ActivityIndicator size="large" color={sectionColor} />
               <Text style={styles.loadingText} testID="loading-text">
                 Loading {route.key}...
               </Text>
@@ -115,11 +97,22 @@ const MainApp = ({ user }: MainAppProps) => {
         <EditDialog />
 
         {!isLoading && (
-          <>
-            {route.key !== "routines" && (
+          <View style={styles.fabContainer}>
+            <FAB 
+              style={[styles.fabButton, { backgroundColor: sectionColor }]} 
+              icon="cog-outline" 
+              color={theme.colors.secondary}
+              customSize={56}
+              onPress={handleSettings} 
+              testID="settings-fab" 
+            />
+
+            {currentRoute?.generateButton && (
               <FAB
-                style={styles.aiFab}
+                style={[styles.fabButton, { backgroundColor: sectionColor }]}
                 icon="auto-fix"
+                color={theme.colors.secondary}
+                customSize={56}
                 onPress={() => {
                   if (cardList) {
                     showEditDialog(cardList, cardList, cardList, true);
@@ -129,8 +122,15 @@ const MainApp = ({ user }: MainAppProps) => {
               />
             )}
 
-            <FAB style={styles.fab} icon="plus" onPress={createCard} testID="add-fab" />
-          </>
+            <FAB 
+              style={[styles.fabButton, { backgroundColor: sectionColor }]} 
+              icon="plus" 
+              color={theme.colors.secondary}
+              customSize={56}
+              onPress={createCard} 
+              testID="add-fab" 
+            />
+          </View>
         )}
       </View>
     );
@@ -138,21 +138,20 @@ const MainApp = ({ user }: MainAppProps) => {
 
   if (showSettings) {
     return (
-      <PaperProvider>
-        <SafeAreaView style={styles.container}>
-          <SettingsPage onBack={() => setShowSettings(false)} />
-          <StatusBar style="dark" />
-        </SafeAreaView>
-      </PaperProvider>
+      <SafeAreaView style={styles.container}>
+        <SettingsPage onBack={() => setShowSettings(false)} />
+        <StatusBar style="dark" />
+      </SafeAreaView>
     );
   }
 
+  const currentRoute = routes[navigationIndex];
+
   return (
-    <PaperProvider>
-      <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container}>
         {/* Header */}
         <Appbar.Header style={styles.appBar}>
-          <Appbar.Content title="Routine Assistant" titleStyle={styles.appBarTitle} />
+          <Appbar.Content title={currentRoute?.title} titleStyle={styles.appBarTitle} />
           <Menu
             visible={menuVisible}
             onDismiss={() => setMenuVisible(false)}
@@ -175,24 +174,34 @@ const MainApp = ({ user }: MainAppProps) => {
           testID="bottom-navigation"
           theme={{
             colors: {
-              secondaryContainer: theme.colors.tertiary,
+              secondaryContainer: routes[navigationIndex].color,
+              onSecondaryContainer: theme.colors.secondary,
+              onSurfaceVariant: theme.colors.textMuted,
+              onSurface: theme.colors.text,
             },
           }}
         />
 
         <StatusBar style="dark" />
       </SafeAreaView>
-    </PaperProvider>
-  );
-};
+    );
+  };
 
-const styles = StyleSheet.create({
+  const styles = StyleSheet.create({
   container: commonStyles.container,
-  appBar: commonStyles.appBar,
+  appBar: {
+    ...commonStyles.appBar,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
   appBarTitle: {
     color: theme.colors.text,
-    fontSize: theme.typography.sizes.xl,
+    fontSize: theme.typography.sizes.xxl,
     fontWeight: theme.typography.weights.bold,
+    letterSpacing: -0.5,
   },
   appBarSubtitle: {
     color: theme.colors.textSecondary,
@@ -210,18 +219,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: theme.spacing.xl,
+    padding: theme.spacing.xxl,
   },
   loadingText: {
-    marginTop: theme.spacing.md,
+    marginTop: theme.spacing.lg,
     fontSize: theme.typography.sizes.md,
-    color: theme.colors.accent,
+    color: theme.colors.textSecondary,
+    fontWeight: theme.typography.weights.medium,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: theme.spacing.xl,
+    padding: theme.spacing.xxl,
   },
   emptyText: {
     fontSize: theme.typography.sizes.md,
@@ -229,26 +239,25 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   bottomNavBar: {
-    backgroundColor: theme.colors.primary,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
+    backgroundColor: theme.colors.secondary,
+    borderTopWidth: 0,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
   },
-  aiFab: {
+  fabContainer: {
     position: "absolute",
-    margin: theme.spacing.lg,
-    right: 0,
-    bottom: 70,
+    right: theme.spacing.lg,
+    bottom: 20,
+    flexDirection: "column",
+    gap: theme.spacing.sm,
     zIndex: 9999,
-    elevation: 16,
-    backgroundColor: theme.colors.accent,
   },
-  fab: {
-    position: "absolute",
-    margin: theme.spacing.lg,
-    right: 0,
-    bottom: 0,
-    zIndex: 9999,
-    elevation: 16,
+  fabButton: {
+    margin: 0,
+    ...theme.shadows.fab,
   },
 });
 

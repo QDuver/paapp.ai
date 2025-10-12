@@ -18,6 +18,14 @@ export interface IFieldMetadata {
   suggestions?: [];
 }
 
+export interface IUIMetadata {
+  key: string;
+  title: string;
+  focusedIcon: string;
+  unfocusedIcon: string;
+  generateButton: boolean;
+}
+
 export abstract class DialogableAbstract {
   constructor(data: any = {}) {
     Object.assign(this, data);
@@ -141,7 +149,11 @@ export abstract class FirestoreDocAbstract extends DialogableAbstract {
     super(data);
     if (!ChildModel || !data) return;
     this.ChildModel = ChildModel;
-    this.items = data.items.map(item => new ChildModel(item));
+    this.items = data.items?.map(item => new ChildModel(item)) || [];
+  }
+
+  static getUIMetadata(): IUIMetadata {
+    throw new Error("getUIMetadata must be implemented by subclass");
   }
 
   static async fromApi<T extends FirestoreDocAbstract>(this: new (data?: any) => T): Promise<T> {

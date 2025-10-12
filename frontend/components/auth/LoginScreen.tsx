@@ -1,9 +1,9 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, Platform, StyleSheet } from 'react-native';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { getFirebaseAuth } from '../../services/Firebase';
+import { theme } from '../../styles/theme';
 
-// Web: use signInWithPopup. For native, placeholder until expo-auth-session / play-services added.
 export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -12,13 +12,12 @@ export default function LoginScreen() {
     setError(null);
     setLoading(true);
     try {
-  const auth = getFirebaseAuth();
-  if (!auth) throw new Error('Auth not initialized');
+      const auth = getFirebaseAuth();
+      if (!auth) throw new Error('Auth not initialized');
       if (Platform.OS === 'web') {
         const provider = new GoogleAuthProvider();
         await signInWithPopup(auth, provider);
       } else {
-        // Native path not yet implemented
         setError('Native Google sign-in not implemented yet');
       }
     } catch (e: any) {
@@ -29,20 +28,77 @@ export default function LoginScreen() {
   }, []);
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
-      <Text style={{ fontSize: 28, fontWeight: '600', marginBottom: 32 }}>Routine Assistant</Text>
-      
-      <TouchableOpacity
-        disabled={loading}
-        onPress={onGooglePress}
-        style={{ backgroundColor: '#4285F4', paddingHorizontal: 20, paddingVertical: 14, borderRadius: 6, width: 240 }}>
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={{ color: '#fff', textAlign: 'center', fontSize: 16, fontWeight: '500' }}>Sign in with Google</Text>
-        )}
-      </TouchableOpacity>
-      {error && <Text style={{ color: 'red', marginTop: 16 }}>{error}</Text>}
+    <View style={styles.container}>
+      <View style={styles.content}>
+        <Text style={styles.title}>Routine Assistant</Text>
+        <Text style={styles.subtitle}>Organize your daily routines, exercises, and meals</Text>
+        
+        <TouchableOpacity
+          disabled={loading}
+          onPress={onGooglePress}
+          style={[styles.button, loading && styles.buttonDisabled]}>
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Sign in with Google</Text>
+          )}
+        </TouchableOpacity>
+        {error && <Text style={styles.errorText}>{error}</Text>}
+      </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: theme.spacing.xxl,
+  },
+  content: {
+    width: '100%',
+    maxWidth: 400,
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: theme.typography.sizes.xxxl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text,
+    marginBottom: theme.spacing.md,
+    textAlign: 'center',
+    letterSpacing: -0.5,
+  },
+  subtitle: {
+    fontSize: theme.typography.sizes.md,
+    color: theme.colors.textSecondary,
+    marginBottom: theme.spacing.xxxl,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  button: {
+    backgroundColor: theme.colors.accent,
+    paddingHorizontal: theme.spacing.xxl,
+    paddingVertical: theme.spacing.lg,
+    borderRadius: theme.borderRadius.md,
+    width: '100%',
+    maxWidth: 280,
+    ...theme.shadows.card,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    textAlign: 'center',
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.semibold,
+  },
+  errorText: {
+    color: theme.colors.error,
+    marginTop: theme.spacing.lg,
+    textAlign: 'center',
+    fontSize: theme.typography.sizes.sm,
+  },
+});

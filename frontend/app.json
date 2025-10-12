@@ -1,12 +1,15 @@
 {
   "expo": {
-    "name": "aiapps",
-    "slug": "aiapps",
+    "name": "Routine Assistant",
+    "slug": "routine-assistant",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -23,7 +26,8 @@
       "edgeToEdgeEnabled": true
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
     }
   }
 }
