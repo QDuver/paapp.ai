@@ -1,9 +1,11 @@
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, View, Pressable } from "react-native";
+import { Card, List, IconButton, Checkbox, TouchableRipple } from "react-native-paper";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { CardAbstract, FirestoreDocAbstract, SubCardAbstract } from "../../models/Abstracts";
 import { useAppContext } from "../../contexts/AppContext";
 import { useDialogContext } from "../../contexts/DialogContext";
-import SubCard from "./SubCard";
+import { theme } from "../../styles/theme";
 
 interface CustomCardProps {
   cardList: FirestoreDocAbstract;
@@ -15,200 +17,195 @@ const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
   const { refreshCounter, setRefreshCounter } = useAppContext();
   const { showEditDialog } = useDialogContext();
 
-  const renderSubCards = (): React.ReactNode => {
-    if (!item.isExpanded) {
-      return null;
-    }
+  const cardBackgroundColor = item.isCompleted ? theme.colors.modalSecondary : theme.colors.secondary;
+  const hasSubCards = (item.items && item.items.length > 0) || item.createNewSubCard() !== null;
+  const description = (item as any).description || (item as any).instructions;
 
-    const hasSubCards = item.items && item.items.length > 0;
-    const supportsSubCards = item.createNewSubCard() !== null;
-
-    if (!hasSubCards && !supportsSubCards) {
-      return null;
-    }
-
-    return (
-      <View>
-        {hasSubCards &&
-          item.items!.map((subItem: SubCardAbstract, subIndex: number) => (
-            <SubCard
-              key={`${refreshCounter}-subcard-${index}-${subIndex}`}
-              subItem={subItem}
-              parentItem={item}
-              cardList={cardList}
-              index={subIndex}
-            />
-          ))}
-
-        {supportsSubCards && (
-          <TouchableOpacity
-            testID="add-subcard-button"
-            style={styles.addSubCardButton}
-            onPress={() => {
-              const newSubCard = item.createNewSubCard();
-              if (item.skipDialogForNewChild()) {
-                newSubCard.onSave(cardList, newSubCard.toFormData(), item, true, setRefreshCounter);
-              } else {
-                showEditDialog(newSubCard, item, cardList, true);
-              }
-            }}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.addSubCardText}>+ Add</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-    );
+  const handleCheckbox = (e?: any) => {
+    e?.stopPropagation?.();
+    item.onComplete(cardList);
+    setRefreshCounter(prev => prev + 1);
   };
 
-  const cardBackgroundColor: string = item.isCompleted ? "#2C2C2E" : "#1C1C1E";
-  const textColor: string = "#FFFFFF";
-  const subtitleColor: string = "#8E8E93";
+  const handleToggleExpand = (e?: any) => {
+    e?.stopPropagation?.();
+    item.onToggleExpand(cardList);
+    setRefreshCounter(prev => prev + 1);
+  };
 
-  return (
-    <View style={[styles.card, { backgroundColor: cardBackgroundColor }]}>
-      <TouchableOpacity
-        testID="exercise-card"
-        style={styles.cardHeader}
-        activeOpacity={0.7}
-        onPress={() => showEditDialog(item, cardList, cardList, false)}
-      >
-        <View style={styles.headerContent}>
-          <View style={styles.titleRow}>
-            <TouchableOpacity
-              style={[
-                styles.completionButton,
-                {
-                  backgroundColor: item.isCompleted ? "#34C759" : "#48484A",
-                  borderWidth: item.isCompleted ? 0 : 2,
-                  borderColor: "#8E8E93",
-                },
-              ]}
-              onPress={() => {
-                item.onComplete(cardList);
-              }}
+  const handleAddSubCard = (e?: any) => {
+    e?.stopPropagation?.();
+    const newSubCard = item.createNewSubCard();
+    if (item.skipDialogForNewChild()) {
+      newSubCard.onSave(cardList, newSubCard.toFormData(), item, true, setRefreshCounter);
+    } else {
+      showEditDialog(newSubCard, item, cardList, true);
+    }
+  };
+
+  // If has subcards, use Card with List.Accordion
+  if (hasSubCards) {
+    return (
+      <Card style={[styles.card, { backgroundColor: cardBackgroundColor }]} testID="exercise-card">
+        <List.Accordion
+          title={item.name || `Item ${index + 1}`}
+          description={description}
+          expanded={item.isExpanded}
+          onPress={handleToggleExpand}
+          onLongPress={() => showEditDialog(item, cardList, cardList, false)}
+          style={[styles.accordionItem, { backgroundColor: cardBackgroundColor }]}
+          titleStyle={styles.accordionTitle}
+          descriptionStyle={styles.accordionDescription}
+          left={props => (
+            <Pressable 
+              onPress={handleCheckbox} 
+              style={styles.radioContainer}
+              hitSlop={8}
             >
-              <Text
-                style={[
-                  styles.completionText,
-                  {
-                    color: item.isCompleted ? "#FFFFFF" : "#8E8E93",
-                  },
-                ]}
-              >
-                {item.isCompleted ? "✓" : ""}
-              </Text>
-            </TouchableOpacity>
-
-            <Text style={[styles.title, { color: textColor }]}>{item.name || `Item ${index + 1}`}</Text>
-
-            {(item.items && item.items.length > 0) || item.createNewSubCard() !== null ? (
-              <TouchableOpacity
-                testID="expand-button"
-                style={styles.expandButtonRight}
-                onPress={() => {
-                  item.onToggleExpand(cardList);
-                }}
-              >
-                <Text style={[styles.expandText, { color: subtitleColor }]}>{item.isExpanded ? "▼" : "▶"}</Text>
-              </TouchableOpacity>
-            ) : null}
-          </View>
-
-          {((item as any).description || (item as any).instructions) && (
-            <Text style={[styles.description, { color: subtitleColor }]}>{(item as any).description || (item as any).instructions}</Text>
+              <Checkbox
+                status={item.isCompleted ? "checked" : "unchecked"}
+                color={theme.colors.success}
+              />
+            </Pressable>
           )}
-        </View>
-      </TouchableOpacity>
+          right={props => (
+            <View style={styles.rightContainer}>
+              {item.createNewSubCard() !== null && (
+                <Pressable 
+                  testID="add-subcard-button" 
+                  onPress={handleAddSubCard}
+                  style={styles.addButton}
+                >
+                  <MaterialCommunityIcons 
+                    name="plus-circle-outline" 
+                    size={24} 
+                    color={theme.colors.buttonPrimary}
+                  />
+                </Pressable>
+              )}
+              <List.Icon {...props} icon={item.isExpanded ? "chevron-up" : "chevron-down"} />
+            </View>
+          )}
+        >
+          {item.items?.map((subItem: SubCardAbstract, subIndex: number) => {
+            const tags = subItem.getTags();
+            const tagString = tags.length > 0 ? tags.join(" • ") : undefined;
+            const isLastItem = subIndex === item.items!.length - 1;
 
-      {renderSubCards()}
-    </View>
+            return (
+              <List.Item
+                key={`${refreshCounter}-subcard-${index}-${subIndex}`}
+                testID="subcard"
+                title={subItem.name || `Set ${subIndex + 1}`}
+                description={tagString}
+                onPress={() => showEditDialog(subItem, item, cardList, false)}
+                style={[styles.subCard, isLastItem && styles.subCardLast]}
+                titleStyle={styles.subCardTitle}
+                descriptionStyle={styles.subCardDescription}
+              />
+            );
+          })}
+        </List.Accordion>
+      </Card>
+    );
+  }
+
+  // If no subcards, use simple List.Item
+  return (
+    <List.Item
+      testID="exercise-card"
+      title={item.name || `Item ${index + 1}`}
+      description={description}
+      onPress={() => showEditDialog(item, cardList, cardList, false)}
+      style={[styles.listItem, { backgroundColor: cardBackgroundColor }]}
+      titleStyle={styles.listItemTitle}
+      descriptionStyle={styles.listItemDescription}
+      left={() => (
+        <Pressable onPress={handleCheckbox} hitSlop={8}>
+          <Checkbox
+            status={item.isCompleted ? "checked" : "unchecked"}
+            color={theme.colors.success}
+          />
+        </Pressable>
+      )}
+    />
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    marginVertical: 6,
-    marginHorizontal: 16,
-    borderRadius: 12,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    marginVertical: theme.spacing.xs,
+    marginHorizontal: theme.spacing.lg,
+    overflow: "hidden",
   },
-  cardHeader: {
-    padding: 16,
+  accordionItem: {
+    paddingLeft: 0,
   },
-  headerContent: {
-    gap: 8,
-  },
-  titleRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: 12,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "600",
-    flex: 1,
-  },
-  description: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  infoRow: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  infoText: {
-    fontSize: 12,
-    fontWeight: "500",
-  },
-  completionButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  completionText: {
-    fontSize: 18,
-    fontWeight: "700",
-  },
-  expandButtonRight: {
-    width: 32,
-    height: 32,
+  radioContainer: {
     justifyContent: "center",
     alignItems: "center",
     marginLeft: 8,
   },
-  expandText: {
-    fontSize: 14,
-    fontWeight: "600",
+  rightContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: -8,
   },
-  addSubCardButton: {
-    marginLeft: 32,
-    marginRight: 16,
-    marginVertical: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: "#48484A",
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: "#8E8E93",
-    borderStyle: "dashed",
+  accordionTitle: {
+    fontWeight: theme.typography.weights.semibold,
+    fontSize: theme.typography.sizes.lg,
+    color: theme.colors.text,
   },
-  addSubCardText: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#8E8E93",
-    textAlign: "center",
+  accordionDescription: {
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.textMuted,
+  },
+  subCard: {
+    paddingLeft: theme.spacing.lg,
+    paddingRight: theme.spacing.lg,
+    paddingVertical: theme.spacing.sm,
+    backgroundColor: "transparent",
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border || "rgba(0, 0, 0, 0.08)",
+    minHeight: 56,
+  },
+  subCardLast: {
+    borderBottomWidth: 0,
+  },
+  subCardTitle: {
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.medium,
+    color: theme.colors.text,
+    marginLeft: theme.spacing.sm,
+  },
+  subCardDescription: {
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.textMuted,
+    marginLeft: theme.spacing.sm,
+    marginTop: 2,
+  },
+  listItem: {
+    marginVertical: theme.spacing.xs,
+    marginHorizontal: theme.spacing.lg,
+    borderRadius: theme.borderRadius.md,
+    ...theme.shadows.card,
+  },
+  listItemTitle: {
+    fontWeight: theme.typography.weights.semibold,
+    fontSize: theme.typography.sizes.lg,
+    color: theme.colors.text,
+  },
+  listItemDescription: {
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.textMuted,
+  },
+  iconButton: {
+    margin: 0,
+  },
+  addButton: {
+    padding: 8,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

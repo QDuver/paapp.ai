@@ -3,9 +3,11 @@ MVP
 - Make sure DB gets created on first load
 - Deploy to Android
 - Design form routines / modes on Android
+- Have default exercises
 
 POST MVP
 - Theme
+- Dialog should become modal
 - Calendar Icon + Swipability
 - Routine type to dropdown
 - Weight input should not accept non-numeric

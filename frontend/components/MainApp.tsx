@@ -12,6 +12,7 @@ import { CardAbstract, FirestoreDocAbstract } from "../models/Abstracts";
 import { SettingsPage } from "./SettingsPage";
 import { useAppContext } from "../contexts/AppContext";
 import { useDialogContext } from "../contexts/DialogContext";
+import { theme, commonStyles } from "../styles/theme";
 
 interface MainAppProps {
   user: any;
@@ -94,10 +95,10 @@ const MainApp = ({ user }: MainAppProps) => {
 
     return (
       <View style={styles.sceneContainer}>
-        <ScrollView style={styles.content} refreshControl={<RefreshControl refreshing={isLoading} tintColor="#fff" />}>
+        <ScrollView style={styles.content} refreshControl={<RefreshControl refreshing={isLoading} tintColor={theme.colors.accent} />}>
           {isLoading ? (
             <View style={styles.loadingContainer} testID="loading-container">
-              <ActivityIndicator size="large" color="#6A5ACD" />
+              <ActivityIndicator size="large" color={theme.colors.accent} />
               <Text style={styles.loadingText} testID="loading-text">
                 Loading {route.key}...
               </Text>
@@ -106,7 +107,7 @@ const MainApp = ({ user }: MainAppProps) => {
             <CardList cardList={cardList} />
           ) : (
             <View style={styles.emptyContainer}>
-              <Text style={[styles.emptyText, { color: "#ccc" }]}>No {route.key} found</Text>
+              <Text style={[styles.emptyText, { color: theme.colors.textMuted }]}>No {route.key} found</Text>
             </View>
           )}
         </ScrollView>
@@ -138,9 +139,9 @@ const MainApp = ({ user }: MainAppProps) => {
   if (showSettings) {
     return (
       <PaperProvider>
-        <SafeAreaView style={[styles.container, { backgroundColor: "#000" }]}>
+        <SafeAreaView style={styles.container}>
           <SettingsPage onBack={() => setShowSettings(false)} />
-          <StatusBar style="light" />
+          <StatusBar style="dark" />
         </SafeAreaView>
       </PaperProvider>
     );
@@ -148,7 +149,7 @@ const MainApp = ({ user }: MainAppProps) => {
 
   return (
     <PaperProvider>
-      <SafeAreaView style={[styles.container, { backgroundColor: "#000" }]}>
+      <SafeAreaView style={styles.container}>
         {/* Header */}
         <Appbar.Header style={styles.appBar}>
           <Appbar.Content title="Routine Assistant" titleStyle={styles.appBarTitle} />
@@ -174,83 +175,76 @@ const MainApp = ({ user }: MainAppProps) => {
           testID="bottom-navigation"
           theme={{
             colors: {
-              secondaryContainer: "#333",
+              secondaryContainer: theme.colors.tertiary,
             },
           }}
         />
 
-        <StatusBar style="light" />
+        <StatusBar style="dark" />
       </SafeAreaView>
     </PaperProvider>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  appBar: {
-    backgroundColor: "#000",
-    borderBottomWidth: 1,
-    borderBottomColor: "#333",
-    elevation: 0,
-  },
+  container: commonStyles.container,
+  appBar: commonStyles.appBar,
   appBarTitle: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold",
+    color: theme.colors.text,
+    fontSize: theme.typography.sizes.xl,
+    fontWeight: theme.typography.weights.bold,
   },
   appBarSubtitle: {
-    color: "#ccc",
-    fontSize: 14,
+    color: theme.colors.textSecondary,
+    fontSize: theme.typography.sizes.sm,
   },
   sceneContainer: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: theme.colors.primary,
   },
   content: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: theme.colors.primary,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    padding: theme.spacing.xl,
   },
   loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: "#6A5ACD",
+    marginTop: theme.spacing.md,
+    fontSize: theme.typography.sizes.md,
+    color: theme.colors.accent,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    padding: theme.spacing.xl,
   },
   emptyText: {
-    fontSize: 16,
-    marginBottom: 20,
+    fontSize: theme.typography.sizes.md,
+    marginBottom: theme.spacing.xl,
     textAlign: "center",
   },
   bottomNavBar: {
-    backgroundColor: "#000",
+    backgroundColor: theme.colors.primary,
     borderTopWidth: 1,
-    borderTopColor: "#333",
+    borderTopColor: theme.colors.border,
   },
   aiFab: {
     position: "absolute",
-    margin: 16,
+    margin: theme.spacing.lg,
     right: 0,
     bottom: 70,
     zIndex: 9999,
     elevation: 16,
-    backgroundColor: "#6A5ACD",
+    backgroundColor: theme.colors.accent,
   },
   fab: {
     position: "absolute",
-    margin: 16,
+    margin: theme.spacing.lg,
     right: 0,
     bottom: 0,
     zIndex: 9999,

@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View } from "react-native";
 import { Appbar, List, TextInput, Button, Card, Switch } from "react-native-paper";
 import { useAppContext } from "../contexts/AppContext";
 import { Settings, SettingsModule } from "../models/Settings";
+import { theme, commonStyles } from "../styles/theme";
 
 interface SettingsProps {
   onBack: () => void;
@@ -30,7 +31,7 @@ export const SettingsPage = ({ onBack }: SettingsProps) => {
               <Switch
                 value={module.enabled}
                 onValueChange={() => module.onSave(data.settings, "enabled", !module.enabled, setRefreshCounter)}
-                color="#6A5ACD"
+                color={theme.colors.accent}
               />
             </View>
 
@@ -44,15 +45,15 @@ export const SettingsPage = ({ onBack }: SettingsProps) => {
                   onChangeText={setEditingText}
                   editable={isEditing}
                   style={styles.textInput}
-                  outlineColor="#333"
-                  activeOutlineColor="#6A5ACD"
-                  textColor="#fff"
-                  placeholderTextColor="#888"
+                  outlineColor={theme.colors.border}
+                  activeOutlineColor={theme.colors.accent}
+                  textColor={theme.colors.text}
+                  placeholderTextColor={theme.colors.textMuted}
                   placeholder="Enter prompt..."
                 />
                 <View style={styles.buttonContainer}>
                   {!isEditing ? (
-                    <Button mode="contained" onPress={() => { setEditingText(module.prompt || ""); setEditingModule(moduleKey); }} style={styles.button} buttonColor="#6A5ACD">
+                    <Button mode="contained" onPress={() => { setEditingText(module.prompt || ""); setEditingModule(moduleKey); }} style={styles.button} buttonColor={theme.colors.accent}>
                       Edit
                     </Button>
                   ) : (
@@ -61,7 +62,7 @@ export const SettingsPage = ({ onBack }: SettingsProps) => {
                         mode="outlined"
                         onPress={() => { setEditingModule(null); }}
                         style={styles.button}
-                        textColor="#fff"
+                        textColor={theme.colors.text}
                       >
                         Cancel
                       </Button>
@@ -69,7 +70,7 @@ export const SettingsPage = ({ onBack }: SettingsProps) => {
                         mode="contained"
                         onPress={() => { module.onSave(data.settings, "prompt", editingText, setRefreshCounter); setEditingModule(null); }}
                         style={styles.button}
-                        buttonColor="#6A5ACD"
+                        buttonColor={theme.colors.accent}
                       >
                         Save
                       </Button>
@@ -87,7 +88,7 @@ export const SettingsPage = ({ onBack }: SettingsProps) => {
   return (
     <View style={styles.container}>
       <Appbar.Header style={styles.appBar}>
-        <Appbar.BackAction onPress={onBack} iconColor="#fff" />
+        <Appbar.BackAction onPress={onBack} iconColor={theme.colors.text} />
         <Appbar.Content title="Settings" titleStyle={styles.appBarTitle} />
       </Appbar.Header>
 
@@ -103,55 +104,47 @@ export const SettingsPage = ({ onBack }: SettingsProps) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-  },
-  appBar: {
-    backgroundColor: "#000",
-    borderBottomWidth: 1,
-    borderBottomColor: "#333",
-    elevation: 0,
-  },
+  container: commonStyles.container,
+  appBar: commonStyles.appBar,
   appBarTitle: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold",
+    color: theme.colors.text,
+    fontSize: theme.typography.sizes.xl,
+    fontWeight: theme.typography.weights.bold,
   },
   content: {
     flex: 1,
   },
   card: {
-    backgroundColor: "#111",
-    marginHorizontal: 16,
-    marginVertical: 12,
-    borderRadius: 12,
+    backgroundColor: theme.colors.secondary,
+    marginHorizontal: theme.spacing.lg,
+    marginVertical: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
   },
   headerContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: theme.spacing.lg,
   },
   moduleTitle: {
-    color: "#6A5ACD",
-    fontSize: 18,
-    fontWeight: "700",
+    color: theme.colors.accent,
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.bold,
     margin: 0,
     padding: 0,
   },
   textInput: {
-    backgroundColor: "#000",
+    backgroundColor: theme.colors.primary,
     minHeight: 200,
-    marginTop: 8,
+    marginTop: theme.spacing.sm,
   },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    gap: 8,
-    marginTop: 16,
+    gap: theme.spacing.sm,
+    marginTop: theme.spacing.lg,
   },
   button: {
-    marginLeft: 8,
+    marginLeft: theme.spacing.sm,
   },
 });

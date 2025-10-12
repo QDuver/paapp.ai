@@ -73,6 +73,7 @@ class Config:
                 admin_client.get_database(name=db_path)
                 print('DATABASE EXISTS')
             except exceptions.NotFound:
+                print('DATABASE DOES NOT EXIST')
                 build_fs_db(user.fs_name)
             self.cache[user.fs_name] = firestore.Client(project=PROJECT, database=user.fs_name)
         self.USER_FS = self.cache[user.fs_name]

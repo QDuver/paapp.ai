@@ -6,13 +6,14 @@ import DraggableFlatList, {
 import { FirestoreDocAbstract, CardAbstract } from "../../models/Abstracts";
 import CustomCard from "./CustomCard";
 import { useAppContext } from "../../contexts/AppContext";
+import { theme } from "../../styles/theme";
 
 interface CardListProps {
-  cardList: FirestoreDocAbstract<any>;
+  cardList: FirestoreDocAbstract;
 }
 
 const CardList = ({ cardList }: CardListProps) => {
-  const { refreshCounter, onUpdate } = useAppContext();
+  const { refreshCounter } = useAppContext();
 
   const renderCard = ({
     item,
@@ -42,7 +43,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContainer: {
-    paddingVertical: 8,
+    paddingVertical: theme.spacing.sm,
   },
   emptyContainer: {
     flex: 1,
@@ -50,23 +51,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   emptyText: {
-    fontSize: 16,
-    color: "#8E8E93",
+    fontSize: theme.typography.sizes.md,
+    color: theme.colors.textMuted,
     textAlign: "center",
   },
   fabContainer: {
     position: "absolute",
-    bottom: 16,
-    right: 16,
+    bottom: theme.spacing.lg,
+    right: theme.spacing.lg,
     zIndex: 9999,
   },
   fab: {
-    backgroundColor: "#6200EE",
+    backgroundColor: theme.colors.accent,
     elevation: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    ...theme.shadows.card,
   },
 });
 

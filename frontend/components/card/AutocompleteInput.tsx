@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useAppContext } from "../../contexts/AppContext";
 import { useDialogContext } from "../../contexts/DialogContext";
+import { theme } from "../../styles/theme";
 
 interface AutocompleteInputProps {
   value: string;
@@ -179,18 +180,18 @@ const styles = StyleSheet.create({
     maxHeight: 150,
     borderWidth: 1,
     borderTopWidth: 0,
-    borderRadius: 8,
+    borderRadius: theme.borderRadius.sm,
     borderTopLeftRadius: 0,
     borderTopRightRadius: 0,
     zIndex: 999,
   },
   suggestionItem: {
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.md - 2,
     borderBottomWidth: 0.5,
   },
   suggestionText: {
-    fontSize: 16,
+    fontSize: theme.typography.sizes.md,
   },
 });
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, View, Text } from "react-native";
+import { PaperProvider } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MainApp from "./components/MainApp";
 import { AppProvider } from "./contexts/AppContext";
@@ -114,13 +115,19 @@ export default function App() {
     );
   }
 
-  if (!user) return <LoginScreen />;
+  if (!user) return (
+    <PaperProvider>
+      <LoginScreen />
+    </PaperProvider>
+  );
 
   return (
-    <AppProvider skipAuth={skipAuth}>
-      <DialogProvider>
-        <MainApp user={user} />
-      </DialogProvider>
-    </AppProvider>
+    <PaperProvider>
+      <AppProvider skipAuth={skipAuth}>
+        <DialogProvider>
+          <MainApp user={user} />
+        </DialogProvider>
+      </AppProvider>
+    </PaperProvider>
   );
 }

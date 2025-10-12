@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { Switch } from "react-native-paper";
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
+import { Modal, Portal, Text, TextInput, Switch, Button, Divider } from "react-native-paper";
 import { useAppContext } from "../../contexts/AppContext";
 import { useDialogContext } from "../../contexts/DialogContext";
 import { CardAbstract, FirestoreDocAbstract, IFieldMetadata } from "../../models/Abstracts";
 import AutocompleteInput from "./AutocompleteInput";
+import { theme, commonStyles } from "../../styles/theme";
 
 const EditDialog = () => {
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
@@ -54,15 +55,19 @@ const EditDialog = () => {
       return (
         <View key={fieldName} style={styles.fieldContainer}>
           <View style={styles.toggleContainer}>
-            <Text style={[styles.fieldLabel, { color: "#FFFFFF", flex: 1 }]}>{fieldLabel}</Text>
+            <Text variant="bodyLarge" style={styles.fieldLabel}>
+              {fieldLabel}
+            </Text>
             <Switch
               value={!!value}
               onValueChange={newValue => handleInputChange(fieldName, newValue)}
-              thumbColor="#FFFFFF"
-              trackColor={{ false: "#3A3A3C", true: "#007AFF" }}
             />
           </View>
-          {hasError && <Text style={styles.errorText}>{errors[fieldName]}</Text>}
+          {hasError && (
+            <Text variant="bodySmall" style={styles.errorText}>
+              {errors[fieldName]}
+            </Text>
+          )}
         </View>
       );
     }
@@ -72,23 +77,25 @@ const EditDialog = () => {
 
     return (
       <View key={fieldName} testID="form-field" style={styles.fieldContainer}>
-        <Text style={[styles.fieldLabel, { color: "#FFFFFF" }]}>{fieldLabel}</Text>
+        <Text variant="bodyLarge" style={styles.fieldLabel}>
+          {fieldLabel}
+        </Text>
 
         {shouldUseAutocomplete ? (
           <AutocompleteInput
             value={displayValue}
             onChangeText={text => handleInputChange(fieldName, text)}
             placeholder={`Enter ${fieldLabel}`}
-            placeholderTextColor="#8E8E93"
+            placeholderTextColor={theme.colors.textMuted}
             suggestions={suggestions}
             style={[styles.textInput]}
             keyboardType={keyboardType || "default"}
             inputMode={fieldType === "number" ? "numeric" : "text"}
             autoComplete={fieldType === "number" ? "off" : undefined}
             hasError={hasError}
-            borderColor="#48484A"
-            backgroundColor="#2C2C2E"
-            color="#FFFFFF"
+            borderColor={theme.colors.border}
+            backgroundColor={theme.colors.modalSecondary}
+            color={theme.colors.text}
             onSuggestionSelect={suggestion => {
               (item as CardAbstract).handleSuggestionSelect(suggestion);
               item.onSave(cardList, { name: suggestion.name }, parent, isNew, setRefreshCounter);
@@ -99,29 +106,28 @@ const EditDialog = () => {
         ) : (
           <TextInput
             testID="form-input"
-            style={[
-              styles.textInput,
-              isMultiline && styles.multilineInput,
-              {
-                backgroundColor: "#2C2C2E",
-                borderColor: hasError ? "#FF3B30" : "#48484A",
-                color: "#FFFFFF",
-              },
-            ]}
+            mode="outlined"
+            style={[styles.textInput, isMultiline && styles.multilineInput]}
             value={displayValue}
             onChangeText={text => handleInputChange(fieldName, text)}
             placeholder={`Enter ${fieldLabel}`}
-            placeholderTextColor="#8E8E93"
+            placeholderTextColor={theme.colors.textMuted}
             keyboardType={keyboardType || "default"}
             inputMode={fieldType === "number" ? "numeric" : "text"}
             autoComplete={fieldType === "number" ? "off" : undefined}
             multiline={isMultiline}
             numberOfLines={isMultiline ? 3 : 1}
-            textAlignVertical={isMultiline ? "top" : "center"}
+            error={hasError}
+            outlineColor={theme.colors.border}
+            activeOutlineColor={theme.colors.buttonPrimary}
           />
         )}
 
-        {hasError && <Text style={styles.errorText}>{errors[fieldName]}</Text>}
+        {hasError && (
+          <Text variant="bodySmall" style={styles.errorText}>
+            {errors[fieldName]}
+          </Text>
+        )}
       </View>
     );
   };
@@ -130,19 +136,25 @@ const EditDialog = () => {
     return null;
   }
 
-  const modalBackgroundColor = "#1C1C1E";
-  const overlayColor = "rgba(0,0,0,0.7)";
-
   return (
-    <Modal visible={visible} transparent={true} animationType="slide" onRequestClose={hideEditDialog} testID="edit-dialog">
-      <KeyboardAvoidingView
-        style={[styles.overlay, { backgroundColor: overlayColor }]}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+    <Portal>
+      <Modal 
+        visible={visible} 
+        onDismiss={hideEditDialog}
+        contentContainerStyle={[styles.modalContainer, { backgroundColor: theme.colors.modalBackground }]}
+        testID="edit-dialog"
       >
-        <View style={[styles.modalContainer, { backgroundColor: modalBackgroundColor }]}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.keyboardView}
+        >
           <View style={styles.header}>
-            <Text style={[styles.title, { color: "#FFFFFF" }]}>Edit Item</Text>
+            <Text variant="titleLarge" style={styles.title}>
+              Edit Item
+            </Text>
           </View>
+
+          <Divider />
 
           <ScrollView style={styles.formContainer} showsVerticalScrollIndicator={false}>
             {(() => {
@@ -152,31 +164,34 @@ const EditDialog = () => {
             })()}
           </ScrollView>
 
+          <Divider />
+
           <View style={styles.actionContainer}>
             <View style={styles.actionRow}>
               {!isNew && (
-                <TouchableOpacity testID="delete-button" style={[styles.deleteButton]} onPress={handleDelete}>
-                  <Text style={styles.deleteButtonText}>Delete</Text>
-                </TouchableOpacity>
+                <Button
+                  testID="delete-button"
+                  mode="text"
+                  textColor={theme.colors.error}
+                  onPress={handleDelete}
+                >
+                  Delete
+                </Button>
               )}
 
               <View style={styles.rightActions}>
-                <TouchableOpacity
+                <Button
                   testID="cancel-button"
-                  style={[
-                    styles.cancelButton,
-                    {
-                      backgroundColor: "#2C2C2E",
-                    },
-                  ]}
+                  mode="outlined"
                   onPress={hideEditDialog}
+                  style={styles.cancelButton}
                 >
-                  <Text style={[styles.cancelButtonText, { color: "#FFFFFF" }]}>Cancel</Text>
-                </TouchableOpacity>
+                  Cancel
+                </Button>
 
-                <TouchableOpacity
+                <Button
                   testID="save-button"
-                  style={styles.saveButton}
+                  mode="contained"
                   onPress={() => {
                     if (!(item instanceof FirestoreDocAbstract)) {
                       item.onSave(cardList, formData, parent, isNew, setRefreshCounter);
@@ -185,45 +200,42 @@ const EditDialog = () => {
                     }
                     hideEditDialog();
                   }}
+                  buttonColor={theme.colors.buttonPrimary}
                 >
-                  <Text style={styles.saveButtonText}>Save</Text>
-                </TouchableOpacity>
+                  Save
+                </Button>
               </View>
             </View>
           </View>
-        </View>
-      </KeyboardAvoidingView>
-    </Modal>
+        </KeyboardAvoidingView>
+      </Modal>
+    </Portal>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: "flex-end",
-  },
   modalContainer: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: "80%",
-    minHeight: "50%",
+    ...commonStyles.modalContainer,
+    margin: theme.spacing.lg,
+    maxHeight: "90%",
+    borderRadius: theme.borderRadius.xl,
+  },
+  keyboardView: {
+    flex: 1,
   },
   header: {
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E5EA",
+    padding: theme.spacing.xl,
   },
   title: {
-    fontSize: 18,
-    fontWeight: "600",
     textAlign: "center",
+    fontWeight: theme.typography.weights.semibold,
   },
   formContainer: {
     flex: 1,
-    padding: 20,
+    padding: theme.spacing.xl,
   },
   fieldContainer: {
-    marginBottom: 20,
+    marginBottom: theme.spacing.xl,
   },
   toggleContainer: {
     flexDirection: "row",
@@ -231,68 +243,33 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   fieldLabel: {
-    fontSize: 16,
-    fontWeight: "500",
-    marginBottom: 8,
+    fontWeight: theme.typography.weights.medium,
+    marginBottom: theme.spacing.sm,
   },
   textInput: {
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    minHeight: 44,
+    backgroundColor: theme.colors.modalSecondary,
   },
   multilineInput: {
     minHeight: 80,
-    maxHeight: 120,
   },
   errorText: {
-    color: "#FF3B30",
-    fontSize: 14,
-    marginTop: 4,
+    color: theme.colors.error,
+    marginTop: theme.spacing.xs,
   },
   actionContainer: {
-    padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: "#E5E5EA",
+    padding: theme.spacing.xl,
   },
   actionRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  deleteButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-  },
-  deleteButtonText: {
-    color: "#FF3B30",
-    fontSize: 16,
-    fontWeight: "500",
-  },
   rightActions: {
     flexDirection: "row",
-    gap: 12,
+    gap: theme.spacing.md,
   },
   cancelButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-  },
-  cancelButtonText: {
-    fontSize: 16,
-    fontWeight: "500",
-  },
-  saveButton: {
-    backgroundColor: "#007AFF",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-  },
-  saveButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
+    borderColor: theme.colors.border,
   },
 });
 
