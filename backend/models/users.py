@@ -2,9 +2,10 @@ from pydantic import BaseModel, Field, computed_field
 from typing import Optional
 import firebase_admin
 from firebase_admin import auth, credentials
-from fastapi import Depends
+from fastapi import Depends, HTTPException, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from config import CONFIG
+import os
 
 # Initialize Firebase Admin SDK
 if not firebase_admin._apps:
@@ -50,6 +51,6 @@ class User(BaseModel):
     def from_firebase_token(cls, credentials: HTTPAuthorizationCredentials = Depends(security)) -> "User":
         decoded_token = auth.verify_id_token(credentials.credentials)
         user = cls(**decoded_token)
+        print("Authenticated user:", user)
         CONFIG.set_user(user)
         return user
-    

@@ -12,7 +12,11 @@
       "WebFetch(domain:docs.expo.dev)",
       "Bash(npx expo install:*)",
       "Bash(npm install:*)",
-      "Bash(npx expo-doctor:*)"
+      "Bash(npx expo-doctor:*)",
+      "Bash(\"C:\\Program Files\\Java\\jdk-24\\bin\\keytool.exe\":*)",
+      "Bash(findstr:*)",
+      "Bash(\"C:\\Program Files\\Java\\jdk-24\\bin\\keytool.exe\" -list -v -keystore \"C:\\projects\\life-automation\\frontend\\android\\app\\debug.keystore\" -alias androiddebugkey -storepass android -keypass android)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": [],
     "ask": []

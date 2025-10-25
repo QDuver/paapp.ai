@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from typing import Optional
 from google.cloud import firestore
 
-from config import CONFIG
+from config import CONFIG, get_all_database_names
 from models import meals, exercises
 from models.routines import Routine, Routines
 from models.exercises import Exercises
@@ -33,6 +33,12 @@ def get_model_class(collection: str):
 
 class InitDayRequest(BaseModel):
     notes: Optional[str] = "None"
+
+
+class ScheduleExercisesRequest(BaseModel):
+    user_id: str
+    name: str
+    notes: Optional[str] = None
 
 
 app = FastAPI()
@@ -72,4 +78,14 @@ def build_with_ai(collection: str, id: str, request: dict, user: User = Depends(
     model_class = get_model_class(collection)
     instance = model_class(id=id)
     instance = instance.build_with_ai(**request)
+    return instance.model_dump()
+
+@app.post("/schedule/exercises/{date}")
+def schedule_exercises( date: str, request: ScheduleExercisesRequest, ):
+    database_names = get_all_database_names()
+    print('All Firestore databases:', database_names)
+
+    instance = Exercises(id=date)
+    build_params = {"notes": request.notes} if request.notes else {}
+    instance = instance.build_with_ai(**build_params)
     return instance.model_dump()

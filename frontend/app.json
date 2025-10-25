@@ -16,9 +16,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.routineassistant.app"
     },
     "android": {
+      "package": "com.routineassistant.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -29,8 +31,11 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
+    "scheme": "routineassistant",
     "plugins": [
-      "expo-font"
+      "expo-font",
+      "expo-web-browser",
+      "expo-dev-client"
     ]
   }
 }
