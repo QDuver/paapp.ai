@@ -24,7 +24,6 @@ interface AppContextType {
   isLoading: boolean;
   refreshCounter: number;
   setRefreshCounter: React.Dispatch<React.SetStateAction<number>>;
-  onBuildWithAi: (firestoreDoc: FirestoreDocAbstract, formData: { [key: string]: any }) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -39,37 +38,31 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   const [refreshCounter, setRefreshCounter] = useState<number>(0);
 
   useEffect(() => {
+    FirestoreDocAbstract.initialize(setIsLoading, setData);
+
     const fetchData = async () => {
       setIsLoading(true);
 
-      const settings = await Settings.fromApi(setIsLoading, setData);
-      const routines = await Routines.fromApi(setIsLoading, setData);
-      const exercises = await Exercises.fromApi(setIsLoading, setData);
-      const meals = await Meals.fromApi(setIsLoading, setData);
+      await Promise.all([
+        Settings.fromApi(),
+        Routines.fromApi(),
+        Exercises.fromApi(),
+        Meals.fromApi(),
+      ]);
+
       const uniqueExercises = await apiClient.get<IUnique[]>(`unique/exercises`);
-      setData({
-        routines,
-        exercises,
-        meals,
-        uniqueExercises,
-        settings,
-      });
+      setData(prevData => ({ ...prevData, uniqueExercises }));
+
       setIsLoading(false);
     };
     fetchData();
   }, []);
-
-
-  const onBuildWithAi = async (firestoreDoc: FirestoreDocAbstract, formData: { [key: string]: any }) => {
-    await firestoreDoc.buildWithAi(formData);
-  };
 
   const contextValue: AppContextType = {
     data,
     isLoading,
     refreshCounter,
     setRefreshCounter,
-    onBuildWithAi,
   };
 
   return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;

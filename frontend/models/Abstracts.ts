@@ -151,8 +151,14 @@ export abstract class FirestoreDocAbstract extends DialogableAbstract {
   abstract collection: string;
   id: string = getCurrentDate();
   ChildModel: any;
-  setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>;
-  setData?: React.Dispatch<React.SetStateAction<any>>;
+
+  private static _setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>;
+  private static _setData?: React.Dispatch<React.SetStateAction<any>>;
+
+  static initialize(setIsLoading: React.Dispatch<React.SetStateAction<boolean>>, setData: React.Dispatch<React.SetStateAction<any>>) {
+    FirestoreDocAbstract._setIsLoading = setIsLoading;
+    FirestoreDocAbstract._setData = setData;
+  }
 
   constructor(data?, ChildModel?) {
     super(data);
@@ -165,30 +171,24 @@ export abstract class FirestoreDocAbstract extends DialogableAbstract {
     throw new Error("getUIMetadata must be implemented by subclass");
   }
 
-  static async fromApi<T extends FirestoreDocAbstract>(
-    this: new (data?: any) => T,
-    setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
-    setData?: React.Dispatch<React.SetStateAction<any>>
-  ): Promise<T> {
+  static async fromApi<T extends FirestoreDocAbstract>(this: new (data?: any) => T): Promise<T> {
     const t = new this();
     const response = await apiClient.get(t.apiUrl);
     const instance = new this(response);
-    instance.setIsLoading = setIsLoading;
-    instance.setData = setData;
+
+    FirestoreDocAbstract._setData(prevData => ({ ...prevData, [instance.collection]: instance }));
+
     return instance;
   }
 
   async buildWithAi(formData: { [key: string]: any }) {
-    if (!this.setIsLoading || !this.setData) {
-      throw new Error("Instance must be created via fromApi() to use buildWithAi");
-    }
 
-    this.setIsLoading(true);
+    FirestoreDocAbstract._setIsLoading(true);
 
     const response = await apiClient.post(`build-with-ai/${this.apiUrl}`, formData);
 
-    this.setData(prevData => ({ ...prevData, [this.collection]: response }));
-    this.setIsLoading(false);
+    FirestoreDocAbstract._setData(prevData => ({ ...prevData, [this.collection]: response }));
+    FirestoreDocAbstract._setIsLoading(false);
   }
 
   get apiUrl(): string {

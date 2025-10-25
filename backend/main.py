@@ -12,7 +12,7 @@ from models.routines import Routines
 
 if __name__ == "__main__":
 
-    CONFIG.USER_FS = firestore.Client(project=PROJECT, database='qd-dmppbwh0rhvv5c9klckgpgrhvdm2')    
+    CONFIG.USER_FS = firestore.Client(project=PROJECT, database='qd-umileigiudber2rbzjguipjfys23')    
     Exercises().build_with_ai()
     # routines = Routines().query()
     # Routines().delete()
