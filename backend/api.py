@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from typing import Optional
 from google.cloud import firestore
 
-from config import CONFIG, get_all_database_names, PROJECT
+from config import CONFIG, get_all_database_names
 from models import meals, exercises
 from models.routines import Routine, Routines
 from models.exercises import Exercises
@@ -80,23 +80,30 @@ def build_with_ai(collection: str, id: str, request: dict, user: User = Depends(
     instance = instance.build_with_ai(**request)
     return instance.model_dump()
 
-@app.post("/schedule/exercises/{date}")
-def schedule_exercises( date: str, request: dict ):
+@app.post("/schedule/{date}")
+def schedule_day(date: str, request: dict):
+    from config import PROJECT
+
     database_names = get_all_database_names()
     print('All Firestore databases:', database_names)
 
+    collections_to_schedule = ['exercises', 'meals']
+
     results = []
     for db_name in database_names:
-        print(f'Building exercises for user database: {db_name}')
+        print(f'Building schedule for user database: {db_name}')
         CONFIG.USER_FS = firestore.Client(project=PROJECT, database=db_name)
 
-        instance = Exercises(id=date)
-        build_params = {"notes": request.get("notes")} if request.get("notes") else {}
-        instance = instance.build_with_ai(**build_params)
+        db_result = {"database": db_name}
 
-        results.append({
-            "database": db_name,
-            "exercises": instance.model_dump()
-        })
+        for collection in collections_to_schedule:
+            print(f'  Building {collection} for {date}')
+            model_class = get_model_class(collection)
+            instance = model_class(id=date)
+            build_params = {"notes": request.get("notes")} if request.get("notes") else {}
+            instance = instance.build_with_ai(**build_params)
+            db_result[collection] = instance.model_dump()
+
+        results.append(db_result)
 
     return {"scheduled": len(results), "results": results}

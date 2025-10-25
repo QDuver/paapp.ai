@@ -19,7 +19,10 @@
       "mcp__ide__getDiagnostics",
       "Bash(python main.py:*)",
       "Bash(uvicorn:*)",
-      "Bash(timeout /t 3 /nobreak)"
+      "Bash(timeout /t 3 /nobreak)",
+      "Bash(gcloud composer environments storage dags list:*)",
+      "Bash(cmd /c del nul)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []
