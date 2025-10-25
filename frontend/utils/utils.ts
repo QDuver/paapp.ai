@@ -6,10 +6,10 @@ const testConnection = async (url: string): Promise<boolean> => {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 1000);
-    
-    await fetch(`${url}/health`, { 
-      method: 'HEAD',
-      signal: controller.signal 
+
+    await fetch(`${url}/health`, {
+      method: "HEAD",
+      signal: controller.signal,
     });
     clearTimeout(timeoutId);
     return true;
@@ -20,14 +20,12 @@ const testConnection = async (url: string): Promise<boolean> => {
 
 export const getBaseUrl = async (): Promise<string> => {
   if (__DEV__) {
-    const localUrl = Platform.OS === "web"
-      ? `http://localhost:${DEV_CONFIG.LOCAL_PORT}`
-      : `http://${DEV_CONFIG.LOCAL_IP}:${DEV_CONFIG.LOCAL_PORT}`;
-    
+    const localUrl =
+      Platform.OS === "web" ? `http://localhost:${DEV_CONFIG.LOCAL_PORT}` : `http://${DEV_CONFIG.LOCAL_IP}:${DEV_CONFIG.LOCAL_PORT}`;
+
     const isLocalAvailable = await testConnection(localUrl);
     console.log("Local server availability:", isLocalAvailable);
     return isLocalAvailable ? localUrl : PROD_CONFIG.API_URL;
-
   } else {
     return PROD_CONFIG.API_URL;
   }

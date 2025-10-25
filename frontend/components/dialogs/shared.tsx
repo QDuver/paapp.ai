@@ -1,0 +1,198 @@
+import React from "react";
+import { StyleSheet, View } from "react-native";
+import { Text, TextInput, Switch } from "react-native-paper";
+import { theme, commonStyles } from "../../styles/theme";
+import { IFieldMetadata } from "../../models/Abstracts";
+import AutocompleteInput from "../card/AutocompleteInput";
+
+export interface SharedDialogStyles {
+  modalContainer: any;
+  keyboardView: any;
+  titleContainer: any;
+  titleAccent: any;
+  title: any;
+  formContainer: any;
+  fieldContainer: any;
+  toggleContainer: any;
+  fieldLabel: any;
+  textInput: any;
+  multilineInput: any;
+  errorText: any;
+  actionContainer: any;
+  actionRow: any;
+  rightActions: any;
+}
+
+export const sharedDialogStyles = StyleSheet.create<SharedDialogStyles>({
+  modalContainer: {
+    ...commonStyles.modalContainer,
+    margin: theme.spacing.lg,
+    maxHeight: "90%",
+    borderRadius: theme.borderRadius.xxl,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  keyboardView: {
+    flex: 1,
+  },
+  titleContainer: {
+    paddingTop: theme.spacing.xl,
+    paddingHorizontal: theme.spacing.xxl,
+    paddingBottom: theme.spacing.md,
+  },
+  titleAccent: {
+    width: 32,
+    height: 3,
+    borderRadius: theme.borderRadius.xs,
+    marginBottom: theme.spacing.sm,
+  },
+  title: {
+    fontWeight: theme.typography.weights.semibold,
+    fontSize: theme.typography.sizes.lg,
+    color: theme.colors.text,
+  },
+  formContainer: {
+    flex: 1,
+    padding: theme.spacing.xxl,
+    paddingTop: theme.spacing.md,
+  },
+  fieldContainer: {
+    marginBottom: theme.spacing.lg,
+  },
+  toggleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: theme.spacing.xs,
+  },
+  fieldLabel: {
+    fontWeight: theme.typography.weights.medium,
+    fontSize: theme.typography.sizes.md,
+    color: theme.colors.text,
+  },
+  textInput: {
+    backgroundColor: theme.colors.modalSecondary,
+  },
+  multilineInput: {
+    minHeight: 80,
+  },
+  errorText: {
+    color: theme.colors.error,
+    marginTop: theme.spacing.xs,
+    fontSize: theme.typography.sizes.sm,
+  },
+  actionContainer: {
+    padding: theme.spacing.xxl,
+    paddingTop: theme.spacing.md,
+  },
+  actionRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  rightActions: {
+    flexDirection: "row",
+    gap: theme.spacing.md,
+  },
+});
+
+export const getSectionColor = (collection?: string) => {
+  if (collection === "routines") return theme.colors.sections.routines.accent;
+  if (collection === "exercises") return theme.colors.sections.exercises.accent;
+  if (collection === "meals") return theme.colors.sections.meals.accent;
+  return theme.colors.buttonPrimary;
+};
+
+interface RenderFieldProps {
+  fieldMetadata: IFieldMetadata;
+  formData: { [key: string]: any };
+  errors: { [key: string]: string | null };
+  collection?: string;
+  data?: any;
+  onInputChange: (fieldName: string, value: string | boolean) => void;
+  onSuggestionSelect?: (suggestion: any) => void;
+}
+
+export const renderField = ({ fieldMetadata, formData, errors, collection, data, onInputChange, onSuggestionSelect }: RenderFieldProps) => {
+  const { field: fieldName, label: fieldLabel, type: fieldType, keyboardType, multiline, suggestions } = fieldMetadata;
+  const sectionColor = getSectionColor(collection);
+
+  const value = formData[fieldName];
+  const displayValue = value === null || value === undefined ? "" : value.toString();
+  const hasError = !!errors[fieldName];
+  const isMultiline = multiline || false;
+  const hasSuggestions = suggestions && suggestions.length > 0;
+
+  if (fieldType === "boolean") {
+    return (
+      <View key={fieldName} style={sharedDialogStyles.fieldContainer}>
+        <View style={sharedDialogStyles.toggleContainer}>
+          <Text variant="bodyLarge" style={sharedDialogStyles.fieldLabel}>
+            {fieldLabel}
+          </Text>
+          <Switch value={!!value} onValueChange={newValue => onInputChange(fieldName, newValue)} color={sectionColor} />
+        </View>
+        {hasError && (
+          <Text variant="bodySmall" style={sharedDialogStyles.errorText}>
+            {errors[fieldName]}
+          </Text>
+        )}
+      </View>
+    );
+  }
+
+  const shouldUseAutocomplete = (hasSuggestions && !isMultiline) || (fieldName === "name" && collection === "exercises" && !isMultiline);
+
+  return (
+    <View key={fieldName} testID="form-field" style={sharedDialogStyles.fieldContainer}>
+      {shouldUseAutocomplete ? (
+        <AutocompleteInput
+          value={displayValue}
+          onChangeText={text => onInputChange(fieldName, text)}
+          placeholder={fieldLabel}
+          placeholderTextColor={theme.colors.textMuted}
+          suggestions={suggestions}
+          fallbackSuggestions={data?.uniqueExercises}
+          collection={collection}
+          style={[sharedDialogStyles.textInput]}
+          keyboardType={keyboardType || "default"}
+          inputMode={fieldType === "number" ? "numeric" : "text"}
+          autoComplete={fieldType === "number" ? "off" : undefined}
+          hasError={hasError}
+          borderColor={theme.colors.border}
+          backgroundColor={theme.colors.modalSecondary}
+          color={theme.colors.text}
+          onSuggestionSelect={onSuggestionSelect}
+          fieldName={fieldName}
+        />
+      ) : (
+        <TextInput
+          testID="form-input"
+          mode="outlined"
+          style={[sharedDialogStyles.textInput, isMultiline && sharedDialogStyles.multilineInput]}
+          value={displayValue}
+          onChangeText={text => onInputChange(fieldName, text)}
+          placeholder={fieldLabel}
+          placeholderTextColor={theme.colors.textMuted}
+          keyboardType={keyboardType || "default"}
+          inputMode={fieldType === "number" ? "numeric" : "text"}
+          autoComplete={fieldType === "number" ? "off" : undefined}
+          multiline={isMultiline}
+          numberOfLines={isMultiline ? 3 : 1}
+          error={hasError}
+          outlineColor={theme.colors.border}
+          activeOutlineColor={sectionColor}
+        />
+      )}
+
+      {hasError && (
+        <Text variant="bodySmall" style={sharedDialogStyles.errorText}>
+          {errors[fieldName]}
+        </Text>
+      )}
+    </View>
+  );
+};

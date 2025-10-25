@@ -1,11 +1,5 @@
 import React, { useState, useMemo } from "react";
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  FlatList,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View, FlatList } from "react-native";
 import { TextInput as PaperTextInput } from "react-native-paper";
 import { theme } from "../../styles/theme";
 
@@ -69,12 +63,7 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
     }
 
     return [];
-  }, [
-    externalSuggestions,
-    fieldName,
-    collection,
-    fallbackSuggestions,
-  ]);
+  }, [externalSuggestions, fieldName, collection, fallbackSuggestions]);
 
   const handleTextChange = (text: string) => {
     onChangeText(text);
@@ -85,10 +74,7 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
       });
 
       setFilteredSuggestions(filtered);
-      setShowSuggestions(
-        filtered.length > 0 &&
-          filtered[0].name.toLowerCase() !== text.toLowerCase()
-      );
+      setShowSuggestions(filtered.length > 0 && filtered[0].name.toLowerCase() !== text.toLowerCase());
     } else {
       setShowSuggestions(false);
     }
@@ -141,16 +127,8 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
             data={filteredSuggestions.slice(0, 5)}
             keyExtractor={(item, index) => `${item}-${index}`}
             renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[
-                  styles.suggestionItem,
-                  { borderBottomColor: borderColor },
-                ]}
-                onPress={() => selectSuggestion(item)}
-              >
-                <Text style={[styles.suggestionText, { color }]}>
-                  {item.name}
-                </Text>
+              <TouchableOpacity style={[styles.suggestionItem, { borderBottomColor: borderColor }]} onPress={() => selectSuggestion(item)}>
+                <Text style={[styles.suggestionText, { color }]}>{item.name}</Text>
               </TouchableOpacity>
             )}
             showsVerticalScrollIndicator={false}

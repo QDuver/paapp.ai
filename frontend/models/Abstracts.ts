@@ -19,12 +19,7 @@ export interface IFieldMetadata {
   suggestions?: [];
 }
 
-export type SettingsAction =
-  | "generate"
-  | "editPrompt"
-  | "duplicate"
-  | "delete"
-  | "configure";
+export type SettingsAction = "generate" | "editPrompt" | "duplicate" | "delete" | "configure";
 
 export interface ISettingsOption {
   label: string;

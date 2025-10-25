@@ -41,7 +41,7 @@ export const SettingsPage = ({ onBack }: SettingsProps) => {
                   mode="outlined"
                   multiline
                   numberOfLines={10}
-                  value={isEditing ? editingText : (module.prompt || "")}
+                  value={isEditing ? editingText : module.prompt || ""}
                   onChangeText={setEditingText}
                   editable={isEditing}
                   style={styles.textInput}
@@ -53,14 +53,24 @@ export const SettingsPage = ({ onBack }: SettingsProps) => {
                 />
                 <View style={styles.buttonContainer}>
                   {!isEditing ? (
-                    <Button mode="contained" onPress={() => { setEditingText(module.prompt || ""); setEditingModule(moduleKey); }} style={styles.button} buttonColor={theme.colors.accent}>
+                    <Button
+                      mode="contained"
+                      onPress={() => {
+                        setEditingText(module.prompt || "");
+                        setEditingModule(moduleKey);
+                      }}
+                      style={styles.button}
+                      buttonColor={theme.colors.accent}
+                    >
                       Edit
                     </Button>
                   ) : (
                     <>
                       <Button
                         mode="outlined"
-                        onPress={() => { setEditingModule(null); }}
+                        onPress={() => {
+                          setEditingModule(null);
+                        }}
                         style={styles.button}
                         textColor={theme.colors.text}
                       >
@@ -68,7 +78,10 @@ export const SettingsPage = ({ onBack }: SettingsProps) => {
                       </Button>
                       <Button
                         mode="contained"
-                        onPress={() => { module.onSave(data.settings, "prompt", editingText, setRefreshCounter); setEditingModule(null); }}
+                        onPress={() => {
+                          module.onSave(data.settings, "prompt", editingText, setRefreshCounter);
+                          setEditingModule(null);
+                        }}
                         style={styles.button}
                         buttonColor={theme.colors.accent}
                       >
@@ -107,7 +120,7 @@ const styles = StyleSheet.create({
   container: commonStyles.container,
   appBar: {
     ...commonStyles.appBar,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 3,

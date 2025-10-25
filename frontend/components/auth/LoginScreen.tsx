@@ -1,8 +1,8 @@
-import React, { useCallback, useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, Platform, StyleSheet } from 'react-native';
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { getFirebaseAuth } from '../../services/Firebase';
-import { theme } from '../../styles/theme';
+import React, { useCallback, useState } from "react";
+import { View, Text, TouchableOpacity, ActivityIndicator, Platform, StyleSheet } from "react-native";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { getFirebaseAuth } from "../../services/Firebase";
+import { theme } from "../../styles/theme";
 
 export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
@@ -13,15 +13,15 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       const auth = getFirebaseAuth();
-      if (!auth) throw new Error('Auth not initialized');
-      if (Platform.OS === 'web') {
+      if (!auth) throw new Error("Auth not initialized");
+      if (Platform.OS === "web") {
         const provider = new GoogleAuthProvider();
         await signInWithPopup(auth, provider);
       } else {
-        setError('Native Google sign-in not implemented yet');
+        setError("Native Google sign-in not implemented yet");
       }
     } catch (e: any) {
-      setError(e?.message || 'Login failed');
+      setError(e?.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -32,16 +32,9 @@ export default function LoginScreen() {
       <View style={styles.content}>
         <Text style={styles.title}>Routine Assistant</Text>
         <Text style={styles.subtitle}>Organize your daily routines, exercises, and meals</Text>
-        
-        <TouchableOpacity
-          disabled={loading}
-          onPress={onGooglePress}
-          style={[styles.button, loading && styles.buttonDisabled]}>
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Sign in with Google</Text>
-          )}
+
+        <TouchableOpacity disabled={loading} onPress={onGooglePress} style={[styles.button, loading && styles.buttonDisabled]}>
+          {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign in with Google</Text>}
         </TouchableOpacity>
         {error && <Text style={styles.errorText}>{error}</Text>}
       </View>
@@ -53,28 +46,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: theme.spacing.xxl,
   },
   content: {
-    width: '100%',
+    width: "100%",
     maxWidth: 400,
-    alignItems: 'center',
+    alignItems: "center",
   },
   title: {
     fontSize: theme.typography.sizes.xxxl,
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.text,
     marginBottom: theme.spacing.md,
-    textAlign: 'center',
+    textAlign: "center",
     letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: theme.typography.sizes.md,
     color: theme.colors.textSecondary,
     marginBottom: theme.spacing.xxxl,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 22,
   },
   button: {
@@ -82,7 +75,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.xxl,
     paddingVertical: theme.spacing.lg,
     borderRadius: theme.borderRadius.md,
-    width: '100%',
+    width: "100%",
     maxWidth: 280,
     ...theme.shadows.card,
   },
@@ -90,15 +83,15 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   buttonText: {
-    color: '#FFFFFF',
-    textAlign: 'center',
+    color: "#FFFFFF",
+    textAlign: "center",
     fontSize: theme.typography.sizes.md,
     fontWeight: theme.typography.weights.semibold,
   },
   errorText: {
     color: theme.colors.error,
     marginTop: theme.spacing.lg,
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: theme.typography.sizes.sm,
   },
 });

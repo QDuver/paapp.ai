@@ -8,7 +8,7 @@ import { apiClient } from "../utils/apiClient";
 
 const modelMap = {
   exercises: Exercises,
-  meals: Meals
+  meals: Meals,
 };
 
 interface DataType {
@@ -43,12 +43,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     const fetchData = async () => {
       setIsLoading(true);
 
-      await Promise.all([
-        Settings.fromApi(setData),
-        Routines.fromApi(setData),
-        Exercises.fromApi(setData),
-        Meals.fromApi(setData),
-      ]);
+      await Promise.all([Settings.fromApi(setData), Routines.fromApi(setData), Exercises.fromApi(setData), Meals.fromApi(setData)]);
 
       const uniqueExercises = await apiClient.get<IUnique[]>(`unique/exercises`);
       setData(prevData => ({ ...prevData, uniqueExercises }));
@@ -82,4 +77,3 @@ export const useAppContext = (): AppContextType => {
 };
 
 export { AppContext };
-

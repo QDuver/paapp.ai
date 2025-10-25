@@ -4,17 +4,16 @@ import { PaperProvider, MD3LightTheme } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MainApp from "./components/MainApp";
 import { AppProvider } from "./contexts/AppContext";
-import { DialogProvider } from "./contexts/DialogContext";
 import LoginScreen from "./components/auth/LoginScreen";
 import { onAuthStateChanged } from "firebase/auth";
 import { getFirebaseAuth } from "./services/Firebase";
 import { theme } from "./styles/theme";
 
 // Load icon fonts CSS for web
-if (Platform.OS === 'web') {
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = '/fonts.css';
+if (Platform.OS === "web") {
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = "/fonts.css";
   document.head.appendChild(link);
 }
 
@@ -136,9 +135,7 @@ export default function App() {
   return (
     <PaperProvider theme={paperTheme}>
       <AppProvider skipAuth={skipAuth}>
-        <DialogProvider>
-          <MainApp />
-        </DialogProvider>
+        <MainApp />
       </AppProvider>
     </PaperProvider>
   );

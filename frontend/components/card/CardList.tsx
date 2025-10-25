@@ -1,26 +1,27 @@
 import React from "react";
 import { StyleSheet, View, Text } from "react-native";
-import DraggableFlatList, {
-  RenderItemParams,
-} from "react-native-draggable-flatlist";
-import { FirestoreDocAbstract, CardAbstract } from "../../models/Abstracts";
+import DraggableFlatList, { RenderItemParams } from "react-native-draggable-flatlist";
+import { FirestoreDocAbstract, CardAbstract, DialogableAbstract } from "../../models/Abstracts";
 import CustomCard from "./CustomCard";
 import { useAppContext } from "../../contexts/AppContext";
 import { theme } from "../../styles/theme";
 
 interface CardListProps {
   firestoreDoc: FirestoreDocAbstract;
+  showEditDialog: (
+    item: DialogableAbstract,
+    parent: FirestoreDocAbstract | CardAbstract,
+    firestoreDoc: FirestoreDocAbstract,
+    isNew: boolean,
+    onSave: (formData: { [key: string]: any }) => void | Promise<void>
+  ) => void;
 }
 
-const CardList = ({ firestoreDoc }: CardListProps) => {
+const CardList = ({ firestoreDoc, showEditDialog }: CardListProps) => {
   const { refreshCounter } = useAppContext();
 
-  const renderCard = ({
-    item,
-    isActive,
-    getIndex,
-  }: RenderItemParams<CardAbstract>) => (
-    <CustomCard firestoreDoc={firestoreDoc} item={item} index={getIndex() ?? 0} />
+  const renderCard = ({ item, isActive, getIndex }: RenderItemParams<CardAbstract>) => (
+    <CustomCard firestoreDoc={firestoreDoc} item={item} index={getIndex() ?? 0} showEditDialog={showEditDialog} />
   );
 
   return (

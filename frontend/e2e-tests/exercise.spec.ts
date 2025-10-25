@@ -35,9 +35,7 @@ test("create and delete an exercise", async ({ page }) => {
 
   // Save the exercise and wait for API response (POST of entire exercise list)
   const saveResponse = page.waitForResponse(
-    response =>
-      response.url().includes(`/exercises/${currentDate}`) &&
-      response.request().method() === "POST",
+    response => response.url().includes(`/exercises/${currentDate}`) && response.request().method() === "POST",
     { timeout: 4000 }
   );
   await page.getByTestId("save-button").click();
@@ -79,9 +77,7 @@ test("create and delete an exercise", async ({ page }) => {
 
   // Save the subcard
   const saveSubcardResponse = page.waitForResponse(
-    response =>
-      response.url().includes(`/exercises/${currentDate}`) &&
-      response.request().method() === "POST",
+    response => response.url().includes(`/exercises/${currentDate}`) && response.request().method() === "POST",
     { timeout: 4000 }
   );
   await page.getByTestId("save-button").click();
@@ -92,16 +88,11 @@ test("create and delete an exercise", async ({ page }) => {
   await page.waitForTimeout(intervalWaitTime);
 
   // Verify the subcard was created by checking for the weight and reps text
-  await expect(
-    page.getByText(`${randomWeight}kg × ${randomRepetitions} reps`).first()
-  ).toBeVisible({ timeout: 1500 });
+  await expect(page.getByText(`${randomWeight}kg × ${randomRepetitions} reps`).first()).toBeVisible({ timeout: 1500 });
   await page.waitForTimeout(intervalWaitTime);
 
   // Click on the subcard to edit it - click on the text that identifies it uniquely
-  await page
-    .getByText(`${randomWeight}kg × ${randomRepetitions} reps`)
-    .first()
-    .click();
+  await page.getByText(`${randomWeight}kg × ${randomRepetitions} reps`).first().click();
   await page.waitForTimeout(intervalWaitTime);
 
   // Wait for the edit dialog to appear
@@ -117,9 +108,7 @@ test("create and delete an exercise", async ({ page }) => {
 
   // Save the edited subcard
   const saveEditedSubcardResponse = page.waitForResponse(
-    response =>
-      response.url().includes(`/exercises/${currentDate}`) &&
-      response.request().method() === "POST",
+    response => response.url().includes(`/exercises/${currentDate}`) && response.request().method() === "POST",
     { timeout: 4000 }
   );
   await page.getByTestId("save-button").click();
@@ -130,16 +119,11 @@ test("create and delete an exercise", async ({ page }) => {
   await page.waitForTimeout(intervalWaitTime);
 
   // Verify the subcard was edited
-  await expect(
-    page.getByText(`${randomWeight}kg × ${newRepetitions} reps`).first()
-  ).toBeVisible({ timeout: 1500 });
+  await expect(page.getByText(`${randomWeight}kg × ${newRepetitions} reps`).first()).toBeVisible({ timeout: 1500 });
   await page.waitForTimeout(intervalWaitTime);
 
   // Click on the subcard again to delete it - click on the updated text
-  await page
-    .getByText(`${randomWeight}kg × ${newRepetitions} reps`)
-    .first()
-    .click();
+  await page.getByText(`${randomWeight}kg × ${newRepetitions} reps`).first().click();
   await page.waitForTimeout(intervalWaitTime);
 
   // Wait for the edit dialog to appear
@@ -148,9 +132,7 @@ test("create and delete an exercise", async ({ page }) => {
 
   // Delete the subcard
   const deleteSubcardResponse = page.waitForResponse(
-    response =>
-      response.url().includes(`/exercises/${currentDate}`) &&
-      response.request().method() === "POST",
+    response => response.url().includes(`/exercises/${currentDate}`) && response.request().method() === "POST",
     { timeout: 4000 }
   );
 
@@ -182,9 +164,7 @@ test("create and delete an exercise", async ({ page }) => {
 
   // Delete the exercise and wait for API response (POST of entire exercise list with item removed)
   const deleteResponse = page.waitForResponse(
-    response =>
-      response.url().includes(`/exercises/${currentDate}`) &&
-      response.request().method() === "POST",
+    response => response.url().includes(`/exercises/${currentDate}`) && response.request().method() === "POST",
     { timeout: 4000 }
   );
 

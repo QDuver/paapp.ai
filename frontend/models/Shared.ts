@@ -1,11 +1,10 @@
 export interface FetchOptions extends RequestInit {}
 
 export enum RequestStatusType {
-  LOADING = 'loading',
-  SUCCESS = 'success',
-  FAILURE = 'failure',
+  LOADING = "loading",
+  SUCCESS = "success",
+  FAILURE = "failure",
 }
-
 
 export interface IEntity {
   name: string;

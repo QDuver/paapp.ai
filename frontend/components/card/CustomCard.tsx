@@ -2,29 +2,34 @@ import React from "react";
 import { StyleSheet, View, Pressable, Text } from "react-native";
 import { Card, List } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { CardAbstract, FirestoreDocAbstract, SubCardAbstract } from "../../models/Abstracts";
+import { CardAbstract, FirestoreDocAbstract, SubCardAbstract, DialogableAbstract } from "../../models/Abstracts";
 import { useAppContext } from "../../contexts/AppContext";
-import { useDialogContext } from "../../contexts/DialogContext";
 import { theme } from "../../styles/theme";
 
 interface CustomCardProps {
   firestoreDoc: FirestoreDocAbstract;
   item: CardAbstract;
   index: number;
+  showEditDialog: (
+    item: DialogableAbstract,
+    parent: FirestoreDocAbstract | CardAbstract,
+    firestoreDoc: FirestoreDocAbstract,
+    isNew: boolean,
+    onSave: (formData: { [key: string]: any }) => void | Promise<void>
+  ) => void;
 }
 
-const CustomCard = ({ item, index, firestoreDoc }: CustomCardProps) => {
+const CustomCard = ({ item, index, firestoreDoc, showEditDialog }: CustomCardProps) => {
   const { refreshCounter, setRefreshCounter } = useAppContext();
-  const { showEditDialog } = useDialogContext();
 
   const cardBackgroundColor = item.isCompleted ? theme.colors.cardCompleted : theme.colors.secondary;
   const hasSubCards = (item.items && item.items.length > 0) || item.createNewSubCard() !== null;
   const description = (item as any).description || (item as any).instructions;
   const titleOpacity = item.isCompleted ? 0.5 : 1;
   const descriptionOpacity = item.isCompleted ? 0.4 : 0.7;
-  
+
   // Get section color based on collection
-  const sectionKey = firestoreDoc.collection as 'routines' | 'exercises' | 'meals';
+  const sectionKey = firestoreDoc.collection as "routines" | "exercises" | "meals";
   const sectionColor = theme.colors.sections[sectionKey]?.icon || theme.colors.accent;
   const sectionBgColor = theme.colors.sections[sectionKey]?.iconBackground || theme.colors.iconBackgrounds.blue;
   const sectionAccentColor = theme.colors.sections[sectionKey]?.accent || theme.colors.accent;
@@ -32,32 +37,28 @@ const CustomCard = ({ item, index, firestoreDoc }: CustomCardProps) => {
   const iconBorderColor = item.isCompleted ? sectionAccentColor : theme.colors.border;
 
   const handleCheckbox = (e?: any) => {
-    console.log('handleCheckbox')
+    console.log("handleCheckbox");
     e?.stopPropagation?.();
     item.onComplete(firestoreDoc);
     setRefreshCounter(prev => prev + 1);
   };
 
   const handleToggleExpand = (e?: any) => {
-    console.log('handleToggleExpand')
+    console.log("handleToggleExpand");
     e?.stopPropagation?.();
     item.onToggleExpand(firestoreDoc);
     setRefreshCounter(prev => prev + 1);
   };
 
   const handleAddSubCard = (e?: any) => {
-    console.log('handleAddSubCard')
+    console.log("handleAddSubCard");
     e?.stopPropagation?.();
     const newSubCard = item.createNewSubCard();
     if (item.skipDialogForNewChild()) {
       newSubCard.onSave(firestoreDoc, newSubCard.toFormData(), item, true, setRefreshCounter);
     } else {
-      showEditDialog(
-        newSubCard,
-        item,
-        firestoreDoc,
-        true,
-        (formData) => newSubCard.onSave(firestoreDoc, formData, item, true, setRefreshCounter)
+      showEditDialog(newSubCard, item, firestoreDoc, true, formData =>
+        newSubCard.onSave(firestoreDoc, formData, item, true, setRefreshCounter)
       );
     }
   };
@@ -65,25 +66,24 @@ const CustomCard = ({ item, index, firestoreDoc }: CustomCardProps) => {
   return (
     <Card style={[styles.card, { backgroundColor: cardBackgroundColor }]} testID="exercise-card">
       <Pressable
-        onPress={hasSubCards ? handleToggleExpand : () => showEditDialog(
-          item,
-          firestoreDoc,
-          firestoreDoc,
-          false,
-          (formData) => item.onSave(firestoreDoc, formData, firestoreDoc, false, setRefreshCounter)
-        )}
-        onLongPress={() => showEditDialog(
-          item,
-          firestoreDoc,
-          firestoreDoc,
-          false,
-          (formData) => item.onSave(firestoreDoc, formData, firestoreDoc, false, setRefreshCounter)
-        )}
+        onPress={
+          hasSubCards
+            ? handleToggleExpand
+            : () =>
+                showEditDialog(item, firestoreDoc, firestoreDoc, false, formData =>
+                  item.onSave(firestoreDoc, formData, firestoreDoc, false, setRefreshCounter)
+                )
+        }
+        onLongPress={() =>
+          showEditDialog(item, firestoreDoc, firestoreDoc, false, formData =>
+            item.onSave(firestoreDoc, formData, firestoreDoc, false, setRefreshCounter)
+          )
+        }
         style={[styles.accordionItem, { backgroundColor: cardBackgroundColor }]}
       >
         <View style={styles.headerContent}>
           <Pressable onPress={handleCheckbox} style={styles.iconContainer} hitSlop={8}>
-            <View style={[styles.iconCircle, { backgroundColor: iconBackground, borderColor: iconBorderColor }]}> 
+            <View style={[styles.iconCircle, { backgroundColor: iconBackground, borderColor: iconBorderColor }]}>
               {item.isCompleted ? (
                 <MaterialCommunityIcons name="check-bold" size={18} color={sectionAccentColor} />
               ) : (
@@ -92,14 +92,8 @@ const CustomCard = ({ item, index, firestoreDoc }: CustomCardProps) => {
             </View>
           </Pressable>
           <View style={styles.headerText}>
-            <Text style={[styles.accordionTitle, { opacity: titleOpacity }]}>
-              {item.name || `Item ${index + 1}`}
-            </Text>
-            {description ? (
-              <Text style={[styles.accordionDescription, { opacity: descriptionOpacity }]}>
-                {description}
-              </Text>
-            ) : null}
+            <Text style={[styles.accordionTitle, { opacity: titleOpacity }]}>{item.name || `Item ${index + 1}`}</Text>
+            {description ? <Text style={[styles.accordionDescription, { opacity: descriptionOpacity }]}>{description}</Text> : null}
           </View>
           {hasSubCards ? (
             <View style={styles.rightContainer}>
@@ -131,13 +125,11 @@ const CustomCard = ({ item, index, firestoreDoc }: CustomCardProps) => {
               testID="subcard"
               title={subItem.name || `Set ${subIndex + 1}`}
               description={tagString}
-              onPress={() => showEditDialog(
-                subItem,
-                item,
-                firestoreDoc,
-                false,
-                (formData) => subItem.onSave(firestoreDoc, formData, item, false, setRefreshCounter)
-              )}
+              onPress={() =>
+                showEditDialog(subItem, item, firestoreDoc, false, formData =>
+                  subItem.onSave(firestoreDoc, formData, item, false, setRefreshCounter)
+                )
+              }
               style={[styles.subCard, isLastItem && styles.subCardLast]}
               titleStyle={styles.subCardTitle}
               descriptionStyle={styles.subCardDescription}

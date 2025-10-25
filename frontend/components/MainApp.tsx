@@ -4,30 +4,38 @@ import { SafeAreaView, ScrollView, StyleSheet, Text, View, ActivityIndicator, Re
 import { FAB, Appbar, BottomNavigation, Menu, Icon, MD3Colors, Divider } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CardList from "./card/CardList";
-import EditDialog from "./card/EditDialog";
+import BuildWithAiDialog from "./dialogs/BuildWithAiDialog";
+import EditItemDialog from "./dialogs/EditItemDialog";
 import { getFirebaseAuth } from "../services/Firebase";
 import { signOut } from "firebase/auth";
-import { CardAbstract, FirestoreDocAbstract, IUIMetadata, SettingsAction } from "../models/Abstracts";
+import { CardAbstract, FirestoreDocAbstract, IUIMetadata, SettingsAction, DialogableAbstract } from "../models/Abstracts";
 import { useAppContext } from "../contexts/AppContext";
-import { useDialogContext } from "../contexts/DialogContext";
 import { theme, commonStyles } from "../styles/theme";
 import { Routines } from "../models/Routines";
 import { Exercises } from "../models/Exercises";
 import { Meals } from "../models/Meals";
 
-
 const MainApp = () => {
-  const { data, isLoading, setIsLoading, setData } = useAppContext();
-  const { showEditDialog } = useDialogContext();
+  const { data, isLoading, setIsLoading, setData, setRefreshCounter } = useAppContext();
 
   const [navigationIndex, setNavigationIndex] = useState(1);
   const [menuVisible, setMenuVisible] = useState(false);
 
+  const [buildAiDialogVisible, setBuildAiDialogVisible] = useState(false);
+  const [buildAiFirestoreDoc, setBuildAiFirestoreDoc] = useState<FirestoreDocAbstract | null>(null);
+
+  const [editDialogVisible, setEditDialogVisible] = useState(false);
+  const [editDialogItem, setEditDialogItem] = useState<DialogableAbstract | null>(null);
+  const [editDialogParent, setEditDialogParent] = useState<FirestoreDocAbstract | CardAbstract | null>(null);
+  const [editDialogFirestoreDoc, setEditDialogFirestoreDoc] = useState<FirestoreDocAbstract | null>(null);
+  const [editDialogIsNew, setEditDialogIsNew] = useState(false);
+  const [editDialogOnSave, setEditDialogOnSave] = useState<(formData: { [key: string]: any }) => void | Promise<void>>(() => () => {});
+
   const handleSignOut = async () => {
-      const auth = getFirebaseAuth();
-      if (auth) {
-        await signOut(auth);
-      }
+    const auth = getFirebaseAuth();
+    if (auth) {
+      await signOut(auth);
+    }
     setMenuVisible(false);
   };
 
@@ -36,13 +44,8 @@ const MainApp = () => {
 
     switch (action) {
       case "generate":
-        showEditDialog(
-          firestoreDoc,
-          firestoreDoc,
-          firestoreDoc,
-          true,
-          (formData) => firestoreDoc.buildWithAi(formData, setIsLoading, setData)
-        );
+        setBuildAiFirestoreDoc(firestoreDoc);
+        setBuildAiDialogVisible(true);
         break;
       case "editPrompt":
         console.log(`Editing prompt for ${firestoreDoc.collection}...`);
@@ -61,25 +64,36 @@ const MainApp = () => {
     }
   };
 
+  const showEditDialog = (
+    item: DialogableAbstract,
+    parent: FirestoreDocAbstract | CardAbstract,
+    firestoreDoc: FirestoreDocAbstract,
+    isNew: boolean,
+    onSave: (formData: { [key: string]: any }) => void | Promise<void>
+  ) => {
+    setEditDialogItem(item);
+    setEditDialogParent(parent);
+    setEditDialogFirestoreDoc(firestoreDoc);
+    setEditDialogIsNew(isNew);
+    setEditDialogOnSave(() => onSave);
+    setEditDialogVisible(true);
+  };
+
   const routes: (IUIMetadata & { color: string })[] = [Routines, Exercises, Meals].map(ModelClass => ({
     ...ModelClass.getUIMetadata(),
-    color: theme.colors.sections[ModelClass.getUIMetadata().key as 'routines' | 'exercises' | 'meals']?.accent || theme.colors.accent,
+    color: theme.colors.sections[ModelClass.getUIMetadata().key as "routines" | "exercises" | "meals"]?.accent || theme.colors.accent,
   }));
 
   const renderScene = ({ route }: { route: { key: string } }) => {
     const firestoreDoc: FirestoreDocAbstract = data?.[route.key];
-    const sectionColor = theme.colors.sections[route.key as 'routines' | 'exercises' | 'meals']?.accent || theme.colors.accent;
+    const sectionColor = theme.colors.sections[route.key as "routines" | "exercises" | "meals"]?.accent || theme.colors.accent;
     const currentRoute = routes.find(r => r.key === route.key);
 
     const createCard = () => {
       if (!firestoreDoc) return;
       const newItem = firestoreDoc.createCard();
-      showEditDialog(
-        newItem,
-        firestoreDoc,
-        firestoreDoc,
-        true,
-        (formData) => newItem.onSave(firestoreDoc, formData, firestoreDoc, true, setRefreshCounter)
+      showEditDialog(newItem, firestoreDoc, firestoreDoc, true, formData =>
+        newItem.onSave(firestoreDoc, formData, firestoreDoc, true, setRefreshCounter)
       );
     };
 
@@ -94,7 +108,7 @@ const MainApp = () => {
               </Text>
             </View>
           ) : firestoreDoc ? (
-            <CardList firestoreDoc={firestoreDoc} />
+            <CardList firestoreDoc={firestoreDoc} showEditDialog={showEditDialog} />
           ) : (
             <View style={styles.emptyContainer}>
               <Text style={[styles.emptyText, { color: theme.colors.textMuted }]}>No {route.key} found</Text>
@@ -102,17 +116,15 @@ const MainApp = () => {
           )}
         </ScrollView>
 
-        <EditDialog />
-
         {!isLoading && (
           <View style={styles.fabContainer}>
-            <FAB 
-              style={[styles.fabButton, { backgroundColor: sectionColor }]} 
-              icon="plus" 
+            <FAB
+              style={[styles.fabButton, { backgroundColor: sectionColor }]}
+              icon="plus"
               color={theme.colors.secondary}
               customSize={56}
-              onPress={createCard} 
-              testID="add-fab" 
+              onPress={createCard}
+              testID="add-fab"
             />
           </View>
         )}
@@ -124,55 +136,71 @@ const MainApp = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-        {/* Header */}
-        <Appbar.Header style={styles.appBar}>
-          <Appbar.Content title={currentRoute?.title} titleStyle={styles.appBarTitle} />
-          <Menu
-            visible={menuVisible}
-            onDismiss={() => setMenuVisible(false)}
-            anchor={
-              <Appbar.Action icon="dots-vertical" onPress={() => setMenuVisible(true)} />
-            }
-          >
-            {currentRoute?.settingsOptions?.map((option, index) => (
-              <Menu.Item
-                key={index}
-                onPress={() => handleSettingsAction(option.action, data[currentRoute.key])}
-                title={option.label}
-                leadingIcon={option.icon}
-              />
-            ))}
-            {currentRoute?.settingsOptions && <Divider />}
-            <Menu.Item onPress={handleSignOut} title="Sign Out" leadingIcon="logout" />
-          </Menu>
-        </Appbar.Header>
+      {/* Header */}
+      <Appbar.Header style={styles.appBar}>
+        <Appbar.Content title={currentRoute?.title} titleStyle={styles.appBarTitle} />
+        <Menu
+          visible={menuVisible}
+          onDismiss={() => setMenuVisible(false)}
+          anchor={<Appbar.Action icon="dots-vertical" onPress={() => setMenuVisible(true)} />}
+        >
+          {currentRoute?.settingsOptions?.map((option, index) => (
+            <Menu.Item
+              key={index}
+              onPress={() => handleSettingsAction(option.action, data[currentRoute.key])}
+              title={option.label}
+              leadingIcon={option.icon}
+            />
+          ))}
+          {currentRoute?.settingsOptions && <Divider />}
+          <Menu.Item onPress={handleSignOut} title="Sign Out" leadingIcon="logout" />
+        </Menu>
+      </Appbar.Header>
 
-        <BottomNavigation
-          navigationState={{ index: navigationIndex, routes }}
-          onIndexChange={setNavigationIndex}
-          renderScene={renderScene}
-          barStyle={styles.bottomNavBar}
-          testID="bottom-navigation"
-          theme={{
-            colors: {
-              secondaryContainer: routes[navigationIndex].color,
-              onSecondaryContainer: theme.colors.secondary,
-              onSurfaceVariant: theme.colors.textMuted,
-              onSurface: theme.colors.text,
-            },
-          }}
-        />
+      <BottomNavigation
+        navigationState={{ index: navigationIndex, routes }}
+        onIndexChange={setNavigationIndex}
+        renderScene={renderScene}
+        barStyle={styles.bottomNavBar}
+        testID="bottom-navigation"
+        theme={{
+          colors: {
+            secondaryContainer: routes[navigationIndex].color,
+            onSecondaryContainer: theme.colors.secondary,
+            onSurfaceVariant: theme.colors.textMuted,
+            onSurface: theme.colors.text,
+          },
+        }}
+      />
 
-        <StatusBar style="dark" />
-      </SafeAreaView>
-    );
-  };
+      <StatusBar style="dark" />
 
-  const styles = StyleSheet.create({
+      <BuildWithAiDialog
+        visible={buildAiDialogVisible}
+        firestoreDoc={buildAiFirestoreDoc}
+        setIsLoading={setIsLoading}
+        setData={setData}
+        onClose={() => setBuildAiDialogVisible(false)}
+      />
+
+      <EditItemDialog
+        visible={editDialogVisible}
+        item={editDialogItem}
+        parent={editDialogParent}
+        firestoreDoc={editDialogFirestoreDoc}
+        isNew={editDialogIsNew}
+        onSave={editDialogOnSave}
+        onClose={() => setEditDialogVisible(false)}
+      />
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
   container: commonStyles.container,
   appBar: {
     ...commonStyles.appBar,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 3,
@@ -223,7 +251,7 @@ const MainApp = () => {
     backgroundColor: theme.colors.secondary,
     borderTopWidth: 0,
     elevation: 8,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
