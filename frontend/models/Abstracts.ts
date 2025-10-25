@@ -189,7 +189,8 @@ export abstract class FirestoreDocAbstract extends DialogableAbstract {
   ) {
     setIsLoading(true);
     const response = await apiClient.post(`build-with-ai/${this.apiUrl}`, formData);
-    setData(prevData => ({ ...prevData, [this.collection]: response }));
+    const instance = new (this.constructor as any)(response);
+    setData(prevData => ({ ...prevData, [this.collection]: instance }));
     setIsLoading(false);
   }
 
