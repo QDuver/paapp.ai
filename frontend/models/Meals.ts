@@ -118,7 +118,25 @@ export class Meals extends FirestoreDocAbstract {
       title: "Meals",
       focusedIcon: "food-apple",
       unfocusedIcon: "food-apple-outline",
-      generateButton: true,
+      generateTitle: "New Meal Plan",
+      settingsOptions: [
+        {
+          label: 'Generate Meal Plan',
+          onPress: () => this.buildWithAi({})
+        },
+        {
+          label: 'Edit Prompt',
+          onPress: () => console.log('Edit Prompt - Meals')
+        },
+        {
+          label: 'Duplicate',
+          onPress: () => console.log('Duplicate - Meals')
+        },
+        {
+          label: 'Delete',
+          onPress: () => console.log('Delete - Meals')
+        }
+      ]
     };
   }
 

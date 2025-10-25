@@ -28,7 +28,7 @@ async function getAuthHeaders(skipAuth: boolean = false): Promise<Record<string,
 }
 
 async function request<T = unknown>(endpoint: string, options: FetchOptions & ApiClientOptions = {}): Promise<T | null> {
-  const baseApi = getBaseUrl();
+  const baseApi = await getBaseUrl();
   const url = endpoint.startsWith("http") ? endpoint : `${baseApi}/${endpoint}`;
   const { skipAuth = false, onError, silent = false, ...fetchOptions } = options;
 

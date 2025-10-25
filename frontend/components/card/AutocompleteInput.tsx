@@ -2,13 +2,11 @@ import React, { useState, useMemo } from "react";
 import {
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
   FlatList,
 } from "react-native";
-import { useAppContext } from "../../contexts/AppContext";
-import { useDialogContext } from "../../contexts/DialogContext";
+import { TextInput as PaperTextInput } from "react-native-paper";
 import { theme } from "../../styles/theme";
 
 interface AutocompleteInputProps {
@@ -16,8 +14,8 @@ interface AutocompleteInputProps {
   onChangeText: (text: string) => void;
   placeholder?: string;
   placeholderTextColor?: string;
-  fieldName?: string; // Add fieldName to determine suggestions
-  suggestions?: any[]; // External suggestions from field metadata
+  fieldName?: string;
+  suggestions?: any[];
   style?: any;
   keyboardType?: any;
   inputMode?: any;
@@ -30,6 +28,8 @@ interface AutocompleteInputProps {
   backgroundColor?: string;
   color?: string;
   onSuggestionSelect?: (suggestion: any) => void;
+  fallbackSuggestions?: any[];
+  collection?: string;
 }
 
 const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
@@ -51,12 +51,11 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   backgroundColor,
   color,
   onSuggestionSelect,
+  fallbackSuggestions,
+  collection,
 }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<any[]>([]);
-
-  const { data } = useAppContext();
-  const { dialogSettings } = useDialogContext();
 
   // Determine suggestions based on field name and context
   const suggestions = useMemo(() => {
@@ -65,19 +64,16 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
       return externalSuggestions;
     }
 
-    if (
-      fieldName === "name" &&
-      dialogSettings.cardList?.collection === "exercises"
-    ) {
-      return data?.uniqueExercises || [];
+    if (fieldName === "name" && collection === "exercises") {
+      return fallbackSuggestions || [];
     }
 
     return [];
   }, [
     externalSuggestions,
     fieldName,
-    dialogSettings.cardList?.collection,
-    data?.uniqueExercises,
+    collection,
+    fallbackSuggestions,
   ]);
 
   const handleTextChange = (text: string) => {
@@ -98,6 +94,8 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
     }
   };
 
+  const resolvedBorderColor = hasError ? "#FF3B30" : borderColor || theme.colors.border;
+
   const selectSuggestion = (suggestion: any) => {
     onChangeText(suggestion.name);
     setShowSuggestions(false);
@@ -109,16 +107,10 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
 
   return (
     <View style={styles.container}>
-      <TextInput
+      <PaperTextInput
         testID="autocomplete-input"
-        style={[
-          style,
-          {
-            backgroundColor,
-            borderColor: hasError ? "#FF3B30" : borderColor,
-            color,
-          },
-        ]}
+        mode="outlined"
+        style={[style, { backgroundColor, color }]}
         value={value}
         onChangeText={handleTextChange}
         placeholder={placeholder}
@@ -134,6 +126,9 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
             setShowSuggestions(true);
           }
         }}
+        outlineColor={resolvedBorderColor}
+        activeOutlineColor={resolvedBorderColor}
+        dense
       />
 
       {(() => {

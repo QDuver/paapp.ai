@@ -11,7 +11,7 @@ const EditDialog = () => {
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
   const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
 
-  const { onBuildWithAi, setRefreshCounter } = useAppContext();
+  const { data, onBuildWithAi, setRefreshCounter } = useAppContext();
   const { dialogSettings, hideEditDialog } = useDialogContext();
   const { visible, item, parent, cardList, isNew } = dialogSettings;
 
@@ -93,6 +93,8 @@ const EditDialog = () => {
             placeholder={fieldLabel}
             placeholderTextColor={theme.colors.textMuted}
             suggestions={suggestions}
+            fallbackSuggestions={data?.uniqueExercises}
+            collection={cardList.collection}
             style={[styles.textInput]}
             keyboardType={keyboardType || "default"}
             inputMode={fieldType === "number" ? "numeric" : "text"}
@@ -158,7 +160,9 @@ const EditDialog = () => {
           <View style={styles.titleContainer}>
             <View style={[styles.titleAccent, { backgroundColor: sectionColor }]} />
             <Text variant="titleMedium" style={styles.title}>
-              {isNew ? "New Item" : "Edit Item"}
+              {isNew && item instanceof FirestoreDocAbstract && (item.constructor as typeof FirestoreDocAbstract).getUIMetadata().generateTitle
+                ? (item.constructor as typeof FirestoreDocAbstract).getUIMetadata().generateTitle
+                : isNew ? "New Item" : "Edit Item"}
             </Text>
           </View>
 

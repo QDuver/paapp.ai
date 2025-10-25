@@ -2,17 +2,33 @@ import { IFieldMetadata } from "../models/Abstracts";
 import { DEV_CONFIG, PROD_CONFIG } from "../config/env";
 import { Alert, Platform } from "react-native";
 
-export const getBaseUrl = (): string => {
+const testConnection = async (url: string): Promise<boolean> => {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 1000);
+    
+    await fetch(`${url}/health`, { 
+      method: 'HEAD',
+      signal: controller.signal 
+    });
+    clearTimeout(timeoutId);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+export const getBaseUrl = async (): Promise<string> => {
   if (__DEV__) {
-    // Development mode
-    if (Platform.OS === "web") {
-      return `http://localhost:${DEV_CONFIG.LOCAL_PORT}`;
-    } else {
-      // For mobile devices (both iOS and Android), use the computer's IP
-      return `http://${DEV_CONFIG.LOCAL_IP}:${DEV_CONFIG.LOCAL_PORT}`;
-    }
+    const localUrl = Platform.OS === "web"
+      ? `http://localhost:${DEV_CONFIG.LOCAL_PORT}`
+      : `http://${DEV_CONFIG.LOCAL_IP}:${DEV_CONFIG.LOCAL_PORT}`;
+    
+    const isLocalAvailable = await testConnection(localUrl);
+    console.log("Local server availability:", isLocalAvailable);
+    return isLocalAvailable ? localUrl : PROD_CONFIG.API_URL;
+
   } else {
-    // Production mode
     return PROD_CONFIG.API_URL;
   }
 };

@@ -1,13 +1,12 @@
 MVP
+- Add exercise not working
 - Run automated tests on AI scripts
+- Long tap is breaking
 - Change all logos / titles / names
-- Make sure DB gets created on first load
 - Deploy to Android
-- Design form routines / modes on Android
 - Have default exercises
 
 POST MVP
-- Theme
 - Remove skipAuth logic and have login by email for testing
 - Dialog should become modal
 - Calendar Icon + Swipability

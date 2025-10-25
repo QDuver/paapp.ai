@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView, ScrollView, StyleSheet, Text, View, ActivityIndicator, RefreshControl } from "react-native";
-import { FAB, Appbar, BottomNavigation, Menu, Icon, MD3Colors } from "react-native-paper";
+import { FAB, Appbar, BottomNavigation, Menu, Icon, MD3Colors, Divider } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CardList from "./card/CardList";
-import UserAvatar from "./auth/UserAvatar";
 import EditDialog from "./card/EditDialog";
 import { getFirebaseAuth } from "../services/Firebase";
 import { signOut } from "firebase/auth";
-import { CardAbstract, FirestoreDocAbstract } from "../models/Abstracts";
-import { SettingsPage } from "./SettingsPage";
+import { CardAbstract, FirestoreDocAbstract, IUIMetadata } from "../models/Abstracts";
 import { useAppContext } from "../contexts/AppContext";
 import { useDialogContext } from "../contexts/DialogContext";
 import { theme, commonStyles } from "../styles/theme";
@@ -17,34 +15,13 @@ import { Routines } from "../models/Routines";
 import { Exercises } from "../models/Exercises";
 import { Meals } from "../models/Meals";
 
-interface MainAppProps {
-  user: any;
-}
 
-const MainApp = ({ user }: MainAppProps) => {
+const MainApp = () => {
   const { data, isLoading } = useAppContext();
   const { showEditDialog } = useDialogContext();
 
   const [navigationIndex, setNavigationIndex] = useState(1);
   const [menuVisible, setMenuVisible] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-
-  useEffect(() => {
-    const loadViewState = async () => {
-      const savedView = await AsyncStorage.getItem("@current_view");
-      if (savedView === "settings") {
-        setShowSettings(true);
-      }
-    };
-    loadViewState();
-  }, []);
-
-  useEffect(() => {
-    const saveViewState = async () => {
-      await AsyncStorage.setItem("@current_view", showSettings ? "settings" : "main");
-    };
-    saveViewState();
-  }, [showSettings]);
 
   const handleSignOut = async () => {
       const auth = getFirebaseAuth();
@@ -54,12 +31,7 @@ const MainApp = ({ user }: MainAppProps) => {
     setMenuVisible(false);
   };
 
-  const handleSettings = () => {
-    setShowSettings(true);
-    setMenuVisible(false);
-  };
-
-  const routes = [Routines, Exercises, Meals].map(ModelClass => ({
+  const routes: (IUIMetadata & { color: string })[] = [Routines, Exercises, Meals].map(ModelClass => ({
     ...ModelClass.getUIMetadata(),
     color: theme.colors.sections[ModelClass.getUIMetadata().key as 'routines' | 'exercises' | 'meals']?.accent || theme.colors.accent,
   }));
@@ -100,30 +72,6 @@ const MainApp = ({ user }: MainAppProps) => {
           <View style={styles.fabContainer}>
             <FAB 
               style={[styles.fabButton, { backgroundColor: sectionColor }]} 
-              icon="cog-outline" 
-              color={theme.colors.secondary}
-              customSize={56}
-              onPress={handleSettings} 
-              testID="settings-fab" 
-            />
-
-            {currentRoute?.generateButton && (
-              <FAB
-                style={[styles.fabButton, { backgroundColor: sectionColor }]}
-                icon="auto-fix"
-                color={theme.colors.secondary}
-                customSize={56}
-                onPress={() => {
-                  if (cardList) {
-                    showEditDialog(cardList, cardList, cardList, true);
-                  }
-                }}
-                testID="ai-fab"
-              />
-            )}
-
-            <FAB 
-              style={[styles.fabButton, { backgroundColor: sectionColor }]} 
               icon="plus" 
               color={theme.colors.secondary}
               customSize={56}
@@ -136,15 +84,6 @@ const MainApp = ({ user }: MainAppProps) => {
     );
   };
 
-  if (showSettings) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <SettingsPage onBack={() => setShowSettings(false)} />
-        <StatusBar style="dark" />
-      </SafeAreaView>
-    );
-  }
-
   const currentRoute = routes[navigationIndex];
 
   return (
@@ -156,12 +95,20 @@ const MainApp = ({ user }: MainAppProps) => {
             visible={menuVisible}
             onDismiss={() => setMenuVisible(false)}
             anchor={
-              <View style={{ marginRight: 8 }}>
-                <UserAvatar user={user} onPress={() => setMenuVisible(true)} />
-              </View>
+              <Appbar.Action icon="dots-vertical" onPress={() => setMenuVisible(true)} />
             }
           >
-            <Menu.Item onPress={handleSettings} title="Settings" leadingIcon="cog-outline" />
+            {currentRoute?.settingsOptions?.map((option, index) => (
+              <Menu.Item 
+                key={index} 
+                onPress={() => {
+                  setMenuVisible(false);
+                  option.onPress(cardList);
+                }} 
+                title={option.label} 
+              />
+            ))}
+            {currentRoute?.settingsOptions && <Divider />}
             <Menu.Item onPress={handleSignOut} title="Sign Out" leadingIcon="logout" />
           </Menu>
         </Appbar.Header>

@@ -1,6 +1,6 @@
 import React from "react";
-import { StyleSheet, View, Pressable } from "react-native";
-import { Card, List, IconButton, Checkbox, TouchableRipple } from "react-native-paper";
+import { StyleSheet, View, Pressable, Text } from "react-native";
+import { Card, List } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { CardAbstract, FirestoreDocAbstract, SubCardAbstract } from "../../models/Abstracts";
 import { useAppContext } from "../../contexts/AppContext";
@@ -27,20 +27,26 @@ const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
   const sectionKey = cardList.collection as 'routines' | 'exercises' | 'meals';
   const sectionColor = theme.colors.sections[sectionKey]?.icon || theme.colors.accent;
   const sectionBgColor = theme.colors.sections[sectionKey]?.iconBackground || theme.colors.iconBackgrounds.blue;
+  const sectionAccentColor = theme.colors.sections[sectionKey]?.accent || theme.colors.accent;
+  const iconBackground = item.isCompleted ? sectionBgColor : theme.colors.secondary;
+  const iconBorderColor = item.isCompleted ? sectionAccentColor : theme.colors.border;
 
   const handleCheckbox = (e?: any) => {
+    console.log('handleCheckbox')
     e?.stopPropagation?.();
     item.onComplete(cardList);
     setRefreshCounter(prev => prev + 1);
   };
 
   const handleToggleExpand = (e?: any) => {
+    console.log('handleToggleExpand')
     e?.stopPropagation?.();
     item.onToggleExpand(cardList);
     setRefreshCounter(prev => prev + 1);
   };
 
   const handleAddSubCard = (e?: any) => {
+    console.log('handleAddSubCard')
     e?.stopPropagation?.();
     const newSubCard = item.createNewSubCard();
     if (item.skipDialogForNewChild()) {
@@ -50,104 +56,71 @@ const CustomCard = ({ item, index, cardList }: CustomCardProps) => {
     }
   };
 
-  // If has subcards, use Card with List.Accordion
-  if (hasSubCards) {
-    return (
-      <Card style={[styles.card, { backgroundColor: cardBackgroundColor }]} testID="exercise-card">
-        <List.Accordion
-          title={item.name || `Item ${index + 1}`}
-          description={description}
-          expanded={item.isExpanded}
-          onPress={handleToggleExpand}
-          onLongPress={() => showEditDialog(item, cardList, cardList, false)}
-          style={[styles.accordionItem, { backgroundColor: cardBackgroundColor }]}
-          titleStyle={[styles.accordionTitle, { opacity: titleOpacity }]}
-          descriptionStyle={[styles.accordionDescription, { opacity: descriptionOpacity }]}
-          left={props => (
-            <Pressable 
-              onPress={handleCheckbox} 
-              style={styles.iconContainer}
-              hitSlop={8}
-            >
-              <View style={[styles.iconCircle, { backgroundColor: sectionBgColor }]}>
-                <MaterialCommunityIcons 
-                  name={item.isCompleted ? "check" : cardList.collection === 'routines' ? "clock-outline" : cardList.collection === 'exercises' ? "dumbbell" : "food-apple-outline"}
-                  size={20} 
-                  color={sectionColor}
-                />
-              </View>
-            </Pressable>
-          )}
-          right={props => (
+  return (
+    <Card style={[styles.card, { backgroundColor: cardBackgroundColor }]} testID="exercise-card">
+      <Pressable
+        onPress={hasSubCards ? handleToggleExpand : () => showEditDialog(item, cardList, cardList, false)}
+        onLongPress={() => showEditDialog(item, cardList, cardList, false)}
+        style={[styles.accordionItem, { backgroundColor: cardBackgroundColor }]}
+      >
+        <View style={styles.headerContent}>
+          <Pressable onPress={handleCheckbox} style={styles.iconContainer} hitSlop={8}>
+            <View style={[styles.iconCircle, { backgroundColor: iconBackground, borderColor: iconBorderColor }]}> 
+              {item.isCompleted ? (
+                <MaterialCommunityIcons name="check-bold" size={18} color={sectionAccentColor} />
+              ) : (
+                <MaterialCommunityIcons name="circle-outline" size={20} color={theme.colors.textMuted} />
+              )}
+            </View>
+          </Pressable>
+          <View style={styles.headerText}>
+            <Text style={[styles.accordionTitle, { opacity: titleOpacity }]}>
+              {item.name || `Item ${index + 1}`}
+            </Text>
+            {description ? (
+              <Text style={[styles.accordionDescription, { opacity: descriptionOpacity }]}>
+                {description}
+              </Text>
+            ) : null}
+          </View>
+          {hasSubCards ? (
             <View style={styles.rightContainer}>
               {item.createNewSubCard() !== null && (
-                <Pressable 
-                  testID="add-subcard-button" 
-                  onPress={handleAddSubCard}
-                  style={styles.addButton}
-                >
-                  <MaterialCommunityIcons 
-                    name="plus-circle-outline" 
-                    size={24} 
-                    color={sectionColor}
-                  />
+                <Pressable testID="add-subcard-button" onPress={handleAddSubCard} style={styles.addButton}>
+                  <MaterialCommunityIcons name="plus-circle-outline" size={24} color={sectionColor} />
                 </Pressable>
               )}
-              <View style={styles.chevronContainer}>
-                <MaterialCommunityIcons 
+              <Pressable onPress={handleToggleExpand} style={styles.chevronContainer} hitSlop={8}>
+                <MaterialCommunityIcons
                   name={item.isExpanded ? "chevron-up" : "chevron-down"}
-                  size={24} 
+                  size={24}
                   color={theme.colors.textSecondary}
                 />
-              </View>
+              </Pressable>
             </View>
-          )}
-        >
-          {item.items?.map((subItem: SubCardAbstract, subIndex: number) => {
-            const tags = subItem.getTags();
-            const tagString = tags.length > 0 ? tags.join(" • ") : undefined;
-            const isLastItem = subIndex === item.items!.length - 1;
+          ) : null}
+        </View>
+      </Pressable>
+      {item.isExpanded &&
+        item.items?.map((subItem: SubCardAbstract, subIndex: number) => {
+          const tags = subItem.getTags();
+          const tagString = tags.length > 0 ? tags.join(" • ") : undefined;
+          const isLastItem = subIndex === item.items!.length - 1;
 
-            return (
-              <List.Item
-                key={`${refreshCounter}-subcard-${index}-${subIndex}`}
-                testID="subcard"
-                title={subItem.name || `Set ${subIndex + 1}`}
-                description={tagString}
-                onPress={() => showEditDialog(subItem, item, cardList, false)}
-                style={[styles.subCard, isLastItem && styles.subCardLast]}
-                titleStyle={styles.subCardTitle}
-                descriptionStyle={styles.subCardDescription}
-              />
-            );
-          })}
-        </List.Accordion>
-      </Card>
-    );
-  }
-
-  // If no subcards, use simple List.Item
-  return (
-    <List.Item
-      testID="exercise-card"
-      title={item.name || `Item ${index + 1}`}
-      description={description}
-      onPress={() => showEditDialog(item, cardList, cardList, false)}
-      style={[styles.listItem, { backgroundColor: cardBackgroundColor }]}
-      titleStyle={styles.listItemTitle}
-      descriptionStyle={styles.listItemDescription}
-      left={() => (
-        <Pressable onPress={handleCheckbox} hitSlop={8} style={styles.iconContainer}>
-          <View style={[styles.iconCircle, { backgroundColor: sectionBgColor }]}>
-            <MaterialCommunityIcons 
-              name={item.isCompleted ? "check" : cardList.collection === 'routines' ? "clock-outline" : cardList.collection === 'exercises' ? "dumbbell" : "food-apple-outline"}
-              size={20} 
-              color={sectionColor}
+          return (
+            <List.Item
+              key={`${refreshCounter}-subcard-${index}-${subIndex}`}
+              testID="subcard"
+              title={subItem.name || `Set ${subIndex + 1}`}
+              description={tagString}
+              onPress={() => showEditDialog(subItem, item, cardList, false)}
+              style={[styles.subCard, isLastItem && styles.subCardLast]}
+              titleStyle={styles.subCardTitle}
+              descriptionStyle={styles.subCardDescription}
             />
-          </View>
-        </Pressable>
-      )}
-    />
+          );
+        })}
+    </Card>
   );
 };
 
@@ -167,13 +140,24 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginLeft: theme.spacing.sm,
+    marginRight: theme.spacing.md,
+  },
+  headerContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  headerText: {
+    flex: 1,
+    paddingRight: theme.spacing.md,
+    marginLeft: theme.spacing.sm,
   },
   iconCircle: {
-    width: 40,
-    height: 40,
+    width: 36,
+    height: 36,
     borderRadius: theme.borderRadius.round,
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
   },
   radioContainer: {
     justifyContent: "center",
@@ -183,7 +167,9 @@ const styles = StyleSheet.create({
   rightContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginRight: -4,
+    paddingRight: theme.spacing.md,
+    marginRight: -theme.spacing.xs,
+    gap: theme.spacing.xs,
   },
   accordionTitle: {
     fontWeight: theme.typography.weights.semibold,
@@ -221,25 +207,6 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
     marginLeft: theme.spacing.sm,
     marginTop: 3,
-  },
-  listItem: {
-    marginVertical: theme.spacing.sm,
-    marginHorizontal: theme.spacing.lg,
-    borderRadius: theme.borderRadius.lg,
-    backgroundColor: theme.colors.secondary,
-    paddingVertical: theme.spacing.xs,
-    ...theme.shadows.card,
-  },
-  listItemTitle: {
-    fontWeight: theme.typography.weights.semibold,
-    fontSize: theme.typography.sizes.lg,
-    color: theme.colors.text,
-    letterSpacing: -0.3,
-  },
-  listItemDescription: {
-    fontSize: theme.typography.sizes.sm,
-    color: theme.colors.textSecondary,
-    marginTop: 2,
   },
   iconButton: {
     margin: 0,

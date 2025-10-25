@@ -60,18 +60,18 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   }, []);
 
 
-  const onBuildWithAi = async (cardList: FirestoreDocAbstract, formData: { [key: string]: any }) => {
-    setIsLoading(true);
+  // const onBuildWithAi = async (cardList: FirestoreDocAbstract, formData: { [key: string]: any }) => {
+  //   setIsLoading(true);
     
-    const ModelClass = modelMap[cardList.collection];
-    const instance = await ModelClass.buildWithAi(formData);
+  //   const ModelClass = modelMap[cardList.collection];
+  //   const instance = await ModelClass.buildWithAi(formData);
     
-    setData(prevData => ({
-      ...prevData,
-      [cardList.collection]: instance
-    }));
-    setIsLoading(false);
-  };
+  //   setData(prevData => ({
+  //     ...prevData,
+  //     [cardList.collection]: instance
+  //   }));
+  //   setIsLoading(false);
+  // };
 
   const contextValue: AppContextType = {
     data,

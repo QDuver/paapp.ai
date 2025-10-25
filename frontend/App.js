@@ -137,7 +137,7 @@ export default function App() {
     <PaperProvider theme={paperTheme}>
       <AppProvider skipAuth={skipAuth}>
         <DialogProvider>
-          <MainApp user={user} />
+          <MainApp />
         </DialogProvider>
       </AppProvider>
     </PaperProvider>

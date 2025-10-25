@@ -18,12 +18,18 @@ export interface IFieldMetadata {
   suggestions?: [];
 }
 
+export interface ISettingsOption {
+  label: string;
+  onPress: (param?: string) => void | Promise<void>;
+}
+
 export interface IUIMetadata {
   key: string;
   title: string;
   focusedIcon: string;
   unfocusedIcon: string;
-  generateButton: boolean;
+  generateTitle?: string;
+  settingsOptions?: ISettingsOption[];
 }
 
 export abstract class DialogableAbstract {
@@ -162,10 +168,14 @@ export abstract class FirestoreDocAbstract extends DialogableAbstract {
     return new this(response);
   }
 
-  static async buildWithAi<T extends FirestoreDocAbstract>(this: new (data?: any) => T, formData: { [key: string]: any }): Promise<T> {
-    const t = new this();
-    const response = await apiClient.post(`build-with-ai/${t.apiUrl}`, formData);
-    return new this(response);
+  static async buildWithAi<T extends FirestoreDocAbstract>(formData: { [key: string]: any }, setIsLoading, setData) {
+
+    setIsLoading(true);
+    
+    const response = await apiClient.post(`build-with-ai/${this.apiUrl}`, formData);
+
+    setData(prevData => ({ ...prevData, [t.collection]: response }));
+    setIsLoading(false);
   }
 
   get apiUrl(): string {

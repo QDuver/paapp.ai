@@ -58,7 +58,16 @@ export class Routines extends FirestoreDocAbstract {
       title: "Routines",
       focusedIcon: "clock",
       unfocusedIcon: "clock-outline",
-      generateButton: false,
+      settingsOptions: [
+        {
+          label: 'Configure Routines',
+          onPress: () => console.log('Configure Routines')
+        },
+        {
+          label: 'Delete',
+          onPress: () => console.log('Delete - Routines')
+        }
+      ]
     };
   }
 }
