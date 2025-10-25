@@ -26,8 +26,8 @@ def build_fs_db(name):
 def get_all_database_names():
     admin_client = firestore_admin_v1.FirestoreAdminClient()
     parent = f"projects/{PROJECT}"
-    databases = admin_client.list_databases(parent=parent)
-    return [db.name.split('/')[-1] for db in databases]
+    response = admin_client.list_databases(parent=parent)
+    return [db.name.split('/')[-1] for db in response.databases]
     
 def get_base_url():
     if os.getenv('K_SERVICE') or os.getenv('GOOGLE_CLOUD_PROJECT'):

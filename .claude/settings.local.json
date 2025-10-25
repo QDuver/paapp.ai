@@ -16,7 +16,10 @@
       "Bash(\"C:\\Program Files\\Java\\jdk-24\\bin\\keytool.exe\":*)",
       "Bash(findstr:*)",
       "Bash(\"C:\\Program Files\\Java\\jdk-24\\bin\\keytool.exe\" -list -v -keystore \"C:\\projects\\life-automation\\frontend\\android\\app\\debug.keystore\" -alias androiddebugkey -storepass android -keypass android)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(python main.py:*)",
+      "Bash(uvicorn:*)",
+      "Bash(timeout /t 3 /nobreak)"
     ],
     "deny": [],
     "ask": []

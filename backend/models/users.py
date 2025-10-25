@@ -51,6 +51,5 @@ class User(BaseModel):
     def from_firebase_token(cls, credentials: HTTPAuthorizationCredentials = Depends(security)) -> "User":
         decoded_token = auth.verify_id_token(credentials.credentials)
         user = cls(**decoded_token)
-        print("Authenticated user:", user)
         CONFIG.set_user(user)
         return user
