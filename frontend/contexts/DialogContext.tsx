@@ -7,6 +7,7 @@ interface DialogSettings {
   parent: FirestoreDocAbstract | CardAbstract | null;
   firestoreDoc: FirestoreDocAbstract | null;
   isNew: boolean;
+  onSave: (formData: { [key: string]: any }) => void | Promise<void>;
 }
 
 interface DialogContextType {
@@ -15,7 +16,8 @@ interface DialogContextType {
     item: DialogableAbstract,
     parent: FirestoreDocAbstract | CardAbstract,
     firestoreDoc: FirestoreDocAbstract,
-    isNew?: boolean
+    isNew: boolean,
+    onSave: (formData: { [key: string]: any }) => void | Promise<void>
   ) => void;
   hideEditDialog: () => void;
 }
@@ -33,13 +35,15 @@ export const DialogProvider = ({ children }: DialogProviderProps) => {
     parent: null,
     firestoreDoc: null,
     isNew: false,
+    onSave: () => {},
   });
 
   const showEditDialog = (
     item: DialogableAbstract,
     parent: FirestoreDocAbstract | CardAbstract,
     firestoreDoc: FirestoreDocAbstract,
-    isNew: boolean = false
+    isNew: boolean,
+    onSave: (formData: { [key: string]: any }) => void | Promise<void>
   ) => {
     setDialogSettings({
       visible: true,
@@ -47,6 +51,7 @@ export const DialogProvider = ({ children }: DialogProviderProps) => {
       parent,
       firestoreDoc,
       isNew,
+      onSave,
     });
   };
 
@@ -57,6 +62,7 @@ export const DialogProvider = ({ children }: DialogProviderProps) => {
       parent: null,
       firestoreDoc: null,
       isNew: false,
+      onSave: () => {},
     });
   };
 

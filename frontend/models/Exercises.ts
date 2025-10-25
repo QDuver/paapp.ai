@@ -138,19 +138,23 @@ export class Exercises extends FirestoreDocAbstract {
       settingsOptions: [
         {
           label: "Generate Program",
-          onPress: (param: string) => console.log("Generate Program - Exercises", param),
+          action: "generate" as const,
+          icon: "auto-fix",
         },
         {
           label: "Edit Prompt",
-          onPress: () => console.log("Edit Prompt - Exercises"),
+          action: "editPrompt" as const,
+          icon: "pencil",
         },
         {
           label: "Duplicate",
-          onPress: () => console.log("Duplicate - Exercises"),
+          action: "duplicate" as const,
+          icon: "content-copy",
         },
         {
           label: "Delete",
-          onPress: () => console.log("Delete - Exercises"),
+          action: "delete" as const,
+          icon: "delete",
         },
       ],
     };

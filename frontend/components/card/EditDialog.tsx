@@ -11,9 +11,9 @@ const EditDialog = () => {
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
   const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
 
-  const { data, onBuildWithAi, setRefreshCounter } = useAppContext();
+  const { data, setRefreshCounter } = useAppContext();
   const { dialogSettings, hideEditDialog } = useDialogContext();
-  const { visible, item, parent, firestoreDoc, isNew } = dialogSettings;
+  const { visible, item, parent, firestoreDoc, isNew, onSave } = dialogSettings;
 
   useEffect(() => {
     if (visible && item && firestoreDoc) {
@@ -201,11 +201,7 @@ const EditDialog = () => {
                   testID="save-button"
                   mode="contained"
                   onPress={() => {
-                    if (!(item instanceof FirestoreDocAbstract)) {
-                      item.onSave(firestoreDoc, formData, parent, isNew, setRefreshCounter);
-                    } else {
-                      onBuildWithAi(firestoreDoc, formData);
-                    }
+                    onSave(formData);
                     hideEditDialog();
                   }}
                   buttonColor={sectionColor}

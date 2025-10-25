@@ -19,9 +19,17 @@ export interface IFieldMetadata {
   suggestions?: [];
 }
 
+export type SettingsAction =
+  | "generate"
+  | "editPrompt"
+  | "duplicate"
+  | "delete"
+  | "configure";
+
 export interface ISettingsOption {
   label: string;
-  onPress: (param?: string) => void | Promise<void>;
+  action: SettingsAction;
+  icon?: string;
 }
 
 export interface IUIMetadata {

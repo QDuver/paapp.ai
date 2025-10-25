@@ -7,7 +7,7 @@ import CardList from "./card/CardList";
 import EditDialog from "./card/EditDialog";
 import { getFirebaseAuth } from "../services/Firebase";
 import { signOut } from "firebase/auth";
-import { CardAbstract, FirestoreDocAbstract, IUIMetadata } from "../models/Abstracts";
+import { CardAbstract, FirestoreDocAbstract, IUIMetadata, SettingsAction } from "../models/Abstracts";
 import { useAppContext } from "../contexts/AppContext";
 import { useDialogContext } from "../contexts/DialogContext";
 import { theme, commonStyles } from "../styles/theme";
@@ -17,7 +17,7 @@ import { Meals } from "../models/Meals";
 
 
 const MainApp = () => {
-  const { data, isLoading } = useAppContext();
+  const { data, isLoading, setIsLoading, setData } = useAppContext();
   const { showEditDialog } = useDialogContext();
 
   const [navigationIndex, setNavigationIndex] = useState(1);
@@ -29,6 +29,36 @@ const MainApp = () => {
         await signOut(auth);
       }
     setMenuVisible(false);
+  };
+
+  const handleSettingsAction = (action: SettingsAction, firestoreDoc: FirestoreDocAbstract) => {
+    setMenuVisible(false);
+
+    switch (action) {
+      case "generate":
+        showEditDialog(
+          firestoreDoc,
+          firestoreDoc,
+          firestoreDoc,
+          true,
+          (formData) => firestoreDoc.buildWithAi(formData, setIsLoading, setData)
+        );
+        break;
+      case "editPrompt":
+        console.log(`Editing prompt for ${firestoreDoc.collection}...`);
+        break;
+      case "duplicate":
+        console.log(`Duplicating ${firestoreDoc.collection}...`);
+        break;
+      case "delete":
+        console.log(`Deleting ${firestoreDoc.collection}...`);
+        break;
+      case "configure":
+        console.log(`Configuring ${firestoreDoc.collection}...`);
+        break;
+      default:
+        console.warn(`Unknown action: ${action}`);
+    }
   };
 
   const routes: (IUIMetadata & { color: string })[] = [Routines, Exercises, Meals].map(ModelClass => ({
@@ -44,7 +74,13 @@ const MainApp = () => {
     const createCard = () => {
       if (!firestoreDoc) return;
       const newItem = firestoreDoc.createCard();
-      showEditDialog(newItem, firestoreDoc, firestoreDoc, true);
+      showEditDialog(
+        newItem,
+        firestoreDoc,
+        firestoreDoc,
+        true,
+        (formData) => newItem.onSave(firestoreDoc, formData, firestoreDoc, true, setRefreshCounter)
+      );
     };
 
     return (
@@ -99,13 +135,11 @@ const MainApp = () => {
             }
           >
             {currentRoute?.settingsOptions?.map((option, index) => (
-              <Menu.Item 
-                key={index} 
-                onPress={() => {
-                  setMenuVisible(false);
-                  option.onPress(firestoreDoc);
-                }} 
-                title={option.label} 
+              <Menu.Item
+                key={index}
+                onPress={() => handleSettingsAction(option.action, data[currentRoute.key])}
+                title={option.label}
+                leadingIcon={option.icon}
               />
             ))}
             {currentRoute?.settingsOptions && <Divider />}

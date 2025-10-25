@@ -52,15 +52,33 @@ const CustomCard = ({ item, index, firestoreDoc }: CustomCardProps) => {
     if (item.skipDialogForNewChild()) {
       newSubCard.onSave(firestoreDoc, newSubCard.toFormData(), item, true, setRefreshCounter);
     } else {
-      showEditDialog(newSubCard, item, firestoreDoc, true);
+      showEditDialog(
+        newSubCard,
+        item,
+        firestoreDoc,
+        true,
+        (formData) => newSubCard.onSave(firestoreDoc, formData, item, true, setRefreshCounter)
+      );
     }
   };
 
   return (
     <Card style={[styles.card, { backgroundColor: cardBackgroundColor }]} testID="exercise-card">
       <Pressable
-        onPress={hasSubCards ? handleToggleExpand : () => showEditDialog(item, firestoreDoc, firestoreDoc, false)}
-        onLongPress={() => showEditDialog(item, firestoreDoc, firestoreDoc, false)}
+        onPress={hasSubCards ? handleToggleExpand : () => showEditDialog(
+          item,
+          firestoreDoc,
+          firestoreDoc,
+          false,
+          (formData) => item.onSave(firestoreDoc, formData, firestoreDoc, false, setRefreshCounter)
+        )}
+        onLongPress={() => showEditDialog(
+          item,
+          firestoreDoc,
+          firestoreDoc,
+          false,
+          (formData) => item.onSave(firestoreDoc, formData, firestoreDoc, false, setRefreshCounter)
+        )}
         style={[styles.accordionItem, { backgroundColor: cardBackgroundColor }]}
       >
         <View style={styles.headerContent}>
@@ -113,7 +131,13 @@ const CustomCard = ({ item, index, firestoreDoc }: CustomCardProps) => {
               testID="subcard"
               title={subItem.name || `Set ${subIndex + 1}`}
               description={tagString}
-              onPress={() => showEditDialog(subItem, item, firestoreDoc, false)}
+              onPress={() => showEditDialog(
+                subItem,
+                item,
+                firestoreDoc,
+                false,
+                (formData) => subItem.onSave(firestoreDoc, formData, item, false, setRefreshCounter)
+              )}
               style={[styles.subCard, isLastItem && styles.subCardLast]}
               titleStyle={styles.subCardTitle}
               descriptionStyle={styles.subCardDescription}

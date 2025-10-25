@@ -121,22 +121,26 @@ export class Meals extends FirestoreDocAbstract {
       generateTitle: "New Meal Plan",
       settingsOptions: [
         {
-          label: 'Generate Meal Plan',
-          onPress: () => this.buildWithAi({})
+          label: "Generate Meal Plan",
+          action: "generate" as const,
+          icon: "auto-fix",
         },
         {
-          label: 'Edit Prompt',
-          onPress: () => console.log('Edit Prompt - Meals')
+          label: "Edit Prompt",
+          action: "editPrompt" as const,
+          icon: "pencil",
         },
         {
-          label: 'Duplicate',
-          onPress: () => console.log('Duplicate - Meals')
+          label: "Duplicate",
+          action: "duplicate" as const,
+          icon: "content-copy",
         },
         {
-          label: 'Delete',
-          onPress: () => console.log('Delete - Meals')
-        }
-      ]
+          label: "Delete",
+          action: "delete" as const,
+          icon: "delete",
+        },
+      ],
     };
   }
 

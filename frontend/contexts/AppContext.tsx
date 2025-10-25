@@ -22,6 +22,8 @@ interface DataType {
 interface AppContextType {
   data: DataType | undefined;
   isLoading: boolean;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setData: React.Dispatch<React.SetStateAction<DataType | undefined>>;
   refreshCounter: number;
   setRefreshCounter: React.Dispatch<React.SetStateAction<number>>;
 }
@@ -59,6 +61,8 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   const contextValue: AppContextType = {
     data,
     isLoading,
+    setIsLoading,
+    setData,
     refreshCounter,
     setRefreshCounter,
   };
