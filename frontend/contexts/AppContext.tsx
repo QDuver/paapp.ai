@@ -38,16 +38,14 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   const [refreshCounter, setRefreshCounter] = useState<number>(0);
 
   useEffect(() => {
-    FirestoreDocAbstract.initialize(setIsLoading, setData);
-
     const fetchData = async () => {
       setIsLoading(true);
 
       await Promise.all([
-        Settings.fromApi(),
-        Routines.fromApi(),
-        Exercises.fromApi(),
-        Meals.fromApi(),
+        Settings.fromApi(setData),
+        Routines.fromApi(setData),
+        Exercises.fromApi(setData),
+        Meals.fromApi(setData),
       ]);
 
       const uniqueExercises = await apiClient.get<IUnique[]>(`unique/exercises`);

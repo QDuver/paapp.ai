@@ -152,14 +152,6 @@ export abstract class FirestoreDocAbstract extends DialogableAbstract {
   id: string = getCurrentDate();
   ChildModel: any;
 
-  private static _setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>;
-  private static _setData?: React.Dispatch<React.SetStateAction<any>>;
-
-  static initialize(setIsLoading: React.Dispatch<React.SetStateAction<boolean>>, setData: React.Dispatch<React.SetStateAction<any>>) {
-    FirestoreDocAbstract._setIsLoading = setIsLoading;
-    FirestoreDocAbstract._setData = setData;
-  }
-
   constructor(data?, ChildModel?) {
     super(data);
     if (!ChildModel || !data) return;
@@ -171,24 +163,26 @@ export abstract class FirestoreDocAbstract extends DialogableAbstract {
     throw new Error("getUIMetadata must be implemented by subclass");
   }
 
-  static async fromApi<T extends FirestoreDocAbstract>(this: new (data?: any) => T): Promise<T> {
+  static async fromApi<T extends FirestoreDocAbstract>(
+    this: new (data?: any) => T,
+    setData?: React.Dispatch<React.SetStateAction<any>>
+  ): Promise<T> {
     const t = new this();
     const response = await apiClient.get(t.apiUrl);
     const instance = new this(response);
-
-    FirestoreDocAbstract._setData(prevData => ({ ...prevData, [instance.collection]: instance }));
-
+    setData(prevData => ({ ...prevData, [instance.collection]: instance }));
     return instance;
   }
 
-  async buildWithAi(formData: { [key: string]: any }) {
-
-    FirestoreDocAbstract._setIsLoading(true);
-
+  async buildWithAi(
+    formData: { [key: string]: any },
+    setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
+    setData?: React.Dispatch<React.SetStateAction<any>>
+  ) {
+    setIsLoading(true);
     const response = await apiClient.post(`build-with-ai/${this.apiUrl}`, formData);
-
-    FirestoreDocAbstract._setData(prevData => ({ ...prevData, [this.collection]: response }));
-    FirestoreDocAbstract._setIsLoading(false);
+    setData(prevData => ({ ...prevData, [this.collection]: response }));
+    setIsLoading(false);
   }
 
   get apiUrl(): string {
