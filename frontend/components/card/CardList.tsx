@@ -9,10 +9,10 @@ import { useAppContext } from "../../contexts/AppContext";
 import { theme } from "../../styles/theme";
 
 interface CardListProps {
-  cardList: FirestoreDocAbstract;
+  firestoreDoc: FirestoreDocAbstract;
 }
 
-const CardList = ({ cardList }: CardListProps) => {
+const CardList = ({ firestoreDoc }: CardListProps) => {
   const { refreshCounter } = useAppContext();
 
   const renderCard = ({
@@ -20,13 +20,13 @@ const CardList = ({ cardList }: CardListProps) => {
     isActive,
     getIndex,
   }: RenderItemParams<CardAbstract>) => (
-    <CustomCard cardList={cardList} item={item} index={getIndex() ?? 0} />
+    <CustomCard firestoreDoc={firestoreDoc} item={item} index={getIndex() ?? 0} />
   );
 
   return (
     <View style={styles.container}>
       <DraggableFlatList<CardAbstract>
-        data={cardList.items}
+        data={firestoreDoc.items}
         renderItem={renderCard}
         keyExtractor={(item, index) => `${refreshCounter}-card-${index}`}
         contentContainerStyle={styles.listContainer}

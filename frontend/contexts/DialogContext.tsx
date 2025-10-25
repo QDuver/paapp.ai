@@ -5,7 +5,7 @@ interface DialogSettings {
   visible: boolean;
   item: DialogableAbstract | null;
   parent: FirestoreDocAbstract | CardAbstract | null;
-  cardList: FirestoreDocAbstract | null;
+  firestoreDoc: FirestoreDocAbstract | null;
   isNew: boolean;
 }
 
@@ -14,7 +14,7 @@ interface DialogContextType {
   showEditDialog: (
     item: DialogableAbstract,
     parent: FirestoreDocAbstract | CardAbstract,
-    cardList: FirestoreDocAbstract,
+    firestoreDoc: FirestoreDocAbstract,
     isNew?: boolean
   ) => void;
   hideEditDialog: () => void;
@@ -31,21 +31,21 @@ export const DialogProvider = ({ children }: DialogProviderProps) => {
     visible: false,
     item: null,
     parent: null,
-    cardList: null,
+    firestoreDoc: null,
     isNew: false,
   });
 
   const showEditDialog = (
     item: DialogableAbstract,
     parent: FirestoreDocAbstract | CardAbstract,
-    cardList: FirestoreDocAbstract,
+    firestoreDoc: FirestoreDocAbstract,
     isNew: boolean = false
   ) => {
     setDialogSettings({
       visible: true,
       item,
       parent,
-      cardList,
+      firestoreDoc,
       isNew,
     });
   };
@@ -55,7 +55,7 @@ export const DialogProvider = ({ children }: DialogProviderProps) => {
       visible: false,
       item: null,
       parent: null,
-      cardList: null,
+      firestoreDoc: null,
       isNew: false,
     });
   };

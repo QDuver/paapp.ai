@@ -24,7 +24,7 @@ interface AppContextType {
   isLoading: boolean;
   refreshCounter: number;
   setRefreshCounter: React.Dispatch<React.SetStateAction<number>>;
-  onBuildWithAi: (cardList: FirestoreDocAbstract, formData: { [key: string]: any }) => void;
+  onBuildWithAi: (firestoreDoc: FirestoreDocAbstract, formData: { [key: string]: any }) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -60,18 +60,18 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   }, []);
 
 
-  // const onBuildWithAi = async (cardList: FirestoreDocAbstract, formData: { [key: string]: any }) => {
-  //   setIsLoading(true);
+  const onBuildWithAi = async (firestoreDoc: FirestoreDocAbstract, formData: { [key: string]: any }) => {
+    // setIsLoading(true);
     
-  //   const ModelClass = modelMap[cardList.collection];
-  //   const instance = await ModelClass.buildWithAi(formData);
+    // const ModelClass = modelMap[firestoreDoc.collection];
+    // const instance = await ModelClass.buildWithAi(formData);
     
-  //   setData(prevData => ({
-  //     ...prevData,
-  //     [cardList.collection]: instance
-  //   }));
-  //   setIsLoading(false);
-  // };
+    // setData(prevData => ({
+    //   ...prevData,
+    //   [firestoreDoc.collection]: instance
+    // }));
+    // setIsLoading(false);
+  };
 
   const contextValue: AppContextType = {
     data,

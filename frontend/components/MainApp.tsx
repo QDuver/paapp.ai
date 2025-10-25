@@ -37,14 +37,14 @@ const MainApp = () => {
   }));
 
   const renderScene = ({ route }: { route: { key: string } }) => {
-    const cardList: FirestoreDocAbstract = data?.[route.key];
+    const firestoreDoc: FirestoreDocAbstract = data?.[route.key];
     const sectionColor = theme.colors.sections[route.key as 'routines' | 'exercises' | 'meals']?.accent || theme.colors.accent;
     const currentRoute = routes.find(r => r.key === route.key);
 
     const createCard = () => {
-      if (!cardList) return;
-      const newItem = cardList.createCard();
-      showEditDialog(newItem, cardList, cardList, true);
+      if (!firestoreDoc) return;
+      const newItem = firestoreDoc.createCard();
+      showEditDialog(newItem, firestoreDoc, firestoreDoc, true);
     };
 
     return (
@@ -57,8 +57,8 @@ const MainApp = () => {
                 Loading {route.key}...
               </Text>
             </View>
-          ) : cardList ? (
-            <CardList cardList={cardList} />
+          ) : firestoreDoc ? (
+            <CardList firestoreDoc={firestoreDoc} />
           ) : (
             <View style={styles.emptyContainer}>
               <Text style={[styles.emptyText, { color: theme.colors.textMuted }]}>No {route.key} found</Text>
@@ -103,7 +103,7 @@ const MainApp = () => {
                 key={index} 
                 onPress={() => {
                   setMenuVisible(false);
-                  option.onPress(cardList);
+                  option.onPress(firestoreDoc);
                 }} 
                 title={option.label} 
               />

@@ -13,14 +13,14 @@ const EditDialog = () => {
 
   const { data, onBuildWithAi, setRefreshCounter } = useAppContext();
   const { dialogSettings, hideEditDialog } = useDialogContext();
-  const { visible, item, parent, cardList, isNew } = dialogSettings;
+  const { visible, item, parent, firestoreDoc, isNew } = dialogSettings;
 
   useEffect(() => {
-    if (visible && item && cardList) {
+    if (visible && item && firestoreDoc) {
       setFormData(item.toFormData());
       setErrors({});
     }
-  }, [visible, item, cardList]);
+  }, [visible, item, firestoreDoc]);
 
   const handleInputChange = (fieldName: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [fieldName]: value }));
@@ -35,12 +35,12 @@ const EditDialog = () => {
       if (!confirmed) return;
     }
 
-    item.delete(cardList, parent);
+    item.delete(firestoreDoc, parent);
     hideEditDialog();
   };
 
   const getSectionColor = () => {
-    const collection = cardList?.collection;
+    const collection = firestoreDoc?.collection;
     if (collection === "routines") return theme.colors.sections.routines.accent;
     if (collection === "exercises") return theme.colors.sections.exercises.accent;
     if (collection === "meals") return theme.colors.sections.meals.accent;
@@ -48,7 +48,7 @@ const EditDialog = () => {
   };
 
   const renderField = (fieldMetadata: IFieldMetadata) => {
-    if (!cardList) return null;
+    if (!firestoreDoc) return null;
 
     const { field: fieldName, label: fieldLabel, type: fieldType, keyboardType, multiline, suggestions } = fieldMetadata;
 
@@ -82,7 +82,7 @@ const EditDialog = () => {
     }
 
     const shouldUseAutocomplete =
-      (hasSuggestions && !isMultiline) || (fieldName === "name" && cardList?.collection === "exercises" && !isMultiline);
+      (hasSuggestions && !isMultiline) || (fieldName === "name" && firestoreDoc?.collection === "exercises" && !isMultiline);
 
     return (
       <View key={fieldName} testID="form-field" style={styles.fieldContainer}>
@@ -94,7 +94,7 @@ const EditDialog = () => {
             placeholderTextColor={theme.colors.textMuted}
             suggestions={suggestions}
             fallbackSuggestions={data?.uniqueExercises}
-            collection={cardList.collection}
+            collection={firestoreDoc.collection}
             style={[styles.textInput]}
             keyboardType={keyboardType || "default"}
             inputMode={fieldType === "number" ? "numeric" : "text"}
@@ -105,7 +105,7 @@ const EditDialog = () => {
             color={theme.colors.text}
             onSuggestionSelect={suggestion => {
               (item as CardAbstract).handleSuggestionSelect(suggestion);
-              item.onSave(cardList, { name: suggestion.name }, parent, isNew, setRefreshCounter);
+              item.onSave(firestoreDoc, { name: suggestion.name }, parent, isNew, setRefreshCounter);
               hideEditDialog();
             }}
             fieldName={fieldName}
@@ -139,7 +139,7 @@ const EditDialog = () => {
     );
   };
 
-  if (!visible || !item || !cardList || !parent) {
+  if (!visible || !item || !firestoreDoc || !parent) {
     return null;
   }
 
@@ -202,9 +202,9 @@ const EditDialog = () => {
                   mode="contained"
                   onPress={() => {
                     if (!(item instanceof FirestoreDocAbstract)) {
-                      item.onSave(cardList, formData, parent, isNew, setRefreshCounter);
+                      item.onSave(firestoreDoc, formData, parent, isNew, setRefreshCounter);
                     } else {
-                      onBuildWithAi(cardList, formData);
+                      onBuildWithAi(firestoreDoc, formData);
                     }
                     hideEditDialog();
                   }}

@@ -28,7 +28,7 @@ apiClient -> fetch JSON -> AppContext maps plain objects to model classes (Routi
 - Central context value: `{ data, currentDate, isLoading, refreshCounter, onUpdate }`.
 - Changing `currentDate` triggers refetch (`apiClient.get(routines/${currentDate})`).
 - `refreshCounter` increments after `onUpdate` to force re-render list keying.
-- Updates: `onUpdate(cardList)` posts the entire cardList object to `${collection}/${id}`.
+- Updates: `onUpdate(firestoreDoc)` posts the entire firestoreDoc object to `${collection}/${id}`.
 
 ## 4. Models & Mutability Conventions
 
@@ -50,7 +50,7 @@ apiClient -> fetch JSON -> AppContext maps plain objects to model classes (Routi
 ## 6. UI Component Patterns
 
 - Lists: `components/card/CardList.tsx` uses `FlatList` keyed with `refreshCounter` to force rerender after mutations.
-- Individual cards rendered via `CustomCard` & `SubCard` (extend models). Preserve prop flow: pass `cardList`, `item`, `index`.
+- Individual cards rendered via `CustomCard` & `SubCard` (extend models). Preserve prop flow: pass `firestoreDoc`, `item`, `index`.
 - Avoid deriving keys from mutable fields; rely on index + refreshCounter pattern unless stable IDs are introduced.
 
 ## 7. Dates & Daily Partitioning
