@@ -126,7 +126,7 @@ export class Meals extends FirestoreDocAbstract {
           icon: "auto-fix",
         },
         {
-          label: "Edit Prompt",
+          label: "Objectives",
           action: "editPrompt" as const,
           icon: "pencil",
         },

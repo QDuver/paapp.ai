@@ -6,6 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import CardList from "./card/CardList";
 import BuildWithAiDialog from "./dialogs/BuildWithAiDialog";
 import EditItemDialog from "./dialogs/EditItemDialog";
+import EditPromptDialog from "./dialogs/EditPromptDialog";
 import { getFirebaseAuth } from "../services/Firebase";
 import { signOut } from "firebase/auth";
 import { CardAbstract, FirestoreDocAbstract, IUIMetadata, SettingsAction, DialogableAbstract } from "../models/Abstracts";
@@ -23,6 +24,9 @@ const MainApp = () => {
 
   const [buildAiDialogVisible, setBuildAiDialogVisible] = useState(false);
   const [buildAiFirestoreDoc, setBuildAiFirestoreDoc] = useState<FirestoreDocAbstract | null>(null);
+
+  const [editPromptDialogVisible, setEditPromptDialogVisible] = useState(false);
+  const [editPromptCollection, setEditPromptCollection] = useState<string | null>(null);
 
   const [editDialogVisible, setEditDialogVisible] = useState(false);
   const [editDialogItem, setEditDialogItem] = useState<DialogableAbstract | null>(null);
@@ -47,7 +51,8 @@ const MainApp = () => {
         setBuildAiDialogVisible(true);
         break;
       case "editPrompt":
-        console.log(`Editing prompt for ${firestoreDoc.collection}...`);
+        setEditPromptCollection(firestoreDoc.collection);
+        setEditPromptDialogVisible(true);
         break;
       case "duplicate":
         console.log(`Duplicating ${firestoreDoc.collection}...`);
@@ -176,6 +181,12 @@ const MainApp = () => {
         setIsLoading={setIsLoading}
         setData={setData}
         onClose={() => setBuildAiDialogVisible(false)}
+      />
+
+      <EditPromptDialog
+        visible={editPromptDialogVisible}
+        collection={editPromptCollection}
+        onClose={() => setEditPromptDialogVisible(false)}
       />
 
       <EditItemDialog

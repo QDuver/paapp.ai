@@ -19,7 +19,7 @@ const BuildWithAiDialog = ({ visible, firestoreDoc, setIsLoading, setData, onClo
 
   useEffect(() => {
     if (visible && firestoreDoc) {
-      setFormData(firestoreDoc.toFormData());
+      setFormData({});
       setErrors({});
     }
   }, [visible, firestoreDoc]);

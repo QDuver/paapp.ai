@@ -7,7 +7,12 @@
       "Bash(if not exist \".claude\\commands\" mkdir .claudecommands)",
       "Bash(del \".claude\\commands\\qp.md\")",
       "Bash(del \"C:\\projects\\life-automation\\frontend\\components\\card\\EditDialog.tsx\" \"C:\\projects\\life-automation\\frontend\\contexts\\DialogContext.tsx\")",
-      "Bash(npm run format:*)"
+      "Bash(npm run format:*)",
+      "WebFetch(domain:expo.dev)",
+      "WebFetch(domain:docs.expo.dev)",
+      "Bash(npx expo install:*)",
+      "Bash(npm install:*)",
+      "Bash(npx expo-doctor:*)"
     ],
     "deny": [],
     "ask": []
