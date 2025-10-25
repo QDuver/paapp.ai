@@ -7,7 +7,8 @@
       "Bash(if not exist \".claude\\commands\" mkdir .claudecommands)",
       "Bash(del \".claude\\commands\\qp.md\")",
       "Bash(del \"C:\\projects\\life-automation\\frontend\\components\\card\\EditDialog.tsx\" \"C:\\projects\\life-automation\\frontend\\contexts\\DialogContext.tsx\")",
-      "Bash(npm run format:*)"
+      "Bash(npm run format:*)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []

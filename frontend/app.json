@@ -3,6 +3,7 @@
     "name": "Routine Assistant",
     "slug": "routine-assistant",
     "version": "1.0.0",
+    "scheme": "routineassistant",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -14,9 +15,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
+      "bundleIdentifier": "com.example.frontend",
       "supportsTablet": true
     },
     "android": {
+      "package": "com.example.routineassistant",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
