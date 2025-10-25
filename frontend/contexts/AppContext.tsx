@@ -42,10 +42,10 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     const fetchData = async () => {
       setIsLoading(true);
 
-      const settings = await Settings.fromApi();
-      const routines = await Routines.fromApi();
-      const exercises = await Exercises.fromApi();
-      const meals = await Meals.fromApi();
+      const settings = await Settings.fromApi(setIsLoading, setData);
+      const routines = await Routines.fromApi(setIsLoading, setData);
+      const exercises = await Exercises.fromApi(setIsLoading, setData);
+      const meals = await Meals.fromApi(setIsLoading, setData);
       const uniqueExercises = await apiClient.get<IUnique[]>(`unique/exercises`);
       setData({
         routines,
@@ -61,16 +61,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
 
 
   const onBuildWithAi = async (firestoreDoc: FirestoreDocAbstract, formData: { [key: string]: any }) => {
-    // setIsLoading(true);
-    
-    // const ModelClass = modelMap[firestoreDoc.collection];
-    // const instance = await ModelClass.buildWithAi(formData);
-    
-    // setData(prevData => ({
-    //   ...prevData,
-    //   [firestoreDoc.collection]: instance
-    // }));
-    // setIsLoading(false);
+    await firestoreDoc.buildWithAi(formData);
   };
 
   const contextValue: AppContextType = {

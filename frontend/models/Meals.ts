@@ -108,7 +108,7 @@ export class Meals extends FirestoreDocAbstract {
   notes: string = "";
   collection = "meals";
 
-  constructor(data) {
+  constructor(data?) {
     super(data, Meal);
   }
 

@@ -3,7 +3,9 @@
     "allow": [
       "Bash(del nul)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(if not exist \".claude\\commands\" mkdir .claudecommands)",
+      "Bash(del \".claude\\commands\\qp.md\")"
     ],
     "deny": [],
     "ask": []

@@ -1,3 +1,4 @@
+import React from "react";
 import { FormDataUtils, getBaseUrl, getCurrentDate } from "../utils/utils";
 import { apiClient } from "../utils/apiClient";
 import { get } from "lodash";
@@ -150,8 +151,10 @@ export abstract class FirestoreDocAbstract extends DialogableAbstract {
   abstract collection: string;
   id: string = getCurrentDate();
   ChildModel: any;
+  setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>;
+  setData?: React.Dispatch<React.SetStateAction<any>>;
 
-  constructor(data, ChildModel) {
+  constructor(data?, ChildModel?) {
     super(data);
     if (!ChildModel || !data) return;
     this.ChildModel = ChildModel;
@@ -162,20 +165,30 @@ export abstract class FirestoreDocAbstract extends DialogableAbstract {
     throw new Error("getUIMetadata must be implemented by subclass");
   }
 
-  static async fromApi<T extends FirestoreDocAbstract>(this: new (data?: any) => T): Promise<T> {
+  static async fromApi<T extends FirestoreDocAbstract>(
+    this: new (data?: any) => T,
+    setIsLoading?: React.Dispatch<React.SetStateAction<boolean>>,
+    setData?: React.Dispatch<React.SetStateAction<any>>
+  ): Promise<T> {
     const t = new this();
     const response = await apiClient.get(t.apiUrl);
-    return new this(response);
+    const instance = new this(response);
+    instance.setIsLoading = setIsLoading;
+    instance.setData = setData;
+    return instance;
   }
 
-  static async buildWithAi<T extends FirestoreDocAbstract>(formData: { [key: string]: any }, setIsLoading, setData) {
+  async buildWithAi(formData: { [key: string]: any }) {
+    if (!this.setIsLoading || !this.setData) {
+      throw new Error("Instance must be created via fromApi() to use buildWithAi");
+    }
 
-    setIsLoading(true);
-    
+    this.setIsLoading(true);
+
     const response = await apiClient.post(`build-with-ai/${this.apiUrl}`, formData);
 
-    setData(prevData => ({ ...prevData, [t.collection]: response }));
-    setIsLoading(false);
+    this.setData(prevData => ({ ...prevData, [this.collection]: response }));
+    this.setIsLoading(false);
   }
 
   get apiUrl(): string {

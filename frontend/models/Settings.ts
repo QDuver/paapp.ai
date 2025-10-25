@@ -1,3 +1,4 @@
+import React from "react";
 import { FirestoreDocAbstract, IFieldMetadata } from "./Abstracts";
 
 export class SettingsModule {
@@ -18,7 +19,7 @@ export class Settings extends FirestoreDocAbstract {
   exercises: SettingsModule;
   meals: SettingsModule;
 
-  constructor(data) {
+  constructor(data?) {
     super(data, null);
     if (data) {
       this.routines = Object.assign(new SettingsModule(), data.routines);

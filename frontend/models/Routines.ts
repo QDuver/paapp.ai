@@ -48,7 +48,7 @@ export class Routines extends FirestoreDocAbstract {
   wakeupTime: string = "";
   collection = "routines";
 
-  constructor(data) {
+  constructor(data?) {
     super(data, Routine);
   }
 

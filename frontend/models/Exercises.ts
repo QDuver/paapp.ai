@@ -1,3 +1,4 @@
+import React from "react";
 import { fieldConverter } from "../utils/utils";
 import { CardAbstract, FirestoreDocAbstract, IFieldMetadata, SubCardAbstract } from "./Abstracts";
 export class ExerciseSet extends SubCardAbstract {
@@ -123,7 +124,7 @@ export class Exercises extends FirestoreDocAbstract {
   notes?: string;
   collection = "exercises";
 
-  constructor(data) {
+  constructor(data?) {
     super(data, Exercise);
   }
 
