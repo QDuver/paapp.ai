@@ -6,11 +6,6 @@ import { Routines } from "../models/Routines";
 import { Settings } from "../models/Settings";
 import { apiClient } from "../utils/apiClient";
 
-const modelMap = {
-  exercises: Exercises,
-  meals: Meals,
-};
-
 interface DataType {
   routines: Routines;
   exercises: Exercises;

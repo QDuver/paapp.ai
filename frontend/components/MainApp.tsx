@@ -29,7 +29,6 @@ const MainApp = () => {
   const [editDialogParent, setEditDialogParent] = useState<FirestoreDocAbstract | CardAbstract | null>(null);
   const [editDialogFirestoreDoc, setEditDialogFirestoreDoc] = useState<FirestoreDocAbstract | null>(null);
   const [editDialogIsNew, setEditDialogIsNew] = useState(false);
-  const [editDialogOnSave, setEditDialogOnSave] = useState<(formData: { [key: string]: any }) => void | Promise<void>>(() => () => {});
 
   const handleSignOut = async () => {
     const auth = getFirebaseAuth();
@@ -68,14 +67,12 @@ const MainApp = () => {
     item: DialogableAbstract,
     parent: FirestoreDocAbstract | CardAbstract,
     firestoreDoc: FirestoreDocAbstract,
-    isNew: boolean,
-    onSave: (formData: { [key: string]: any }) => void | Promise<void>
+    isNew: boolean
   ) => {
     setEditDialogItem(item);
     setEditDialogParent(parent);
     setEditDialogFirestoreDoc(firestoreDoc);
     setEditDialogIsNew(isNew);
-    setEditDialogOnSave(() => onSave);
     setEditDialogVisible(true);
   };
 
@@ -92,9 +89,7 @@ const MainApp = () => {
     const createCard = () => {
       if (!firestoreDoc) return;
       const newItem = firestoreDoc.createCard();
-      showEditDialog(newItem, firestoreDoc, firestoreDoc, true, formData =>
-        newItem.onSave(firestoreDoc, formData, firestoreDoc, true, setRefreshCounter)
-      );
+      showEditDialog(newItem, firestoreDoc, firestoreDoc, true);
     };
 
     return (
@@ -189,7 +184,6 @@ const MainApp = () => {
         parent={editDialogParent}
         firestoreDoc={editDialogFirestoreDoc}
         isNew={editDialogIsNew}
-        onSave={editDialogOnSave}
         onClose={() => setEditDialogVisible(false)}
       />
     </SafeAreaView>

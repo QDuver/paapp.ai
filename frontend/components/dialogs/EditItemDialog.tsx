@@ -12,11 +12,10 @@ interface EditItemDialogProps {
   parent: FirestoreDocAbstract | CardAbstract | null;
   firestoreDoc: FirestoreDocAbstract | null;
   isNew: boolean;
-  onSave: (formData: { [key: string]: any }) => void | Promise<void>;
   onClose: () => void;
 }
 
-const EditItemDialog = ({ visible, item, parent, firestoreDoc, isNew, onSave, onClose }: EditItemDialogProps) => {
+const EditItemDialog = ({ visible, item, parent, firestoreDoc, isNew, onClose }: EditItemDialogProps) => {
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
   const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
 
@@ -49,7 +48,8 @@ const EditItemDialog = ({ visible, item, parent, firestoreDoc, isNew, onSave, on
   };
 
   const handleSave = () => {
-    onSave(formData);
+    if (!item || !firestoreDoc || !parent) return;
+    item.onSave(firestoreDoc, formData, parent, isNew, setRefreshCounter);
     onClose();
   };
 

@@ -14,8 +14,7 @@ interface CustomCardProps {
     item: DialogableAbstract,
     parent: FirestoreDocAbstract | CardAbstract,
     firestoreDoc: FirestoreDocAbstract,
-    isNew: boolean,
-    onSave: (formData: { [key: string]: any }) => void | Promise<void>
+    isNew: boolean
   ) => void;
 }
 
@@ -57,28 +56,15 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog }: CustomCardPro
     if (item.skipDialogForNewChild()) {
       newSubCard.onSave(firestoreDoc, newSubCard.toFormData(), item, true, setRefreshCounter);
     } else {
-      showEditDialog(newSubCard, item, firestoreDoc, true, formData =>
-        newSubCard.onSave(firestoreDoc, formData, item, true, setRefreshCounter)
-      );
+      showEditDialog(newSubCard, item, firestoreDoc, true);
     }
   };
 
   return (
     <Card style={[styles.card, { backgroundColor: cardBackgroundColor }]} testID="exercise-card">
       <Pressable
-        onPress={
-          hasSubCards
-            ? handleToggleExpand
-            : () =>
-                showEditDialog(item, firestoreDoc, firestoreDoc, false, formData =>
-                  item.onSave(firestoreDoc, formData, firestoreDoc, false, setRefreshCounter)
-                )
-        }
-        onLongPress={() =>
-          showEditDialog(item, firestoreDoc, firestoreDoc, false, formData =>
-            item.onSave(firestoreDoc, formData, firestoreDoc, false, setRefreshCounter)
-          )
-        }
+        onPress={hasSubCards ? handleToggleExpand : () => showEditDialog(item, firestoreDoc, firestoreDoc, false)}
+        onLongPress={() => showEditDialog(item, firestoreDoc, firestoreDoc, false)}
         style={[styles.accordionItem, { backgroundColor: cardBackgroundColor }]}
       >
         <View style={styles.headerContent}>
@@ -125,11 +111,7 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog }: CustomCardPro
               testID="subcard"
               title={subItem.name || `Set ${subIndex + 1}`}
               description={tagString}
-              onPress={() =>
-                showEditDialog(subItem, item, firestoreDoc, false, formData =>
-                  subItem.onSave(firestoreDoc, formData, item, false, setRefreshCounter)
-                )
-              }
+              onPress={() => showEditDialog(subItem, item, firestoreDoc, false)}
               style={[styles.subCard, isLastItem && styles.subCardLast]}
               titleStyle={styles.subCardTitle}
               descriptionStyle={styles.subCardDescription}

@@ -12,8 +12,7 @@ interface CardListProps {
     item: DialogableAbstract,
     parent: FirestoreDocAbstract | CardAbstract,
     firestoreDoc: FirestoreDocAbstract,
-    isNew: boolean,
-    onSave: (formData: { [key: string]: any }) => void | Promise<void>
+    isNew: boolean
   ) => void;
 }
 
