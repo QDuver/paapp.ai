@@ -52,7 +52,7 @@ const BuildWithAiDialog = ({ visible, firestoreDoc, setIsLoading, setData, onClo
         contentContainerStyle={[sharedDialogStyles.modalContainer, { backgroundColor: theme.colors.modalBackground }]}
         testID="build-ai-dialog"
       >
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={sharedDialogStyles.keyboardView}>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={sharedDialogStyles.keyboardView}>
           <View style={sharedDialogStyles.titleContainer}>
             <View style={[sharedDialogStyles.titleAccent, { backgroundColor: sectionColor }]} />
             <Text variant="titleMedium" style={sharedDialogStyles.title}>

@@ -85,7 +85,7 @@ const EditItemDialog = ({ visible, item, parent, firestoreDoc, isNew, onClose }:
         contentContainerStyle={[sharedDialogStyles.modalContainer, { backgroundColor: theme.colors.modalBackground }]}
         testID="edit-dialog"
       >
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={sharedDialogStyles.keyboardView}>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={sharedDialogStyles.keyboardView}>
           <View style={sharedDialogStyles.titleContainer}>
             <View style={[sharedDialogStyles.titleAccent, { backgroundColor: sectionColor }]} />
             <Text variant="titleMedium" style={sharedDialogStyles.title}>

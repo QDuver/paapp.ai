@@ -36,7 +36,7 @@ export const sharedDialogStyles = StyleSheet.create<SharedDialogStyles>({
     elevation: 8,
   },
   keyboardView: {
-    flex: 1,
+    maxHeight: "100%",
   },
   titleContainer: {
     paddingTop: theme.spacing.xl,
@@ -55,7 +55,7 @@ export const sharedDialogStyles = StyleSheet.create<SharedDialogStyles>({
     color: theme.colors.text,
   },
   formContainer: {
-    flex: 1,
+    flexShrink: 1,
     padding: theme.spacing.xxl,
     paddingTop: theme.spacing.md,
   },
