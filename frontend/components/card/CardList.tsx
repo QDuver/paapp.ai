@@ -5,6 +5,7 @@ import { FirestoreDocAbstract, CardAbstract, DialogableAbstract } from "../../mo
 import CustomCard from "./CustomCard";
 import { useAppContext } from "../../contexts/AppContext";
 import { theme } from "../../styles/theme";
+import CardListWeb from "./CardListWeb";
 
 interface CardListProps {
   firestoreDoc: FirestoreDocAbstract;
@@ -21,12 +22,40 @@ interface CardListProps {
 const CardList = ({ firestoreDoc, showEditDialog, refreshing, sectionColor }: CardListProps) => {
   const { refreshCounter, setRefreshCounter } = useAppContext();
 
-  const renderCard = ({ item, isActive, getIndex }: RenderItemParams<CardAbstract>) => (
-    <CustomCard firestoreDoc={firestoreDoc} item={item} index={getIndex() ?? 0} showEditDialog={showEditDialog} />
-  );
+  if (Platform.OS === "web") {
+    return (
+      <CardListWeb
+        firestoreDoc={firestoreDoc}
+        showEditDialog={showEditDialog}
+        refreshing={refreshing}
+        sectionColor={sectionColor}
+        refreshCounter={refreshCounter}
+      />
+    );
+  }
+
+  const renderCard = ({ item, isActive, getIndex, drag }: RenderItemParams<CardAbstract>) => {
+    console.log(`renderCard for index ${getIndex()}: drag=${!!drag}, isActive=${isActive}`);
+    return (
+      <CustomCard
+        firestoreDoc={firestoreDoc}
+        item={item}
+        index={getIndex() ?? 0}
+        showEditDialog={showEditDialog}
+        drag={drag}
+        isActive={isActive}
+      />
+    );
+  };
 
   const handleRefresh = () => {
     setRefreshCounter(refreshCounter + 1);
+  };
+
+  const handleDragEnd = ({ data }: { data: CardAbstract[] }) => {
+    console.log("handleDragEnd called with", data.length, "items");
+    firestoreDoc.items = data;
+    firestoreDoc.onSave();
   };
 
   return (
@@ -37,7 +66,8 @@ const CardList = ({ firestoreDoc, showEditDialog, refreshing, sectionColor }: Ca
         keyExtractor={(item, index) => `${refreshCounter}-card-${index}`}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={Platform.OS === "web"}
-        activationDistance={10}
+        onDragEnd={handleDragEnd}
+        activationDistance={Platform.OS === "web" ? 0 : 10}
         dragItemOverflow={true}
         refreshControl={<RefreshControl refreshing={refreshing} tintColor={sectionColor} onRefresh={handleRefresh} />}
       />

@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View, Pressable, Text } from "react-native";
+import { StyleSheet, View, Pressable, Text, Platform, TouchableOpacity } from "react-native";
 import { Card, List } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { CardAbstract, FirestoreDocAbstract, SubCardAbstract, DialogableAbstract } from "../../models/Abstracts";
@@ -16,10 +16,16 @@ interface CustomCardProps {
     firestoreDoc: FirestoreDocAbstract,
     isNew: boolean
   ) => void;
+  drag?: () => void;
+  isActive?: boolean;
+  dragListeners?: any;
+  isDragging?: boolean;
 }
 
-const CustomCard = ({ item, index, firestoreDoc, showEditDialog }: CustomCardProps) => {
+const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive, dragListeners, isDragging }: CustomCardProps) => {
   const { refreshCounter, setRefreshCounter } = useAppContext();
+
+  console.log(`CustomCard ${index}: drag=${!!drag}, isActive=${isActive}, dragListeners=${!!dragListeners}, isDragging=${isDragging}`);
 
   const cardBackgroundColor = item.isCompleted ? theme.colors.cardCompleted : theme.colors.secondary;
   const hasSubCards = (item.items && item.items.length > 0) || item.createNewSubCard() !== null;
@@ -61,13 +67,36 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog }: CustomCardPro
   };
 
   return (
-    <Card style={[styles.card, { backgroundColor: cardBackgroundColor }]} testID="exercise-card">
+    <Card
+      style={[
+        styles.card,
+        { backgroundColor: cardBackgroundColor },
+        (isActive || isDragging) && styles.cardDragging,
+      ]}
+      testID="exercise-card"
+    >
       <Pressable
         onPress={hasSubCards ? handleToggleExpand : () => showEditDialog(item, firestoreDoc, firestoreDoc, false)}
         onLongPress={() => showEditDialog(item, firestoreDoc, firestoreDoc, false)}
         style={[styles.accordionItem, { backgroundColor: cardBackgroundColor }]}
       >
         <View style={styles.headerContent}>
+          {(drag || dragListeners) && (
+            <TouchableOpacity
+              onPressIn={() => {
+                console.log("Drag handle pressed");
+                if (drag) drag();
+              }}
+              onLongPress={drag}
+              delayLongPress={0}
+              style={styles.dragHandle}
+              hitSlop={8}
+              activeOpacity={0.6}
+              {...(dragListeners || {})}
+            >
+              <MaterialCommunityIcons name="drag-horizontal-variant" size={24} color={theme.colors.textMuted} />
+            </TouchableOpacity>
+          )}
           <Pressable onPress={handleCheckbox} style={styles.iconContainer} hitSlop={8}>
             <View style={[styles.iconCircle, { backgroundColor: iconBackground, borderColor: iconBorderColor }]}>
               {item.isCompleted ? (
@@ -129,6 +158,23 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderRadius: theme.borderRadius.lg,
     ...theme.shadows.card,
+  },
+  cardDragging: {
+    opacity: 0.7,
+    ...(Platform.OS === 'web' ? {
+      transform: 'scale(1.02)',
+    } : {
+      transform: [{ scale: 1.02 }],
+    }),
+  },
+  dragHandle: {
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: theme.spacing.sm,
+    marginLeft: theme.spacing.xs,
+    ...(Platform.OS === "web" && {
+      cursor: "grab",
+    }),
   },
   accordionItem: {
     paddingLeft: theme.spacing.xs,
