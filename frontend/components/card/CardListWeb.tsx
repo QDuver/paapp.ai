@@ -22,6 +22,11 @@ interface CardListWebProps {
 
 const CardListWeb = ({ firestoreDoc, showEditDialog, refreshing, sectionColor, refreshCounter }: CardListWebProps) => {
   const { setRefreshCounter } = useAppContext();
+  const [localItems, setLocalItems] = React.useState<CardAbstract[]>(firestoreDoc.items);
+
+  React.useEffect(() => {
+    setLocalItems(firestoreDoc.items);
+  }, [firestoreDoc.items, refreshCounter]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -32,19 +37,21 @@ const CardListWeb = ({ firestoreDoc, showEditDialog, refreshing, sectionColor, r
     const { active, over } = event;
 
     if (active.id !== over.id) {
-      const oldIndex = firestoreDoc.items.findIndex((item: any, idx: number) => `card-${idx}` === active.id);
-      const newIndex = firestoreDoc.items.findIndex((item: any, idx: number) => `card-${idx}` === over.id);
+      const oldIndex = localItems.findIndex((item: any, idx: number) => `card-${idx}` === active.id);
+      const newIndex = localItems.findIndex((item: any, idx: number) => `card-${idx}` === over.id);
 
-      console.log("handleDragEnd - moving from", oldIndex, "to", newIndex);
-      firestoreDoc.items = arrayMove(firestoreDoc.items, oldIndex, newIndex);
-      setRefreshCounter(prev => prev + 1);
-      firestoreDoc.onSave();
+      const newItems = arrayMove(localItems, oldIndex, newIndex);
+      setLocalItems(newItems);
+      firestoreDoc.items = newItems;
+      firestoreDoc.onSave().catch(error => {
+        console.error("Error saving reordered items:", error);
+      });
     }
   };
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <SortableContext items={firestoreDoc.items.map((_: any, idx: number) => `card-${idx}`)} strategy={verticalListSortingStrategy}>
+      <SortableContext items={localItems.map((_: any, idx: number) => `card-${idx}`)} strategy={verticalListSortingStrategy}>
         <ScrollView
           style={styles.container}
           contentContainerStyle={styles.listContainer}
@@ -53,15 +60,13 @@ const CardListWeb = ({ firestoreDoc, showEditDialog, refreshing, sectionColor, r
             <RefreshControl
               refreshing={refreshing}
               tintColor={sectionColor}
-              onRefresh={() => {
-                console.log("Refresh triggered");
-              }}
+              onRefresh={() => setRefreshCounter(prev => prev + 1)}
             />
           }
         >
-          {firestoreDoc.items.map((item: CardAbstract, index: number) => (
+          {localItems.map((item: CardAbstract, index: number) => (
             <SortableCard
-              key={`${refreshCounter}-card-${index}`}
+              key={`card-${index}-${item.name}`}
               id={`card-${index}`}
               item={item}
               index={index}

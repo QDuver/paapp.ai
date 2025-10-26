@@ -21,6 +21,12 @@ interface CardListProps {
 
 const CardList = ({ firestoreDoc, showEditDialog, refreshing, sectionColor }: CardListProps) => {
   const { refreshCounter, setRefreshCounter } = useAppContext();
+  const [localItems, setLocalItems] = React.useState<CardAbstract[]>(firestoreDoc.items);
+  const [isDragging, setIsDragging] = React.useState(false);
+
+  React.useEffect(() => {
+    setLocalItems(firestoreDoc.items);
+  }, [firestoreDoc.items, refreshCounter]);
 
   if (Platform.OS === "web") {
     return (
@@ -34,42 +40,54 @@ const CardList = ({ firestoreDoc, showEditDialog, refreshing, sectionColor }: Ca
     );
   }
 
-  const renderCard = ({ item, isActive, getIndex, drag }: RenderItemParams<CardAbstract>) => {
-    console.log(`renderCard for index ${getIndex()}: drag=${!!drag}, isActive=${isActive}`);
-    return (
-      <CustomCard
-        firestoreDoc={firestoreDoc}
-        item={item}
-        index={getIndex() ?? 0}
-        showEditDialog={showEditDialog}
-        drag={drag}
-        isActive={isActive}
-      />
-    );
-  };
+  const renderCard = ({ item, isActive, getIndex, drag }: RenderItemParams<CardAbstract>) => (
+    <CustomCard
+      firestoreDoc={firestoreDoc}
+      item={item}
+      index={getIndex() ?? 0}
+      showEditDialog={showEditDialog}
+      drag={drag}
+      isActive={isActive}
+    />
+  );
 
   const handleRefresh = () => {
     setRefreshCounter(refreshCounter + 1);
   };
 
+  const handleDragBegin = () => {
+    setIsDragging(true);
+  };
+
   const handleDragEnd = ({ data }: { data: CardAbstract[] }) => {
-    console.log("handleDragEnd called with", data.length, "items");
+    setIsDragging(false);
+    setLocalItems(data);
     firestoreDoc.items = data;
-    firestoreDoc.onSave();
+    firestoreDoc.onSave().catch(error => {
+      console.error("Error saving reordered items:", error);
+    });
   };
 
   return (
     <View style={styles.container}>
       <DraggableFlatList<CardAbstract>
-        data={firestoreDoc.items}
+        data={localItems}
         renderItem={renderCard}
-        keyExtractor={(item, index) => `${refreshCounter}-card-${index}`}
+        keyExtractor={(item, index) => `card-${index}-${item.name}`}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={Platform.OS === "web"}
+        onDragBegin={handleDragBegin}
         onDragEnd={handleDragEnd}
-        activationDistance={Platform.OS === "web" ? 0 : 10}
+        activationDistance={10}
         dragItemOverflow={true}
-        refreshControl={<RefreshControl refreshing={refreshing} tintColor={sectionColor} onRefresh={handleRefresh} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            tintColor={sectionColor}
+            onRefresh={handleRefresh}
+            enabled={!isDragging}
+          />
+        }
       />
     </View>
   );

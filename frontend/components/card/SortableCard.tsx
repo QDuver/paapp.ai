@@ -24,14 +24,6 @@ const SortableCard = ({ id, item, index, firestoreDoc, showEditDialog }: Sortabl
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  const handleDragStart = (e: any) => {
-    console.log("Drag started on card", index);
-    if (listeners?.onPointerDown) {
-      listeners.onPointerDown(e);
-    }
   };
 
   return (

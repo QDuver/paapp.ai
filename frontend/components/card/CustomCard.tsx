@@ -25,8 +25,6 @@ interface CustomCardProps {
 const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive, dragListeners, isDragging }: CustomCardProps) => {
   const { refreshCounter, setRefreshCounter } = useAppContext();
 
-  console.log(`CustomCard ${index}: drag=${!!drag}, isActive=${isActive}, dragListeners=${!!dragListeners}, isDragging=${isDragging}`);
-
   const cardBackgroundColor = item.isCompleted ? theme.colors.cardCompleted : theme.colors.secondary;
   const hasSubCards = (item.items && item.items.length > 0) || item.createNewSubCard() !== null;
   const description = (item as any).description || (item as any).instructions;
@@ -71,7 +69,6 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
       style={[
         styles.card,
         { backgroundColor: cardBackgroundColor },
-        (isActive || isDragging) && styles.cardDragging,
       ]}
       testID="exercise-card"
     >
@@ -81,22 +78,6 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
         style={[styles.accordionItem, { backgroundColor: cardBackgroundColor }]}
       >
         <View style={styles.headerContent}>
-          {(drag || dragListeners) && (
-            <TouchableOpacity
-              onPressIn={() => {
-                console.log("Drag handle pressed");
-                if (drag) drag();
-              }}
-              onLongPress={drag}
-              delayLongPress={0}
-              style={styles.dragHandle}
-              hitSlop={8}
-              activeOpacity={0.6}
-              {...(dragListeners || {})}
-            >
-              <MaterialCommunityIcons name="drag-horizontal-variant" size={24} color={theme.colors.textMuted} />
-            </TouchableOpacity>
-          )}
           <Pressable onPress={handleCheckbox} style={styles.iconContainer} hitSlop={8}>
             <View style={[styles.iconCircle, { backgroundColor: iconBackground, borderColor: iconBorderColor }]}>
               {item.isCompleted ? (
@@ -110,22 +91,34 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
             <Text style={[styles.accordionTitle, { opacity: titleOpacity }]}>{item.name || `Item ${index + 1}`}</Text>
             {description ? <Text style={[styles.accordionDescription, { opacity: descriptionOpacity }]}>{description}</Text> : null}
           </View>
-          {hasSubCards ? (
-            <View style={styles.rightContainer}>
-              {item.createNewSubCard() !== null && (
-                <Pressable testID="add-subcard-button" onPress={handleAddSubCard} style={styles.addButton}>
-                  <MaterialCommunityIcons name="plus-circle-outline" size={24} color={sectionColor} />
-                </Pressable>
-              )}
-              <Pressable onPress={handleToggleExpand} style={styles.chevronContainer} hitSlop={8}>
+          <View style={styles.rightContainer}>
+            {hasSubCards && item.createNewSubCard() !== null && (
+              <Pressable testID="add-subcard-button" onPress={handleAddSubCard} style={styles.actionIcon} hitSlop={8}>
+                <MaterialCommunityIcons name="plus" size={20} color={theme.colors.textSecondary} />
+              </Pressable>
+            )}
+            {hasSubCards && (
+              <Pressable onPress={handleToggleExpand} style={styles.actionIcon} hitSlop={8}>
                 <MaterialCommunityIcons
                   name={item.isExpanded ? "chevron-up" : "chevron-down"}
-                  size={24}
+                  size={20}
                   color={theme.colors.textSecondary}
                 />
               </Pressable>
-            </View>
-          ) : null}
+            )}
+            {(drag || dragListeners) && (
+              <TouchableOpacity
+                onLongPress={drag}
+                delayLongPress={0}
+                style={styles.actionIcon}
+                hitSlop={8}
+                activeOpacity={0.6}
+                {...(dragListeners || {})}
+              >
+                <MaterialCommunityIcons name="drag-vertical" size={20} color={theme.colors.textMuted} />
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
       </Pressable>
       {item.isExpanded &&
@@ -158,23 +151,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderRadius: theme.borderRadius.lg,
     ...theme.shadows.card,
-  },
-  cardDragging: {
-    opacity: 0.7,
-    ...(Platform.OS === 'web' ? {
-      transform: 'scale(1.02)',
-    } : {
-      transform: [{ scale: 1.02 }],
-    }),
-  },
-  dragHandle: {
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: theme.spacing.sm,
-    marginLeft: theme.spacing.xs,
-    ...(Platform.OS === "web" && {
-      cursor: "grab",
-    }),
   },
   accordionItem: {
     paddingLeft: theme.spacing.xs,
@@ -211,9 +187,18 @@ const styles = StyleSheet.create({
   rightContainer: {
     flexDirection: "row",
     alignItems: "center",
+    gap: theme.spacing.sm,
     paddingRight: theme.spacing.md,
-    marginRight: -theme.spacing.xs,
-    gap: theme.spacing.xs,
+  },
+  actionIcon: {
+    width: 32,
+    height: 32,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: theme.borderRadius.sm,
+    ...(Platform.OS === "web" && {
+      cursor: "pointer",
+    }),
   },
   accordionTitle: {
     fontWeight: theme.typography.weights.semibold,
@@ -251,19 +236,6 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
     marginLeft: theme.spacing.sm,
     marginTop: 3,
-  },
-  iconButton: {
-    margin: 0,
-  },
-  addButton: {
-    padding: theme.spacing.sm,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  chevronContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: theme.spacing.sm,
   },
 });
 

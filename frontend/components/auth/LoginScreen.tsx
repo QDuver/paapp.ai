@@ -16,12 +16,6 @@ export default function LoginScreen() {
 
   const oauthClientIds = getOAuthClientIds();
 
-  console.log("=== OAuth Configuration ===");
-  console.log("Platform:", Platform.OS);
-  console.log("Web Client ID:", oauthClientIds.webClientId);
-  console.log("Android Client ID:", oauthClientIds.androidClientId);
-  console.log("iOS Client ID:", oauthClientIds.iosClientId);
-
   const [request, response, promptAsync] = Google.useAuthRequest({
     webClientId: oauthClientIds.webClientId,
     androidClientId: oauthClientIds.androidClientId,
@@ -30,64 +24,33 @@ export default function LoginScreen() {
   });
 
   useEffect(() => {
-    if (request) {
-      console.log("=== OAuth Request Object ===");
-      console.log("Request URL:", request.url);
-      console.log("Request Redirect URI:", request.redirectUri);
-      console.log("Request Client ID:", request.clientId);
-      console.log("Request Response Type:", request.responseType);
-      console.log("Request Code Challenge:", request.codeChallenge);
-      console.log("\nFull Request:", JSON.stringify(request, null, 2));
-    }
-  }, [request]);
-
-  useEffect(() => {
-    console.log("=== OAuth Response ===");
-    console.log("Response Type:", response?.type);
-    console.log("Full Response:", JSON.stringify(response, null, 2));
-
     if (response?.type === "success") {
-      console.log("✅ OAuth Success!");
-
       const params = response.params as any;
-      console.log("Response params:", Object.keys(params));
-      console.log("ID Token:", params.id_token ? "Present" : "Missing");
-      console.log("Access Token:", params.access_token ? "Present" : "Missing");
-      console.log("Auth Code:", params.code ? "Present" : "Missing");
-
       const auth = getFirebaseAuth();
 
       if (params.id_token) {
         const credential = GoogleAuthProvider.credential(params.id_token, params.access_token);
         signInWithCredential(auth, credential)
           .then(() => {
-            console.log("✅ Firebase sign-in successful");
             setLoading(false);
           })
           .catch((e: any) => {
-            console.error("❌ Firebase sign-in error:", e);
             setError(e?.message || "Login failed");
             setLoading(false);
           });
       } else {
-        console.error("❌ No tokens in response");
         setError("Authentication failed: No tokens received");
         setLoading(false);
       }
     } else if (response?.type === "error") {
-      console.error("❌ OAuth Error Response:", response);
-      console.error("Error Code:", (response as any)?.error);
-      console.error("Error Params:", (response as any)?.params);
       setError(`Authentication failed: ${(response as any)?.error || "Unknown error"}`);
       setLoading(false);
     } else if (response?.type === "dismiss" || response?.type === "cancel") {
-      console.log("ℹ️ OAuth dismissed/cancelled");
       setLoading(false);
     }
   }, [response]);
 
   const onGooglePress = useCallback(async () => {
-    console.log("=== Google Sign-In Button Pressed ===");
     setError(null);
     setLoading(true);
     try {
@@ -95,18 +58,12 @@ export default function LoginScreen() {
       if (!auth) throw new Error("Auth not initialized");
 
       if (Platform.OS === "web") {
-        console.log("Using web popup flow");
         const provider = new GoogleAuthProvider();
         await signInWithPopup(auth, provider);
       } else {
-        console.log("Using native mobile flow");
-        console.log("Calling promptAsync");
-        const result = await promptAsync();
-        console.log("promptAsync result:", JSON.stringify(result, null, 2));
+        await promptAsync();
       }
     } catch (e: any) {
-      console.error("❌ Google Sign-In Error:", e);
-      console.error("Error details:", JSON.stringify(e, null, 2));
       setError(e?.message || "Login failed");
       setLoading(false);
     }
@@ -122,24 +79,6 @@ export default function LoginScreen() {
           {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign in with Google</Text>}
         </TouchableOpacity>
         {error && <Text style={styles.errorText}>{error}</Text>}
-
-        {Platform.OS !== "web" && (
-          <View style={styles.debugContainer}>
-            <Text style={styles.debugLabel}>Debug Info:</Text>
-            <Text style={styles.debugText} selectable>
-              Platform: {Platform.OS}
-            </Text>
-            <Text style={styles.debugText} selectable>
-              Redirect URI: {request?.redirectUri || "Loading..."}
-            </Text>
-            <Text style={styles.debugText} selectable>
-              Client ID: {request?.clientId || "Loading..."}
-            </Text>
-            <Text style={styles.debugText} selectable>
-              Response Type: {request?.responseType || "Loading..."}
-            </Text>
-          </View>
-        )}
       </View>
     </View>
   );
@@ -196,23 +135,5 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing.lg,
     textAlign: "center",
     fontSize: theme.typography.sizes.sm,
-  },
-  debugContainer: {
-    marginTop: theme.spacing.xl,
-    padding: theme.spacing.md,
-    backgroundColor: "rgba(0,0,0,0.1)",
-    borderRadius: theme.borderRadius.sm,
-    width: "100%",
-  },
-  debugLabel: {
-    color: theme.colors.textSecondary,
-    fontSize: theme.typography.sizes.xs,
-    marginBottom: theme.spacing.xs,
-    fontWeight: theme.typography.weights.semibold,
-  },
-  debugText: {
-    color: theme.colors.text,
-    fontSize: theme.typography.sizes.xs,
-    fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
   },
 });
