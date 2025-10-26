@@ -1,4 +1,4 @@
-package com.routineassistant.app
+package com.aiapps.routineassistant
 
 import android.app.Application
 import android.content.res.Configuration

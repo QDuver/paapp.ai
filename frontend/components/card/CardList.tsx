@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text, RefreshControl, Platform } from "react-native";
 import DraggableFlatList, { RenderItemParams } from "react-native-draggable-flatlist";
 import { FirestoreDocAbstract, CardAbstract, DialogableAbstract } from "../../models/Abstracts";
 import CustomCard from "./CustomCard";
@@ -14,14 +14,20 @@ interface CardListProps {
     firestoreDoc: FirestoreDocAbstract,
     isNew: boolean
   ) => void;
+  refreshing: boolean;
+  sectionColor: string;
 }
 
-const CardList = ({ firestoreDoc, showEditDialog }: CardListProps) => {
-  const { refreshCounter } = useAppContext();
+const CardList = ({ firestoreDoc, showEditDialog, refreshing, sectionColor }: CardListProps) => {
+  const { refreshCounter, setRefreshCounter } = useAppContext();
 
   const renderCard = ({ item, isActive, getIndex }: RenderItemParams<CardAbstract>) => (
     <CustomCard firestoreDoc={firestoreDoc} item={item} index={getIndex() ?? 0} showEditDialog={showEditDialog} />
   );
+
+  const handleRefresh = () => {
+    setRefreshCounter(refreshCounter + 1);
+  };
 
   return (
     <View style={styles.container}>
@@ -30,9 +36,10 @@ const CardList = ({ firestoreDoc, showEditDialog }: CardListProps) => {
         renderItem={renderCard}
         keyExtractor={(item, index) => `${refreshCounter}-card-${index}`}
         contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={Platform.OS === "web"}
         activationDistance={10}
         dragItemOverflow={true}
+        refreshControl={<RefreshControl refreshing={refreshing} tintColor={sectionColor} onRefresh={handleRefresh} />}
       />
     </View>
   );
@@ -41,6 +48,10 @@ const CardList = ({ firestoreDoc, showEditDialog }: CardListProps) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    ...(Platform.OS === 'web' && {
+      overflowY: 'auto',
+      height: '100%',
+    }),
   },
   listContainer: {
     paddingVertical: theme.spacing.md,

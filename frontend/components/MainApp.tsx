@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import { SafeAreaView, ScrollView, StyleSheet, Text, View, ActivityIndicator, RefreshControl } from "react-native";
+import { ScrollView, StyleSheet, Text, View, ActivityIndicator, RefreshControl } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { FAB, Appbar, BottomNavigation, Menu, Icon, MD3Colors, Divider } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CardList from "./card/CardList";
@@ -99,22 +100,25 @@ const MainApp = () => {
 
     return (
       <View style={styles.sceneContainer}>
-        <ScrollView style={styles.content} refreshControl={<RefreshControl refreshing={isLoading} tintColor={sectionColor} />}>
-          {isLoading ? (
-            <View style={styles.loadingContainer} testID="loading-container">
-              <ActivityIndicator size="large" color={sectionColor} />
-              <Text style={styles.loadingText} testID="loading-text">
-                Loading {route.key}...
-              </Text>
-            </View>
-          ) : firestoreDoc ? (
-            <CardList firestoreDoc={firestoreDoc} showEditDialog={showEditDialog} />
-          ) : (
-            <View style={styles.emptyContainer}>
-              <Text style={[styles.emptyText, { color: theme.colors.textMuted }]}>No {route.key} found</Text>
-            </View>
-          )}
-        </ScrollView>
+        {isLoading ? (
+          <View style={[styles.content, styles.loadingContainer]} testID="loading-container">
+            <ActivityIndicator size="large" color={sectionColor} />
+            <Text style={styles.loadingText} testID="loading-text">
+              Loading {route.key}...
+            </Text>
+          </View>
+        ) : firestoreDoc ? (
+          <CardList
+            firestoreDoc={firestoreDoc}
+            showEditDialog={showEditDialog}
+            refreshing={isLoading}
+            sectionColor={sectionColor}
+          />
+        ) : (
+          <View style={[styles.content, styles.emptyContainer]}>
+            <Text style={[styles.emptyText, { color: theme.colors.textMuted }]}>No {route.key} found</Text>
+          </View>
+        )}
 
         {!isLoading && (
           <View style={styles.fabContainer}>

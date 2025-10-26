@@ -17,7 +17,7 @@ default_args = {
 def schedule_day(**context):
     api_base_url = Variable.get("BACKEND_API_URL", default_var="https://your-service.run.app")
 
-    execution_date = context['ds']
+    execution_date = datetime.now().strftime('%Y-%m-%d')
 
     url = f"{api_base_url}/schedule/{execution_date}"
 

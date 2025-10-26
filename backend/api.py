@@ -59,26 +59,7 @@ def warmup_user_connection(user: User = Depends(User.from_firebase_token)):
 @app.get("/unique/{collection}")
 def get_document(collection: str, user: User = Depends(User.from_firebase_token)):
     return get_model_class(collection)().get_unique()
-    
 
-@app.get("/{collection}/{document}")
-def get_document(collection: str, document: str, user: User = Depends(User.from_firebase_token)):
-    return get_model_class(collection)(id=document).query()
-
-@app.post("/{collection}/{document}")
-def overwrite_with_format(collection: str, document: str, request: dict, user: User = Depends(User.from_firebase_token)):
-    model_class = get_model_class(collection)
-    validated_data = model_class(**request)
-    data = validated_data.model_dump()
-    CONFIG.USER_FS.collection(collection).document(document).set(data)
-
-
-@app.post("/build-with-ai/{collection}/{id}")
-def build_with_ai(collection: str, id: str, request: dict, user: User = Depends(User.from_firebase_token)):
-    model_class = get_model_class(collection)
-    instance = model_class(id=id)
-    instance = instance.build_with_ai(**request)
-    return instance.model_dump()
 
 @app.post("/schedule/{date}")
 def schedule_day(date: str, request: dict):
@@ -107,3 +88,26 @@ def schedule_day(date: str, request: dict):
         results.append(db_result)
 
     return {"scheduled": len(results), "results": results}
+
+@app.post("/build-with-ai/{collection}/{id}")
+def build_with_ai(collection: str, id: str, request: dict, user: User = Depends(User.from_firebase_token)):
+    model_class = get_model_class(collection)
+    instance = model_class(id=id)
+    instance = instance.build_with_ai(**request)
+    return instance.model_dump()
+
+
+# ALWAYS KEEP LAST ---------------
+
+@app.get("/{collection}/{document}")
+def get_document(collection: str, document: str, user: User = Depends(User.from_firebase_token)):
+    return get_model_class(collection)(id=document).query()
+
+@app.post("/{collection}/{document}")
+def overwrite_with_format(collection: str, document: str, request: dict, user: User = Depends(User.from_firebase_token)):
+    model_class = get_model_class(collection)
+    validated_data = model_class(**request)
+    data = validated_data.model_dump()
+    CONFIG.USER_FS.collection(collection).document(document).set(data)
+
+

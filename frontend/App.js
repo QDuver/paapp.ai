@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, View, Text, Platform } from "react-native";
 import { PaperProvider, MD3LightTheme } from "react-native-paper";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MainApp from "./components/MainApp";
 import { AppProvider } from "./contexts/AppContext";
@@ -31,26 +32,10 @@ export default function App() {
   const [isFirebaseInitialized, setIsFirebaseInitialized] = useState(false);
   const [userReady, setUserReady] = useState(false);
   const [user, setUser] = useState(null);
-  const [skipAuth, setSkipAuth] = useState(false);
 
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        // Check for skipAuth parameter in URL (both query param and path formats)
-        if (typeof window !== "undefined" && window.location) {
-          const urlParams = new URLSearchParams(window.location.search);
-          const pathname = window.location.pathname;
-          const shouldSkipAuth = urlParams.get("skipAuth") === "true" || pathname.includes("skipAuth=true");
-
-          if (shouldSkipAuth) {
-            setSkipAuth(true);
-            setIsFirebaseInitialized(true);
-            setUserReady(true);
-            setUser({ uid: "test-user", email: "test@example.com" });
-            return;
-          }
-        }
-
         // Import and initialize Firebase first
         const { default: initializeFirebase } = await import("./services/Firebase");
         await initializeFirebase();
@@ -111,32 +96,38 @@ export default function App() {
   // Show loading screen while Firebase initializes
   if (!isFirebaseInitialized || !userReady) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: "#f5f5f5",
-        }}
-      >
-        <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={{ marginTop: 10, color: "#666" }}>Initializing...</Text>
-      </View>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "#f5f5f5",
+          }}
+        >
+          <ActivityIndicator size="large" color="#007AFF" />
+          <Text style={{ marginTop: 10, color: "#666" }}>Initializing...</Text>
+        </View>
+      </GestureHandlerRootView>
     );
   }
 
   if (!user)
     return (
-      <PaperProvider theme={paperTheme}>
-        <LoginScreen />
-      </PaperProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <PaperProvider theme={paperTheme}>
+          <LoginScreen />
+        </PaperProvider>
+      </GestureHandlerRootView>
     );
 
   return (
-    <PaperProvider theme={paperTheme}>
-      <AppProvider skipAuth={skipAuth}>
-        <MainApp />
-      </AppProvider>
-    </PaperProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <PaperProvider theme={paperTheme}>
+        <AppProvider>
+          <MainApp />
+        </AppProvider>
+      </PaperProvider>
+    </GestureHandlerRootView>
   );
 }

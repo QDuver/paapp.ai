@@ -38,7 +38,14 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     const fetchData = async () => {
       setIsLoading(true);
 
-      await Promise.all([Settings.fromApi(setData), Routines.fromApi(setData), Exercises.fromApi(setData), Meals.fromApi(setData)]);
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      await Promise.all([
+        Settings.fromApi(setData),
+        Routines.fromApi(setData),
+        Exercises.fromApi(setData),
+        Meals.fromApi(setData),
+      ]);
 
       const uniqueExercises = await apiClient.get<IUnique[]>(`unique/exercises`);
       setData(prevData => ({ ...prevData, uniqueExercises }));

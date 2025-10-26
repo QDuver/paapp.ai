@@ -45,7 +45,6 @@ apiClient -> fetch JSON -> AppContext maps plain objects to model classes (Routi
 - Auto attaches: `Authorization: Bearer <FirebaseToken>` when user signed in.
 - Base URL selection logic differs on `__DEV__` + platform (web = localhost; native = LOCAL_IP). Always reuse `getBaseUrl()` pattern when adding new fetch code.
 - Error handling: throws errors with detailed messages; consuming code should handle with try/catch.
-- Supports optional `skipAuth` parameter for unauthenticated requests.
 
 ## 6. UI Component Patterns
 

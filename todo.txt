@@ -1,6 +1,4 @@
 MVP
-- Add exercise not working
-- Run automated tests on AI scripts
 - Long tap is breaking
 - Change all logos / titles / names
 - Deploy to Android

@@ -3,25 +3,25 @@ import { FetchOptions } from "../models/Shared";
 import { getBaseUrl } from "./utils";
 
 interface ApiClientOptions {
-  skipAuth?: boolean;
   onError?: (error: Error) => void;
   silent?: boolean;
 }
 
-async function getAuthHeaders(skipAuth: boolean = false): Promise<Record<string, string>> {
+async function getAuthHeaders(): Promise<Record<string, string>> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
 
-  if (skipAuth) {
-    headers["Authorization"] = "Bearer umileigiudber2rbzjguipjfys23";
-    return headers;
-  }
-
   const auth = getFirebaseAuth();
   if (auth?.currentUser) {
-    const token = await auth.currentUser.getIdToken();
-    headers["Authorization"] = `Bearer ${token}`;
+    try {
+      const token = await auth.currentUser.getIdToken();
+      headers["Authorization"] = `Bearer ${token}`;
+    } catch (error) {
+      console.error("[AUTH] Failed to get ID token:", error);
+    }
+  } else {
+    console.warn("[AUTH] No currentUser available when making API request");
   }
 
   return headers;
@@ -30,10 +30,10 @@ async function getAuthHeaders(skipAuth: boolean = false): Promise<Record<string,
 async function request<T = unknown>(endpoint: string, options: FetchOptions & ApiClientOptions = {}): Promise<T | null> {
   const baseApi = await getBaseUrl();
   const url = endpoint.startsWith("http") ? endpoint : `${baseApi}/${endpoint}`;
-  const { skipAuth = false, onError, silent = false, ...fetchOptions } = options;
+  const { onError, silent = false, ...fetchOptions } = options;
 
   try {
-    const authHeaders = await getAuthHeaders(skipAuth);
+    const authHeaders = await getAuthHeaders();
 
     const finalOptions: RequestInit = {
       ...fetchOptions,

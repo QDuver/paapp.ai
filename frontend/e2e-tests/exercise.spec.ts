@@ -6,8 +6,8 @@ test("create and delete an exercise", async ({ page }) => {
   const today = new Date();
   const currentDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
-  // Open the app with skipAuth flag
-  await page.goto("/?skipAuth=true");
+  // Open the app
+  await page.goto("/");
 
   // Navigate to the Exercises tab
   const exercisesTab = page.getByRole("tab", { name: "Exercises" });
