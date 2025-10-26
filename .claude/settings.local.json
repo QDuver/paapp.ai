@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "*",
-      "Bash(firebase hosting:channel:list:*)"
+      "Bash(firebase hosting:channel:list:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

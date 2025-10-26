@@ -139,7 +139,7 @@ const MainApp = () => {
   const currentRoute = routes[navigationIndex];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right']}>
       {/* Header */}
       <Appbar.Header style={styles.appBar}>
         <Appbar.Content title={currentRoute?.title} titleStyle={styles.appBarTitle} />
