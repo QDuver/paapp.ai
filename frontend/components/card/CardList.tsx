@@ -1,5 +1,5 @@
 import React from "react";
-import { Platform } from "react-native";
+import { Platform, useWindowDimensions } from "react-native";
 import { FirestoreDocAbstract, CardAbstract, DialogableAbstract } from "../../models/Abstracts";
 import CardListWeb from "./CardListWeb";
 import CardListMobile from "./CardListMobile";
@@ -17,9 +17,12 @@ interface CardListProps {
 }
 
 const CardList = ({ firestoreDoc, showEditDialog, refreshing, sectionColor }: CardListProps) => {
-  if (Platform.OS === "web") {
+  const { width } = useWindowDimensions();
+  const isMobile = Platform.OS !== "web" || width < 768;
+
+  if (isMobile) {
     return (
-      <CardListWeb
+      <CardListMobile
         firestoreDoc={firestoreDoc}
         showEditDialog={showEditDialog}
         refreshing={refreshing}
@@ -29,7 +32,7 @@ const CardList = ({ firestoreDoc, showEditDialog, refreshing, sectionColor }: Ca
   }
 
   return (
-    <CardListMobile
+    <CardListWeb
       firestoreDoc={firestoreDoc}
       showEditDialog={showEditDialog}
       refreshing={refreshing}

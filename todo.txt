@@ -6,16 +6,10 @@ BACKEND
 
 FRONTEND
 - bug : autocomplete not fully showing
-- feedback form
 - bug on reordering
--splashscreen cut off on android
+- splashscreen cut off on android
 
 POST MVP
-- Remove skipAuth logic and have login by email for testing
-- Dialog should become modal
+- feedback form
 - Calendar Icon + Swipability
-- Routine type to dropdown
-- Weight input should not accept non-numeric
-- Reordering not stable
 - Hypertrophy vs. Strength (for me only)
-- Feedback as navigation

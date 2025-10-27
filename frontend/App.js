@@ -6,6 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import MainApp from "./components/MainApp";
 import { AppProvider } from "./contexts/AppContext";
 import LoginScreen from "./components/auth/LoginScreen";
+import SplashScreen from "./components/SplashScreen";
 import { onAuthStateChanged } from "firebase/auth";
 import { getFirebaseAuth } from "./services/Firebase";
 import { theme } from "./styles/theme";
@@ -98,40 +99,7 @@ export default function App() {
   if (!isFirebaseInitialized || !userReady) {
     return (
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "#ffffff",
-          }}
-        >
-          <Image
-            source={require("./assets/logo.png")}
-            style={{ width: 150, height: 150, marginBottom: 30 }}
-            resizeMode="contain"
-          />
-          <Text
-            style={{
-              fontSize: 32,
-              fontWeight: "bold",
-              color: theme.colors.accent,
-              marginBottom: 10,
-            }}
-          >
-            {BRANDING.appName}
-          </Text>
-          <Text
-            style={{
-              fontSize: 16,
-              color: "#666",
-              textAlign: "center",
-              paddingHorizontal: 40,
-            }}
-          >
-            {BRANDING.tagline}
-          </Text>
-        </View>
+        <SplashScreen />
       </GestureHandlerRootView>
     );
   }

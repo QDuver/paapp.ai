@@ -17,7 +17,7 @@ default_args = {
 def sync_unique_items(**context):
     api_base_url = Variable.get("BACKEND_API_URL", default_var="https://your-service.run.app")
 
-    url = f"{api_base_url}/sync-uniques"
+    url = f"{api_base_url}/uniques"
 
     logging.info(f"Calling API: {url}")
 
@@ -39,7 +39,7 @@ def sync_unique_items(**context):
         raise
 
 with DAG(
-    'sync_uniques',
+    'uniques',
     default_args=default_args,
     description='Sync unique items from all collections to settings for all users',
     schedule_interval='0 2 * * *',

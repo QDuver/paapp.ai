@@ -5,15 +5,13 @@ from pydantic import BaseModel
 from typing import Optional
 from google.cloud import firestore
 
-from config import CONFIG, get_all_database_names
-from models import meals, exercises
-from models.routines import Routine, Routines
+from config import CONFIG, PROJECT, get_all_database_names
+from models.routines import Routines
 from models.exercises import Exercises
 from models.meals import Meals
 from models.settings import Settings
 from models.users import User
-import time
-
+from models.abstracts import FirestoreDoc
 
 # Mapping of collection names to their corresponding classes
 COLLECTION_CLASS_MAPPING = {
@@ -56,17 +54,11 @@ def warmup_user_connection(user: User = Depends(User.from_firebase_token)):
     CONFIG.USER_FS.collection('_warmup').document('_warmup').get()
     return {}
 
-@app.get("/unique/{collection}")
-def get_document(collection: str, user: User = Depends(User.from_firebase_token)):
-    return get_model_class(collection)().get_unique()
-
-
 @app.post("/schedule/{date}")
 def schedule_day(date: str, request: dict):
     from config import PROJECT
 
     database_names = get_all_database_names()
-    print('All Firestore databases:', database_names)
 
     collections_to_schedule = ['exercises', 'meals']
 
@@ -89,11 +81,8 @@ def schedule_day(date: str, request: dict):
 
     return {"scheduled": len(results), "results": results}
 
-@app.post("/sync-uniques")
-def sync_uniques():
-    from config import PROJECT
-    from models.abstracts import FirestoreDoc
-
+@app.post("/uniques")
+def uniques():
     database_names = get_all_database_names()
     print('All Firestore databases:', database_names)
 
