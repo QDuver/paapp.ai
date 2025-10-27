@@ -1,6 +1,7 @@
 MVP
 - dag for uniques
 - dag for erasing non completed
+- grocery shopping
 
 POST MVP
 - Remove skipAuth logic and have login by email for testing
