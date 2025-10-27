@@ -89,6 +89,25 @@ def schedule_day(date: str, request: dict):
 
     return {"scheduled": len(results), "results": results}
 
+@app.post("/sync-uniques")
+def sync_uniques():
+    from config import PROJECT
+    from models.abstracts import FirestoreDoc
+
+    database_names = get_all_database_names()
+    print('All Firestore databases:', database_names)
+
+    results = []
+    for db_name in database_names:
+        print(f'Syncing unique items for database: {db_name}')
+        CONFIG.USER_FS = firestore.Client(project=PROJECT, database=db_name)
+
+        sync_result = FirestoreDoc.sync_all_uniques()
+        print(f'  Result: {sync_result}')
+        results.append({"database": db_name, "collections": sync_result})
+
+    return {"synced": len(results), "results": results}
+
 @app.post("/build-with-ai/{collection}/{id}")
 def build_with_ai(collection: str, id: str, request: dict, user: User = Depends(User.from_firebase_token)):
     model_class = get_model_class(collection)

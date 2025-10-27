@@ -1,8 +1,14 @@
 MVP
-- Long tap is breaking
-- Change all logos / titles / names
-- Deploy to Android
-- Have default exercises
+BACKEND
+- dag for uniques
+- dag for erasing non completed
+- grocery shopping
+
+FRONTEND
+- bug : autocomplete not fully showing
+- feedback form
+- bug on reordering
+-splashscreen cut off on android
 
 POST MVP
 - Remove skipAuth logic and have login by email for testing

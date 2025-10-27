@@ -7,8 +7,9 @@ echo Setting Composer variables...
 call gcloud composer environments run aiapps --location europe-west2 variables set -- BACKEND_API_URL https://life-automation-api-1050310982145.europe-west2.run.app
 
 echo.
-echo Uploading DAG to Composer...
+echo Uploading DAGs to Composer...
 call gcloud composer environments storage dags import --environment aiapps --location europe-west2 --source dags/scheduler.py
+call gcloud composer environments storage dags import --environment aiapps --location europe-west2 --source dags/sync_uniques.py
 
 echo.
 echo Deployment complete!

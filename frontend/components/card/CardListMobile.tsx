@@ -24,7 +24,22 @@ const CardListMobile = ({ firestoreDoc, showEditDialog, refreshing, sectionColor
   const [localItems, setLocalItems] = React.useState<CardAbstract[]>(firestoreDoc.items);
   const [isDragging, setIsDragging] = React.useState(false);
 
+  console.log('[CardListMobile] Render:', {
+    itemCount: localItems.length,
+    isDragging,
+    refreshing,
+    refreshCounter,
+    firestoreDocItems: firestoreDoc.items.length,
+    localOrder: localItems.map(item => item.name),
+    firestoreOrder: firestoreDoc.items.map(item => item.name)
+  });
+
   React.useEffect(() => {
+    console.log('[CardListMobile] ⚠️ useEffect triggered - resetting localItems from firestoreDoc', {
+      fromOrder: localItems.map(item => item.name),
+      toOrder: firestoreDoc.items.map(item => item.name),
+      refreshCounter
+    });
     setLocalItems(firestoreDoc.items);
   }, [firestoreDoc.items, refreshCounter]);
 
@@ -40,14 +55,38 @@ const CardListMobile = ({ firestoreDoc, showEditDialog, refreshing, sectionColor
   );
 
   const handleRefresh = () => {
+    console.log('[CardListMobile] Refresh triggered', { currentCounter: refreshCounter });
     setRefreshCounter(refreshCounter + 1);
   };
 
-  const handleDragBegin = () => {
+  const handleDragBegin = (index: number) => {
+    const item = localItems[index];
+    console.log('[CardListMobile] Drag begin', {
+      itemCount: localItems.length,
+      draggedCard: item?.name,
+      fromIndex: index
+    });
     setIsDragging(true);
   };
 
-  const handleDragEnd = ({ data }: { data: CardAbstract[] }) => {
+  const handlePlaceholderIndexChange = (fromIndex: number, toIndex: number) => {
+    const item = localItems[fromIndex];
+    console.log('[CardListMobile] Placeholder moved', {
+      card: item?.name,
+      fromIndex,
+      toIndex,
+      distance: toIndex - fromIndex
+    });
+  };
+
+  const handleDragEnd = ({ data, from, to }: { data: CardAbstract[]; from: number; to: number }) => {
+    console.log('[CardListMobile] Drag end', {
+      card: localItems[from]?.name,
+      fromIndex: from,
+      toIndex: to,
+      orderChanged: from !== to,
+      newOrder: data.map(item => item.name)
+    });
     setIsDragging(false);
     setLocalItems(data);
     firestoreDoc.items = data;
@@ -61,11 +100,12 @@ const CardListMobile = ({ firestoreDoc, showEditDialog, refreshing, sectionColor
       <DraggableFlatList<CardAbstract>
         data={localItems}
         renderItem={renderCard}
-        keyExtractor={(item, index) => `card-${index}-${item.name}`}
+        keyExtractor={(item) => `card-${item.name}`}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={Platform.OS === "web"}
         onDragBegin={handleDragBegin}
         onDragEnd={handleDragEnd}
+        onPlaceholderIndexChange={handlePlaceholderIndexChange}
         activationDistance={10}
         dragItemOverflow={true}
         refreshControl={
