@@ -17,22 +17,6 @@ export class Routine extends CardAbstract {
         converter: fieldConverter.string,
         placeholder: "Enter routine name",
       },
-      {
-        field: "durationMin",
-        label: "Duration (min)",
-        type: "number",
-        keyboardType: "number-pad",
-        converter: fieldConverter.number,
-        placeholder: "0",
-      },
-      {
-        field: "routineType",
-        label: "Routine Type",
-        type: "string",
-        keyboardType: "default",
-        converter: fieldConverter.string,
-        placeholder: "e.g., Morning, Evening, Work",
-      },
     ];
   }
 

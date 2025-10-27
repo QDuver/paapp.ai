@@ -1,5 +1,5 @@
-import React from "react";
-import { StyleSheet, View, Pressable, Text, Platform, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
+import { StyleSheet, View, Pressable, Text, Platform, TouchableOpacity, TextInput } from "react-native";
 import { Card, List } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { CardAbstract, FirestoreDocAbstract, SubCardAbstract, DialogableAbstract } from "../../models/Abstracts";
@@ -24,6 +24,8 @@ interface CustomCardProps {
 
 const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive, dragListeners, isDragging }: CustomCardProps) => {
   const { refreshCounter, setRefreshCounter } = useAppContext();
+  const [isInlineEditing, setIsInlineEditing] = useState(false);
+  const [inlineEditValue, setInlineEditValue] = useState("");
 
   const cardBackgroundColor = item.isCompleted ? theme.colors.cardCompleted : theme.colors.secondary;
   const hasSubCards = (item.items && item.items.length > 0) || item.createNewSubCard() !== null;
@@ -34,6 +36,11 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
   // Get section color based on collection
   const sectionKey = firestoreDoc.collection as "routines" | "exercises" | "meals";
   const sectionAccentColor = theme.colors.sections[sectionKey]?.accent || theme.colors.accent;
+
+  // Check if item has only one editable field for inline editing
+  const editableFields = item.getEditableFields();
+  const canInlineEdit = editableFields.length === 1 && !hasSubCards;
+  const singleField = editableFields[0];
 
   const handleCheckbox = (e?: any) => {
     console.log("handleCheckbox");
@@ -60,6 +67,21 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
     setRefreshCounter(prev => prev + 1);
   };
 
+  const handleStartInlineEdit = (e?: any) => {
+    e?.stopPropagation?.();
+    if (!canInlineEdit) return;
+    const currentValue = (item as any)[singleField.field] || "";
+    setInlineEditValue(currentValue);
+    setIsInlineEditing(true);
+  };
+
+  const handleSaveInlineEdit = () => {
+    if (!singleField) return;
+    const formData = { [singleField.field]: inlineEditValue };
+    item.onSave(firestoreDoc, formData, firestoreDoc, false, setRefreshCounter);
+    setIsInlineEditing(false);
+  };
+
   return (
     <Card
       style={[
@@ -69,7 +91,7 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
       testID="exercise-card"
     >
       <Pressable
-        onPress={hasSubCards ? handleToggleExpand : () => showEditDialog(item, firestoreDoc, firestoreDoc, false)}
+        onPress={hasSubCards ? handleToggleExpand : canInlineEdit ? handleStartInlineEdit : () => showEditDialog(item, firestoreDoc, firestoreDoc, false)}
         onLongPress={() => showEditDialog(item, firestoreDoc, firestoreDoc, false)}
         style={[styles.accordionItem, { backgroundColor: cardBackgroundColor }]}
       >
@@ -84,37 +106,54 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
             )}
           </Pressable>
           <View style={styles.headerText}>
-            <Text style={[styles.accordionTitle, { opacity: titleOpacity }]}>{item.name || `Item ${index + 1}`}</Text>
-            {description ? <Text style={[styles.accordionDescription, { opacity: descriptionOpacity }]}>{description}</Text> : null}
-          </View>
-          <View style={styles.rightContainer}>
-            {hasSubCards && item.createNewSubCard() !== null && (
-              <Pressable testID="add-subcard-button" onPress={handleAddSubCard} style={styles.actionIcon} hitSlop={8}>
-                <MaterialCommunityIcons name="plus" size={20} color={theme.colors.textSecondary} />
-              </Pressable>
-            )}
-            {hasSubCards && (
-              <Pressable onPress={handleToggleExpand} style={styles.actionIcon} hitSlop={8}>
-                <MaterialCommunityIcons
-                  name={item.isExpanded ? "chevron-up" : "chevron-down"}
-                  size={20}
-                  color={theme.colors.textSecondary}
-                />
-              </Pressable>
-            )}
-            {(drag || dragListeners) && (
-              <TouchableOpacity
-                onLongPress={drag}
-                delayLongPress={0}
-                style={styles.actionIcon}
-                hitSlop={8}
-                activeOpacity={0.6}
-                {...(dragListeners || {})}
-              >
-                <MaterialCommunityIcons name="drag-vertical" size={20} color={theme.colors.textMuted} />
-              </TouchableOpacity>
+            {isInlineEditing ? (
+              <TextInput
+                style={styles.inlineEditInput}
+                value={inlineEditValue}
+                onChangeText={setInlineEditValue}
+                autoFocus
+                placeholder={singleField?.placeholder || "Enter value"}
+                placeholderTextColor={theme.colors.textMuted}
+                onSubmitEditing={handleSaveInlineEdit}
+                onBlur={handleSaveInlineEdit}
+              />
+            ) : (
+              <>
+                <Text style={[styles.accordionTitle, { opacity: titleOpacity }]}>{item.name || `Item ${index + 1}`}</Text>
+                {description ? <Text style={[styles.accordionDescription, { opacity: descriptionOpacity }]}>{description}</Text> : null}
+              </>
             )}
           </View>
+          {!isInlineEditing && (
+            <View style={styles.rightContainer}>
+              {hasSubCards && item.createNewSubCard() !== null && (
+                <Pressable testID="add-subcard-button" onPress={handleAddSubCard} style={styles.actionIcon} hitSlop={8}>
+                  <MaterialCommunityIcons name="plus" size={20} color={theme.colors.textSecondary} />
+                </Pressable>
+              )}
+              {hasSubCards && (
+                <Pressable onPress={handleToggleExpand} style={styles.actionIcon} hitSlop={8}>
+                  <MaterialCommunityIcons
+                    name={item.isExpanded ? "chevron-up" : "chevron-down"}
+                    size={20}
+                    color={theme.colors.textSecondary}
+                  />
+                </Pressable>
+              )}
+              {(drag || dragListeners) && (
+                <TouchableOpacity
+                  onLongPress={drag}
+                  delayLongPress={0}
+                  style={styles.actionIcon}
+                  hitSlop={8}
+                  activeOpacity={0.6}
+                  {...(dragListeners || {})}
+                >
+                  <MaterialCommunityIcons name="drag-vertical" size={20} color={theme.colors.textMuted} />
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
         </View>
       </Pressable>
       {item.isExpanded &&
@@ -239,6 +278,18 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
     marginLeft: theme.spacing.sm,
     marginTop: 3,
+  },
+  inlineEditInput: {
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.semibold,
+    color: theme.colors.text,
+    borderWidth: 1,
+    borderColor: theme.colors.accent,
+    borderRadius: theme.borderRadius.sm,
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
+    backgroundColor: theme.colors.primary,
+    letterSpacing: -0.3,
   },
 });
 
