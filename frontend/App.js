@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, View, Text, Platform } from "react-native";
+import { ActivityIndicator, View, Text, Platform, Image } from "react-native";
 import { PaperProvider, MD3LightTheme } from "react-native-paper";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -9,6 +9,7 @@ import LoginScreen from "./components/auth/LoginScreen";
 import { onAuthStateChanged } from "firebase/auth";
 import { getFirebaseAuth } from "./services/Firebase";
 import { theme } from "./styles/theme";
+import { BRANDING } from "./constants/branding";
 
 // Load icon fonts CSS for web
 if (Platform.OS === "web") {
@@ -93,7 +94,7 @@ export default function App() {
     initializeApp();
   }, []);
 
-  // Show loading screen while Firebase initializes
+  // Show splash screen while Firebase initializes
   if (!isFirebaseInitialized || !userReady) {
     return (
       <GestureHandlerRootView style={{ flex: 1 }}>
@@ -102,11 +103,34 @@ export default function App() {
             flex: 1,
             justifyContent: "center",
             alignItems: "center",
-            backgroundColor: "#f5f5f5",
+            backgroundColor: "#ffffff",
           }}
         >
-          <ActivityIndicator size="large" color="#007AFF" />
-          <Text style={{ marginTop: 10, color: "#666" }}>Initializing...</Text>
+          <Image
+            source={require("./assets/logo.png")}
+            style={{ width: 150, height: 150, marginBottom: 30 }}
+            resizeMode="contain"
+          />
+          <Text
+            style={{
+              fontSize: 32,
+              fontWeight: "bold",
+              color: theme.colors.accent,
+              marginBottom: 10,
+            }}
+          >
+            {BRANDING.appName}
+          </Text>
+          <Text
+            style={{
+              fontSize: 16,
+              color: "#666",
+              textAlign: "center",
+              paddingHorizontal: 40,
+            }}
+          >
+            {BRANDING.tagline}
+          </Text>
         </View>
       </GestureHandlerRootView>
     );

@@ -7,6 +7,7 @@ import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import { makeRedirectUri, ResponseType } from "expo-auth-session";
 import { getOAuthClientIds } from "../../config/firebase";
+import { BRANDING } from "../../constants/branding";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -72,8 +73,8 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>Routine Assistant 4</Text>
-        <Text style={styles.subtitle}>Organize your daily routines, exercises, and meals</Text>
+        <Text style={styles.title}>{BRANDING.appName}</Text>
+        <Text style={styles.subtitle}>{BRANDING.tagline}</Text>
 
         <TouchableOpacity disabled={loading} onPress={onGooglePress} style={[styles.button, loading && styles.buttonDisabled]}>
           {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign in with Google</Text>}

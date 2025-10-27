@@ -62,16 +62,18 @@ const CardListWeb = ({ firestoreDoc, showEditDialog, refreshing, sectionColor }:
             />
           }
         >
-          {localItems.map((item: CardAbstract, index: number) => (
-            <SortableCard
-              key={`card-${index}-${item.name}`}
-              id={`card-${index}`}
-              item={item}
-              index={index}
-              firestoreDoc={firestoreDoc}
-              showEditDialog={showEditDialog}
-            />
-          ))}
+          <View style={styles.cardsWrapper}>
+            {localItems.map((item: CardAbstract, index: number) => (
+              <SortableCard
+                key={`card-${index}-${item.name}`}
+                id={`card-${index}`}
+                item={item}
+                index={index}
+                firestoreDoc={firestoreDoc}
+                showEditDialog={showEditDialog}
+              />
+            ))}
+          </View>
         </ScrollView>
       </SortableContext>
     </DndContext>
@@ -86,6 +88,12 @@ const styles = StyleSheet.create({
   listContainer: {
     paddingVertical: theme.spacing.md,
     paddingBottom: theme.spacing.xxl,
+    alignItems: "center",
+  },
+  cardsWrapper: {
+    width: "100%",
+    maxWidth: 1200,
+    paddingHorizontal: theme.spacing.lg,
   },
 });
 
