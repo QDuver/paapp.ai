@@ -2,6 +2,8 @@ MVP
 - dag for uniques
 - dag for erasing non completed
 - grocery shopping
+- bug : autocomplete not fully showing
+- feedback form
 
 POST MVP
 - Remove skipAuth logic and have login by email for testing
