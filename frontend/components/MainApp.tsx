@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import { ScrollView, StyleSheet, Text, View, ActivityIndicator, RefreshControl } from "react-native";
+import { ScrollView, StyleSheet, Text, View, ActivityIndicator, RefreshControl, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FAB, Appbar, BottomNavigation, Menu, Icon, MD3Colors, Divider } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -142,7 +142,10 @@ const MainApp = () => {
     <SafeAreaView style={styles.container} edges={['left', 'right']}>
       {/* Header */}
       <Appbar.Header style={styles.appBar}>
-        <Appbar.Content title={currentRoute?.title} titleStyle={styles.appBarTitle} />
+        <View style={styles.headerContent}>
+          <Image source={require("../assets/logo.png")} style={styles.logo} resizeMode="contain" />
+          <Text style={styles.appBarTitle}>paapp.ai</Text>
+        </View>
         <Menu
           visible={menuVisible}
           onDismiss={() => setMenuVisible(false)}
@@ -215,11 +218,24 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 2,
   },
+  headerContent: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingLeft: theme.spacing.md,
+    gap: theme.spacing.xs,
+  },
+  logo: {
+    width: 28,
+    height: 28,
+    marginTop: 6,
+  },
   appBarTitle: {
     color: theme.colors.text,
     fontSize: theme.typography.sizes.xxl,
     fontWeight: theme.typography.weights.bold,
     letterSpacing: -0.5,
+    includeFontPadding: false,
   },
   appBarSubtitle: {
     color: theme.colors.textSecondary,

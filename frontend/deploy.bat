@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo Deploying Routine Assistant to Firebase
+echo Deploying paapp.ai to Firebase
 echo ========================================
 echo.
 
