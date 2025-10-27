@@ -1,11 +1,8 @@
 import React from "react";
-import { StyleSheet, View, Text, RefreshControl, Platform } from "react-native";
-import DraggableFlatList, { RenderItemParams } from "react-native-draggable-flatlist";
+import { Platform } from "react-native";
 import { FirestoreDocAbstract, CardAbstract, DialogableAbstract } from "../../models/Abstracts";
-import CustomCard from "./CustomCard";
-import { useAppContext } from "../../contexts/AppContext";
-import { theme } from "../../styles/theme";
 import CardListWeb from "./CardListWeb";
+import CardListMobile from "./CardListMobile";
 
 interface CardListProps {
   firestoreDoc: FirestoreDocAbstract;
@@ -20,14 +17,6 @@ interface CardListProps {
 }
 
 const CardList = ({ firestoreDoc, showEditDialog, refreshing, sectionColor }: CardListProps) => {
-  const { refreshCounter, setRefreshCounter } = useAppContext();
-  const [localItems, setLocalItems] = React.useState<CardAbstract[]>(firestoreDoc.items);
-  const [isDragging, setIsDragging] = React.useState(false);
-
-  React.useEffect(() => {
-    setLocalItems(firestoreDoc.items);
-  }, [firestoreDoc.items, refreshCounter]);
-
   if (Platform.OS === "web") {
     return (
       <CardListWeb
@@ -35,96 +24,18 @@ const CardList = ({ firestoreDoc, showEditDialog, refreshing, sectionColor }: Ca
         showEditDialog={showEditDialog}
         refreshing={refreshing}
         sectionColor={sectionColor}
-        refreshCounter={refreshCounter}
       />
     );
   }
 
-  const renderCard = ({ item, isActive, getIndex, drag }: RenderItemParams<CardAbstract>) => (
-    <CustomCard
+  return (
+    <CardListMobile
       firestoreDoc={firestoreDoc}
-      item={item}
-      index={getIndex() ?? 0}
       showEditDialog={showEditDialog}
-      drag={drag}
-      isActive={isActive}
+      refreshing={refreshing}
+      sectionColor={sectionColor}
     />
   );
-
-  const handleRefresh = () => {
-    setRefreshCounter(refreshCounter + 1);
-  };
-
-  const handleDragBegin = () => {
-    setIsDragging(true);
-  };
-
-  const handleDragEnd = ({ data }: { data: CardAbstract[] }) => {
-    setIsDragging(false);
-    setLocalItems(data);
-    firestoreDoc.items = data;
-    firestoreDoc.onSave().catch(error => {
-      console.error("Error saving reordered items:", error);
-    });
-  };
-
-  return (
-    <View style={styles.container}>
-      <DraggableFlatList<CardAbstract>
-        data={localItems}
-        renderItem={renderCard}
-        keyExtractor={(item, index) => `card-${index}-${item.name}`}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={Platform.OS === "web"}
-        onDragBegin={handleDragBegin}
-        onDragEnd={handleDragEnd}
-        activationDistance={10}
-        dragItemOverflow={true}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            tintColor={sectionColor}
-            onRefresh={handleRefresh}
-            enabled={!isDragging}
-          />
-        }
-      />
-    </View>
-  );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    ...(Platform.OS === 'web' && {
-      overflowY: 'auto',
-      height: '100%',
-    }),
-  },
-  listContainer: {
-    paddingVertical: theme.spacing.md,
-    paddingBottom: theme.spacing.xxl,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  emptyText: {
-    fontSize: theme.typography.sizes.md,
-    color: theme.colors.textMuted,
-    textAlign: "center",
-  },
-  fabContainer: {
-    position: "absolute",
-    bottom: theme.spacing.lg,
-    right: theme.spacing.lg,
-    zIndex: 9999,
-  },
-  fab: {
-    backgroundColor: theme.colors.accent,
-    ...theme.shadows.fab,
-  },
-});
 
 export default CardList;

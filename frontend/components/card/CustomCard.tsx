@@ -33,11 +33,7 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
 
   // Get section color based on collection
   const sectionKey = firestoreDoc.collection as "routines" | "exercises" | "meals";
-  const sectionColor = theme.colors.sections[sectionKey]?.icon || theme.colors.accent;
-  const sectionBgColor = theme.colors.sections[sectionKey]?.iconBackground || theme.colors.iconBackgrounds.blue;
   const sectionAccentColor = theme.colors.sections[sectionKey]?.accent || theme.colors.accent;
-  const iconBackground = item.isCompleted ? sectionBgColor : theme.colors.secondary;
-  const iconBorderColor = item.isCompleted ? sectionAccentColor : theme.colors.border;
 
   const handleCheckbox = (e?: any) => {
     console.log("handleCheckbox");
@@ -47,21 +43,21 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
   };
 
   const handleToggleExpand = (e?: any) => {
-    console.log("handleToggleExpand");
     e?.stopPropagation?.();
     item.onToggleExpand(firestoreDoc);
     setRefreshCounter(prev => prev + 1);
   };
 
   const handleAddSubCard = (e?: any) => {
-    console.log("handleAddSubCard");
     e?.stopPropagation?.();
     const newSubCard = item.createNewSubCard();
+    item.isExpanded = true;
     if (item.skipDialogForNewChild()) {
       newSubCard.onSave(firestoreDoc, newSubCard.toFormData(), item, true, setRefreshCounter);
     } else {
       showEditDialog(newSubCard, item, firestoreDoc, true);
     }
+    setRefreshCounter(prev => prev + 1);
   };
 
   return (
@@ -79,13 +75,13 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
       >
         <View style={styles.headerContent}>
           <Pressable onPress={handleCheckbox} style={styles.iconContainer} hitSlop={8}>
-            <View style={[styles.iconCircle, { backgroundColor: iconBackground, borderColor: iconBorderColor }]}>
-              {item.isCompleted ? (
-                <MaterialCommunityIcons name="check-bold" size={18} color={sectionAccentColor} />
-              ) : (
-                <MaterialCommunityIcons name="circle-outline" size={20} color={theme.colors.textMuted} />
-              )}
-            </View>
+            {item.isCompleted ? (
+              <View style={[styles.completedCircle, { backgroundColor: sectionAccentColor }]}>
+                <MaterialCommunityIcons name="check" size={20} color="#FFFFFF" />
+              </View>
+            ) : (
+              <View style={[styles.emptyCircle, { borderColor: sectionAccentColor }]} />
+            )}
           </Pressable>
           <View style={styles.headerText}>
             <Text style={[styles.accordionTitle, { opacity: titleOpacity }]}>{item.name || `Item ${index + 1}`}</Text>
@@ -154,13 +150,28 @@ const styles = StyleSheet.create({
   },
   accordionItem: {
     paddingLeft: theme.spacing.xs,
-    paddingVertical: theme.spacing.xs,
+    paddingVertical: theme.spacing.md,
   },
   iconContainer: {
     justifyContent: "center",
     alignItems: "center",
     marginLeft: theme.spacing.sm,
     marginRight: theme.spacing.md,
+  },
+  completedCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1.5,
+    justifyContent: "center",
+    alignItems: "center",
   },
   headerContent: {
     flexDirection: "row",
@@ -170,14 +181,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingRight: theme.spacing.md,
     marginLeft: theme.spacing.sm,
-  },
-  iconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: theme.borderRadius.round,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
   },
   radioContainer: {
     justifyContent: "center",

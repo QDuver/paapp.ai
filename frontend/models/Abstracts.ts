@@ -150,7 +150,7 @@ export abstract class CardAbstract extends DialogableAbstract {
 }
 
 export abstract class FirestoreDocAbstract extends DialogableAbstract {
-  items: [] = [];
+  items: any[] = [];
   abstract collection: string;
   id: string = getCurrentDate();
   ChildModel: any;

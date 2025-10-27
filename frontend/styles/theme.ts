@@ -1,14 +1,24 @@
+export const palette = {
+  color1: "#40F99B",
+  color2: "#2E4052",
+  color3: "#FFC857",
+  color4: "#412234",
+  color5: "#FCB0B3",
+};
+
 export const theme = {
   colors: {
+    palette,
+
     // Background colors
-    primary: "#F3F3F8",
+    primary: "#FAFAFA",
     secondary: "#FFFFFF",
     tertiary: "#FAFAFA",
     cardCompleted: "#F8F9FA",
 
     // Accent colors
-    accent: "#5E5CE6",
-    accentLight: "#E8E7FF",
+    accent: palette.color2,
+    accentLight: `${palette.color3}40`,
 
     // Text colors
     text: "#1C1C1E",
@@ -21,48 +31,48 @@ export const theme = {
     borderLight: "#F2F2F7",
     modalBackground: "#FFFFFF",
     modalSecondary: "#F8F9FA",
-    buttonPrimary: "#5E5CE6",
+    buttonPrimary: palette.color3,
 
     // Status colors
     error: "#FF3B30",
-    warning: "#FF9500",
-    success: "#34C759",
+    warning: palette.color1,
+    success: palette.color4,
 
     // Icon backgrounds (subtle, colorful)
     iconBackgrounds: {
-      blue: "#E3F2FD",
-      purple: "#F3E5F5",
-      green: "#E8F5E9",
-      orange: "#FFF3E0",
+      blue: `${palette.color3}20`,
+      purple: `${palette.color2}20`,
+      green: `${palette.color4}20`,
+      orange: `${palette.color1}20`,
       red: "#FFEBEE",
       teal: "#E0F2F1",
-      indigo: "#E8EAF6",
+      indigo: `${palette.color2}30`,
       pink: "#FCE4EC",
     },
 
     // Icon colors
     iconColors: {
-      blue: "#2196F3",
-      purple: "#9C27B0",
-      green: "#4CAF50",
-      orange: "#FF9800",
+      blue: palette.color3,
+      purple: palette.color2,
+      green: palette.color4,
+      orange: palette.color1,
       red: "#F44336",
       teal: "#009688",
-      indigo: "#3F51B5",
+      indigo: palette.color2,
       pink: "#E91E63",
     },
 
     // Section-specific theme colors
     sections: {
       routines: {
-        icon: "#FF9800",
-        iconBackground: "#FFF3E0",
-        accent: "#FF9800",
+        icon: palette.color1,
+        iconBackground: `${palette.color1}20`,
+        accent: palette.color1,
       },
       exercises: {
-        icon: "#4CAF50",
-        iconBackground: "#E8F5E9",
-        accent: "#4CAF50",
+        icon: palette.color4,
+        iconBackground: `${palette.color4}20`,
+        accent: palette.color4,
       },
       meals: {
         icon: "#F44336",

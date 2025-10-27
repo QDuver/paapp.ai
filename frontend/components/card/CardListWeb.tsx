@@ -17,11 +17,10 @@ interface CardListWebProps {
   ) => void;
   refreshing: boolean;
   sectionColor: string;
-  refreshCounter: number;
 }
 
-const CardListWeb = ({ firestoreDoc, showEditDialog, refreshing, sectionColor, refreshCounter }: CardListWebProps) => {
-  const { setRefreshCounter } = useAppContext();
+const CardListWeb = ({ firestoreDoc, showEditDialog, refreshing, sectionColor }: CardListWebProps) => {
+  const { refreshCounter, setRefreshCounter } = useAppContext();
   const [localItems, setLocalItems] = React.useState<CardAbstract[]>(firestoreDoc.items);
 
   React.useEffect(() => {
@@ -53,13 +52,12 @@ const CardListWeb = ({ firestoreDoc, showEditDialog, refreshing, sectionColor, r
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={localItems.map((_: any, idx: number) => `card-${idx}`)} strategy={verticalListSortingStrategy}>
         <ScrollView
-          style={styles.container}
+          style={[styles.container, { backgroundColor: `${sectionColor}08` }]}
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={true}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
-              tintColor={sectionColor}
               onRefresh={() => setRefreshCounter(prev => prev + 1)}
             />
           }
