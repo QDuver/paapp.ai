@@ -1,7 +1,7 @@
 
 import datetime
 from typing import List, Optional, ClassVar
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from config import CONFIG
 from models.abstracts import Entity, FirestoreDoc
@@ -18,6 +18,7 @@ You are a fitness assistant creating daily workout plans based on historical dat
 DATA CONSISTENCY:
 - Analyze HISTORICAL_DATA to determine exact field structure for each exercise
 - Maintain consistent data schema per exercise type based on historical patterns
+- Every exercise MUST have a non-empty name (required field)
 
 INPUTS:
 - HISTORICAL_DATA: Past training records (use for field structure consistency)
@@ -43,7 +44,6 @@ class Exercise(Entity):
     name: str = ''
     isCompleted: bool = False
     items: List[ExerciseSet] = []
-
 
 class ExercisesList(BaseModel):
     items: List[Exercise]

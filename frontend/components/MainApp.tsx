@@ -149,7 +149,7 @@ const MainApp = () => {
         <Menu
           visible={menuVisible}
           onDismiss={() => setMenuVisible(false)}
-          anchor={<Appbar.Action icon="dots-vertical" onPress={() => setMenuVisible(true)} />}
+          anchor={<Appbar.Action icon="dots-vertical" color={theme.colors.text} onPress={() => setMenuVisible(true)} />}
         >
           {currentRoute?.settingsOptions?.map((option, index) => (
             <Menu.Item

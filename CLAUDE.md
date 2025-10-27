@@ -225,6 +225,7 @@ The `Agent` class (backend/clients/vertex.py) wraps Google Gemini:
 
 - Don't add unnecessary complexity or over-engineer solutions. Keep the architecture simple and maintainable.
 - Don't add comments.
+- Don't automatically run the frontend app after making changes.
 
 ### ✅ Do This
 

@@ -28,7 +28,8 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
   const [inlineEditValue, setInlineEditValue] = useState("");
 
   const cardBackgroundColor = item.isCompleted ? theme.colors.cardCompleted : theme.colors.secondary;
-  const hasSubCards = (item.items && item.items.length > 0) || item.createNewSubCard() !== null;
+  const hasSubCards = item.items && item.items.length > 0;
+  const canAddSubCards = item.createNewSubCard() !== null;
   const description = (item as any).description || (item as any).instructions;
   const titleOpacity = item.isCompleted ? 0.5 : 1;
   const descriptionOpacity = item.isCompleted ? 0.4 : 0.7;
@@ -126,7 +127,7 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
           </View>
           {!isInlineEditing && (
             <View style={styles.rightContainer}>
-              {hasSubCards && item.createNewSubCard() !== null && (
+              {canAddSubCards && (
                 <Pressable testID="add-subcard-button" onPress={handleAddSubCard} style={styles.actionIcon} hitSlop={8}>
                   <MaterialCommunityIcons name="plus" size={20} color={theme.colors.textSecondary} />
                 </Pressable>
