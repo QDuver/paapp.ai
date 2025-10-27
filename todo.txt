@@ -1,8 +1,6 @@
 MVP
-- Long tap is breaking
-- Change all logos / titles / names
-- Deploy to Android
-- Have default exercises
+- dag for uniques
+- dag for erasing non completed
 
 POST MVP
 - Remove skipAuth logic and have login by email for testing
