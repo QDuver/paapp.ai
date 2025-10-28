@@ -25,11 +25,14 @@ class FirestoreDoc(BaseModel):
     def save(self):
         CONFIG.USER_FS.collection(self.collection).document(self.id).set(self.model_dump(exclude_none=True))
 
+    def default(self):
+        self.save()
+        return self
+
     def query(self):
         data = CONFIG.USER_FS.collection(self.collection).document(self.id).get().to_dict()
         if data is None:
-            self.save()
-            return self
+            return self.default()
 
         uniques_doc = CONFIG.USER_FS.collection(self.collection).document('uniques').get().to_dict()
         if uniques_doc:

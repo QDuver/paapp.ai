@@ -69,7 +69,7 @@ def build_with_ai(collection: str, id: str, request: dict, user: User = Depends(
 def delete_incomplete():
     for db_name in get_all_database_names():
         CONFIG.USER_FS = firestore.Client(project=PROJECT, database=db_name)
-        for collection in ['exercises', 'meals', 'routines']:
+        for collection in ['exercises', 'meals']:
             docs = CONFIG.USER_FS.collection(collection).stream()
             for doc in docs:
                 if doc.id == CONFIG.today:

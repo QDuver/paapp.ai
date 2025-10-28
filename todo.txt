@@ -1,6 +1,8 @@
 MVP
 BACKEND
 - grocery shopping
+- meals : plan for x days ahead
+- meals : feed into errands
 
 FRONTEND
 - routines : day vs. template
@@ -8,6 +10,8 @@ FRONTEND
 - Meals - calories shouldn't be 0 by default
 - 1st login experience
 - quantity metrics for food
+- loads of different loading messages while AI Building
+- settings back to FAB, return of avatar
 
 
 POST MVP
@@ -18,3 +22,6 @@ POST MVP
 - Delete card by Swipability
 - FavIcon to look professional
 - Calorie tracker
+- Picture to count calories
+- Self contained model
+- Android

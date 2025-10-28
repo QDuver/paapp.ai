@@ -28,3 +28,24 @@ class Routines(FirestoreDoc):
     Routine(name='Running', durationMin=45),
     Routine(name='Meal', routineType='meals'),
 ]
+
+    def default(self):
+        try:
+            current_date = datetime.datetime.strptime(self.id, "%Y-%m-%d")
+            previous_date = (current_date - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+            previous_data = CONFIG.USER_FS.collection(self.collection).document(previous_date).get().to_dict()
+
+            if previous_data:
+                previous_data['id'] = self.id
+                if 'items' in previous_data:
+                    for item in previous_data['items']:
+                        item['isCompleted'] = False
+
+                instance = self.__class__(**previous_data)
+                instance.save()
+                return instance
+        except (ValueError, Exception):
+            pass
+
+        self.save()
+        return self
