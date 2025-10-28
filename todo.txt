@@ -10,6 +10,7 @@ FRONTEND
 - quantity metrics for food
 - handle ux when adding new cards bottom screen
 - upon completion, slide card to top
+- reordering - collapse before
 
 
 POST MVP
