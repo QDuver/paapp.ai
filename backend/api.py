@@ -25,13 +25,6 @@ COLLECTION_CLASS_MAPPING = {
 }
 
 
-def get_model_class(collection: str):
-    if collection not in COLLECTION_CLASS_MAPPING:
-        raise HTTPException(
-            status_code=400, detail=f"Collection '{collection}' not found in mapping. Available collections: {list(COLLECTION_CLASS_MAPPING.keys())}")
-    return COLLECTION_CLASS_MAPPING[collection]
-
-
 app = FastAPI()
 origins = ["*"]
 app.add_middleware(
@@ -49,8 +42,7 @@ def warmup_user_connection(user: User = Depends(User.from_firebase_token)):
 
 @app.post("/build-with-ai/{collection}/{id}")
 def build_with_ai(collection: str, id: str, request: dict, user: User = Depends(User.from_firebase_token)):
-    model_class = get_model_class(collection)
-    instance = model_class(id=id)
+    instance = COLLECTION_CLASS_MAPPING[collection](id=id)
     instance = instance.build_with_ai(**request)
     return instance.model_dump()
 
@@ -84,7 +76,7 @@ def schedule_day():
     for db_name in get_all_database_names():
         CONFIG.USER_FS = firestore.Client(project=PROJECT, database=db_name)
         for collection in ['exercises', 'meals']:
-            instance = get_model_class(collection)()
+            instance =  COLLECTION_CLASS_MAPPING[collection]()
             instance.build_with_ai()
 
     return {}
@@ -95,7 +87,7 @@ def uniques():
     for db_name in get_all_database_names():
         CONFIG.USER_FS = firestore.Client(project=PROJECT, database=db_name)
         for collection in ['meals', 'routines', 'exercises']:
-            unique_items = get_model_class(collection)().get_unique()
+            unique_items = COLLECTION_CLASS_MAPPING[collection]().get_unique()
             CONFIG.USER_FS.collection(collection).document('uniques').set({'uniques': unique_items})
 
     return {}
@@ -110,12 +102,11 @@ def uniques():
 
 @app.get("/{collection}/{document}")
 def get_document(collection: str, document: str, user: User = Depends(User.from_firebase_token)):
-    return get_model_class(collection)(id=document).query()
+    return COLLECTION_CLASS_MAPPING[collection](id=document).query()
 
 @app.post("/{collection}/{document}")
 def overwrite_with_format(collection: str, document: str, request: dict, user: User = Depends(User.from_firebase_token)):
-    model_class = get_model_class(collection)
-    validated_data = model_class(**request)
+    validated_data = COLLECTION_CLASS_MAPPING[collection](**request)
     data = validated_data.model_dump()
     CONFIG.USER_FS.collection(collection).document(document).set(data)
 
