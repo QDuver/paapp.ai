@@ -93,6 +93,20 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
 
   const handleSaveInlineEdit = () => {
     if (!singleField) return;
+
+    const trimmedValue = inlineEditValue.trim();
+    const isNewItem = !!(item as any).__tempId;
+
+    if (!trimmedValue && isNewItem) {
+      const parent = firestoreDoc;
+      if (parent.items) {
+        parent.items = parent.items.filter((i: CardAbstract) => (i as any).__tempId !== (item as any).__tempId);
+      }
+      setIsInlineEditing(false);
+      setRefreshCounter(prev => prev + 1);
+      return;
+    }
+
     const formData = { [singleField.field]: inlineEditValue };
     item.onSave(firestoreDoc, formData, firestoreDoc, false, setRefreshCounter);
     setIsInlineEditing(false);

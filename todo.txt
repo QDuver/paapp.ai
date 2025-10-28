@@ -8,7 +8,6 @@ FRONTEND
 - logo alignment
 - 1st login experience
 - quantity metrics for food
-- Don't add a card if name was never set
 - Fill in all fab-settings buttons
 
 
