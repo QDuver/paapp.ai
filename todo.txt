@@ -8,6 +8,7 @@ FRONTEND
 - bug : autocomplete not fully showing
 - bug on reordering
 - splashscreen cut off on android
+- logo alignment
 
 POST MVP
 - feedback form

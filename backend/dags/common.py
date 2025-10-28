@@ -1,0 +1,46 @@
+import sys
+import os
+sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
+from datetime import datetime, timedelta
+from functools import partial
+from airflow import DAG
+from airflow.operators.python import PythonOperator
+import requests
+from config import CONFIG
+
+DEFAULT_ARGS = {
+    'owner': 'airflow',
+    'depends_on_past': False,
+    'email_on_failure': True,
+    'email_on_retry': False,
+    'retries': 2,
+    'retry_delay': timedelta(minutes=5),
+}
+
+def call_api(endpoint):
+    response = requests.get(
+        f"{CONFIG.CLOUD_RUN_URL}{endpoint}",
+        timeout=300
+    )
+    response.raise_for_status()
+    return response.json()
+
+def create_dag(dag_id, description, schedule_interval, task_id, endpoint, tags=None):
+    with DAG(
+        dag_id,
+        default_args=DEFAULT_ARGS,
+        description=description,
+        schedule_interval=schedule_interval,
+        start_date=datetime(2025, 1, 1),
+        catchup=False,
+        tags=tags or ['life-automation'],
+    ) as dag:
+
+        PythonOperator(
+            task_id=task_id,
+            python_callable=partial(call_api, endpoint),
+        )
+
+    return dag  

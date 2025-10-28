@@ -151,6 +151,7 @@ export abstract class CardAbstract extends DialogableAbstract {
 
 export abstract class FirestoreDocAbstract extends DialogableAbstract {
   items: any[] = [];
+  uniques: IUnique[] = [];
   abstract collection: string;
   id: string = getCurrentDate();
   ChildModel: any;
@@ -160,6 +161,7 @@ export abstract class FirestoreDocAbstract extends DialogableAbstract {
     if (!ChildModel || !data) return;
     this.ChildModel = ChildModel;
     this.items = data.items?.map(item => new ChildModel(item)) || [];
+    this.uniques = data.uniques || [];
   }
 
   static getUIMetadata(): IUIMetadata {

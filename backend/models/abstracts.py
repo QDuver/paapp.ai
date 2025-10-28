@@ -15,6 +15,7 @@ class FirestoreDoc(BaseModel):
     id: str = today
     collection: str = ''
     items: Optional[List[Entity]] = None
+    uniques: Optional[List[Dict]] = None
     system_prompt: ClassVar[str] = ''
     response_model: ClassVar[Type[BaseModel]] = None
     ai_model: ClassVar[str] = 'gemini-2.0-flash-lite-001'
@@ -30,6 +31,11 @@ class FirestoreDoc(BaseModel):
         if data is None:
             self.save()
             return self
+
+        uniques_doc = CONFIG.USER_FS.collection(self.collection).document('uniques').get().to_dict()
+        if uniques_doc:
+            data['uniques'] = uniques_doc.get('uniques', [])
+
         return self.__class__(**data)
 
     def delete(self):
@@ -48,6 +54,20 @@ class FirestoreDoc(BaseModel):
 
         return historics
 
+    def build_with_ai(self, notes: Optional[str] = None) -> 'FirestoreDoc':
+        agent = Agent()
+        prompt = agent.prompt({
+            'HISTORICAL_DATA': self.historics(self.collection, self.id),
+            'USER_NOTES': notes
+        })
+        combined_prompt = self.system_prompt.format(USER_PROMPT=self.get_prompt())
+        output = agent.call(si=combined_prompt, prompt=prompt, model=self.ai_model, schema=self.response_model)
+        result = json_to_model(output, model=self.response_model)
+        instance = self.__class__( id=self.id, notes=notes, items=result.items )
+        instance.save()
+        return instance
+
+
     def get_unique(self) -> List[Dict]:
         unique_items = {}
 
@@ -65,45 +85,3 @@ class FirestoreDoc(BaseModel):
 
         return sorted([{'name': item['name'], 'items': item['items']}
                        for item in unique_items.values()], key=lambda x: x['name'])
-
-    def build_with_ai(self, notes: Optional[str] = None) -> 'FirestoreDoc':
-        agent = Agent()
-        prompt = agent.prompt({
-            'HISTORICAL_DATA': self.historics(self.collection, self.id),
-            'USER_NOTES': notes
-        })
-        combined_prompt = self.system_prompt.format(USER_PROMPT=self.get_prompt())
-        output = agent.call(si=combined_prompt, prompt=prompt, model=self.ai_model, schema=self.response_model)
-        result = json_to_model(output, model=self.response_model)
-        instance = self.__class__( id=self.id, notes=notes, items=result.items )
-        instance.save()
-        return instance
-
-    @classmethod
-    def sync_all_uniques(cls) -> Dict:
-        subclasses = [subcls for subcls in cls.__subclasses__() if subcls().collection and subcls().collection != 'settings']
-
-        settings_doc = CONFIG.USER_FS.collection('settings').document('settings').get()
-        settings_data = settings_doc.to_dict() if settings_doc.exists else {}
-
-        result = {}
-        for subcls in subclasses:
-            collection = subcls().collection
-            try:
-                instance = subcls()
-                unique_items = instance.get_unique()
-
-                if collection not in settings_data:
-                    settings_data[collection] = {}
-
-                settings_data[collection]['uniques'] = unique_items
-                result[collection] = len(unique_items)
-
-            except Exception as e:
-                result[collection] = f"error: {str(e)}"
-                
-        print('settings_data:', settings_data)
-
-        CONFIG.USER_FS.collection('settings').document('settings').set(settings_data, merge=True)
-        return result
-    

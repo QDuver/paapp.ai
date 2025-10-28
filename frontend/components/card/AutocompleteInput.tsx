@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { StyleSheet, Text, TouchableOpacity, View, FlatList } from "react-native";
-import { TextInput as PaperTextInput } from "react-native-paper";
+import { TextInput as PaperTextInput, Portal } from "react-native-paper";
 import { theme } from "../../styles/theme";
 
 interface AutocompleteInputProps {
@@ -50,6 +50,8 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
 }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<any[]>([]);
+  const [dropdownLayout, setDropdownLayout] = useState<{ top: number; left: number; width: number } | null>(null);
+  const containerRef = useRef<View>(null);
 
   // Determine suggestions based on field name and context
   const suggestions = useMemo(() => {
@@ -65,6 +67,18 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
     return [];
   }, [externalSuggestions, fieldName, collection, fallbackSuggestions]);
 
+  const measureLayout = () => {
+    if (containerRef.current) {
+      containerRef.current.measure((x, y, width, height, pageX, pageY) => {
+        setDropdownLayout({
+          top: pageY + height,
+          left: pageX,
+          width: width,
+        });
+      });
+    }
+  };
+
   const handleTextChange = (text: string) => {
     onChangeText(text);
 
@@ -74,7 +88,11 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
       });
 
       setFilteredSuggestions(filtered);
-      setShowSuggestions(filtered.length > 0 && filtered[0].name.toLowerCase() !== text.toLowerCase());
+      const shouldShow = filtered.length > 0 && filtered[0].name.toLowerCase() !== text.toLowerCase();
+      setShowSuggestions(shouldShow);
+      if (shouldShow) {
+        measureLayout();
+      }
     } else {
       setShowSuggestions(false);
     }
@@ -92,71 +110,84 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   };
 
   return (
-    <View style={styles.container}>
-      <PaperTextInput
-        testID="autocomplete-input"
-        mode="outlined"
-        style={[style, { backgroundColor, color }]}
-        value={value}
-        onChangeText={handleTextChange}
-        placeholder={placeholder}
-        placeholderTextColor={placeholderTextColor}
-        keyboardType={keyboardType}
-        inputMode={inputMode}
-        autoComplete={autoComplete}
-        multiline={multiline}
-        numberOfLines={numberOfLines}
-        textAlignVertical={textAlignVertical}
-        onFocus={() => {
-          if (value.length > 0 && filteredSuggestions.length > 0) {
-            setShowSuggestions(true);
-          }
-        }}
-        outlineColor={resolvedBorderColor}
-        activeOutlineColor={resolvedBorderColor}
-        dense
-      />
+    <>
+      <View ref={containerRef} style={styles.container}>
+        <PaperTextInput
+          testID="autocomplete-input"
+          mode="outlined"
+          style={[style, { backgroundColor, color }]}
+          value={value}
+          onChangeText={handleTextChange}
+          placeholder={placeholder}
+          placeholderTextColor={placeholderTextColor}
+          keyboardType={keyboardType}
+          inputMode={inputMode}
+          autoComplete={autoComplete}
+          multiline={multiline}
+          numberOfLines={numberOfLines}
+          textAlignVertical={textAlignVertical}
+          onFocus={() => {
+            if (value.length > 0 && filteredSuggestions.length > 0) {
+              setShowSuggestions(true);
+              measureLayout();
+            }
+          }}
+          outlineColor={resolvedBorderColor}
+          activeOutlineColor={resolvedBorderColor}
+          dense
+        />
+      </View>
 
-      {(() => {
-        return null;
-      })()}
-
-      {showSuggestions && (
-        <View style={[styles.suggestionsContainer, { backgroundColor }]}>
-          <FlatList
-            data={filteredSuggestions.slice(0, 5)}
-            keyExtractor={(item, index) => `${item}-${index}`}
-            renderItem={({ item }) => (
-              <TouchableOpacity style={[styles.suggestionItem, { borderBottomColor: borderColor }]} onPress={() => selectSuggestion(item)}>
-                <Text style={[styles.suggestionText, { color }]}>{item.name}</Text>
-              </TouchableOpacity>
-            )}
-            showsVerticalScrollIndicator={false}
-            nestedScrollEnabled
-          />
-        </View>
+      {showSuggestions && dropdownLayout && (
+        <Portal>
+          <View
+            style={[
+              styles.suggestionsContainer,
+              {
+                backgroundColor,
+                borderColor: borderColor,
+                position: "absolute",
+                top: dropdownLayout.top,
+                left: dropdownLayout.left,
+                width: dropdownLayout.width,
+              },
+            ]}
+          >
+            <FlatList
+              data={filteredSuggestions.slice(0, 5)}
+              keyExtractor={(item, index) => `${item}-${index}`}
+              renderItem={({ item }) => (
+                <TouchableOpacity style={[styles.suggestionItem, { borderBottomColor: borderColor }]} onPress={() => selectSuggestion(item)}>
+                  <Text style={[styles.suggestionText, { color }]}>{item.name}</Text>
+                </TouchableOpacity>
+              )}
+              showsVerticalScrollIndicator={false}
+              nestedScrollEnabled
+            />
+          </View>
+        </Portal>
       )}
-    </View>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     position: "relative",
-    zIndex: 1,
   },
   suggestionsContainer: {
-    position: "absolute",
-    top: "100%",
-    left: 0,
-    right: 0,
     maxHeight: 150,
     borderWidth: 1,
     borderTopWidth: 0,
     borderRadius: theme.borderRadius.sm,
     borderTopLeftRadius: 0,
     borderTopRightRadius: 0,
-    zIndex: 999,
+    zIndex: 99999,
+    elevation: 100,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
   },
   suggestionItem: {
     paddingHorizontal: theme.spacing.md,

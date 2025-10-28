@@ -93,7 +93,7 @@ const EditItemDialog = ({ visible, item, parent, firestoreDoc, isNew, onClose }:
             </Text>
           </View>
 
-          <ScrollView style={sharedDialogStyles.formContainer} showsVerticalScrollIndicator={false}>
+          <ScrollView style={sharedDialogStyles.formContainer} showsVerticalScrollIndicator={false} nestedScrollEnabled>
             {filteredFields.map(fieldMetadata =>
               renderField({
                 fieldMetadata,

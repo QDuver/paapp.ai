@@ -148,6 +148,8 @@ export const renderField = ({ fieldMetadata, formData, errors, collection, data,
   }
 
   const shouldUseAutocomplete = (hasSuggestions && !isMultiline) || (fieldName === "name" && collection === "exercises" && !isMultiline);
+  console.log('collection:', data, 'shouldUseAutocomplete:', shouldUseAutocomplete);
+  const fallbackSuggestions = collection ? data?.[collection]?.uniques : undefined;
 
   return (
     <View key={fieldName} testID="form-field" style={sharedDialogStyles.fieldContainer}>
@@ -158,7 +160,7 @@ export const renderField = ({ fieldMetadata, formData, errors, collection, data,
           placeholder={fieldLabel}
           placeholderTextColor={theme.colors.textMuted}
           suggestions={suggestions}
-          fallbackSuggestions={data?.uniqueExercises}
+          fallbackSuggestions={fallbackSuggestions}
           collection={collection}
           style={[sharedDialogStyles.textInput]}
           keyboardType={keyboardType || "default"}

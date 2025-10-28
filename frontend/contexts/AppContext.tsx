@@ -1,16 +1,14 @@
 import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import { FirestoreDocAbstract, IUnique } from "../models/Abstracts";
+import { FirestoreDocAbstract } from "../models/Abstracts";
 import { Exercises } from "../models/Exercises";
 import { Meals } from "../models/Meals";
 import { Routines } from "../models/Routines";
 import { Settings } from "../models/Settings";
-import { apiClient } from "../utils/apiClient";
 
 interface DataType {
   routines: Routines;
   exercises: Exercises;
   meals: Meals;
-  uniqueExercises: IUnique[];
   settings: Settings;
 }
 
@@ -46,9 +44,6 @@ export const AppProvider = ({ children }: AppProviderProps) => {
         Exercises.fromApi(setData),
         Meals.fromApi(setData),
       ]);
-
-      const uniqueExercises = await apiClient.get<IUnique[]>(`unique/exercises`);
-      setData(prevData => ({ ...prevData, uniqueExercises }));
 
       setIsLoading(false);
     };
