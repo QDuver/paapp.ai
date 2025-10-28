@@ -17,9 +17,10 @@ interface CardListWebProps {
   ) => void;
   refreshing: boolean;
   sectionColor: string;
+  autoFocusItemId?: string | null;
 }
 
-const CardListWeb = ({ firestoreDoc, showEditDialog, refreshing, sectionColor }: CardListWebProps) => {
+const CardListWeb = ({ firestoreDoc, showEditDialog, refreshing, sectionColor, autoFocusItemId }: CardListWebProps) => {
   const { refreshCounter, setRefreshCounter } = useAppContext();
   const [localItems, setLocalItems] = React.useState<CardAbstract[]>(firestoreDoc.items);
 
@@ -71,6 +72,7 @@ const CardListWeb = ({ firestoreDoc, showEditDialog, refreshing, sectionColor }:
                 index={index}
                 firestoreDoc={firestoreDoc}
                 showEditDialog={showEditDialog}
+                autoFocusItemId={autoFocusItemId}
               />
             ))}
           </View>

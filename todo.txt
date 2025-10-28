@@ -16,3 +16,4 @@ POST MVP
 - feedback form
 - Calendar Icon + Swipability
 - Hypertrophy vs. Strength (for me only)
+- Delete card by Swipability

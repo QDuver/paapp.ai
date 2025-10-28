@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, View, Pressable, Text, Platform, TouchableOpacity } from "react-native";
 import { Card, List } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -21,12 +21,26 @@ interface CustomCardProps {
   isActive?: boolean;
   dragListeners?: any;
   isDragging?: boolean;
+  autoFocusItemId?: string | null;
 }
 
-const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive, dragListeners, isDragging }: CustomCardProps) => {
+const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive, dragListeners, isDragging, autoFocusItemId }: CustomCardProps) => {
   const { refreshCounter, setRefreshCounter, data } = useAppContext();
   const [isInlineEditing, setIsInlineEditing] = useState(false);
   const [inlineEditValue, setInlineEditValue] = useState("");
+
+  useEffect(() => {
+    if (autoFocusItemId && (item as any).__tempId === autoFocusItemId) {
+      const editableFields = item.getEditableFields();
+      const canInlineEdit = editableFields.length === 1;
+      if (canInlineEdit) {
+        const singleField = editableFields[0];
+        const currentValue = (item as any)[singleField.field] || "";
+        setInlineEditValue(currentValue);
+        setIsInlineEditing(true);
+      }
+    }
+  }, [autoFocusItemId]);
 
   const cardBackgroundColor = item.isCompleted ? theme.colors.cardCompleted : theme.colors.secondary;
   const hasSubCards = item.items && item.items.length > 0;
@@ -116,6 +130,7 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
           </Pressable>
           <Pressable
             onPress={canInlineEdit ? handleStartInlineEdit : () => showEditDialog(item, firestoreDoc, firestoreDoc, false)}
+            onLongPress={() => showEditDialog(item, firestoreDoc, firestoreDoc, false)}
             style={styles.headerText}
           >
             {isInlineEditing ? (

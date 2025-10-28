@@ -22,6 +22,7 @@ const MainApp = () => {
 
   const [navigationIndex, setNavigationIndex] = useState(1);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [autoFocusItemId, setAutoFocusItemId] = useState<string | null>(null);
 
   const [buildAiDialogVisible, setBuildAiDialogVisible] = useState(false);
   const [buildAiFirestoreDoc, setBuildAiFirestoreDoc] = useState<FirestoreDocAbstract | null>(null);
@@ -95,7 +96,18 @@ const MainApp = () => {
     const createCard = () => {
       if (!firestoreDoc) return;
       const newItem = firestoreDoc.createCard();
-      showEditDialog(newItem, firestoreDoc, firestoreDoc, true);
+      const editableFields = newItem.getEditableFields();
+      const canInlineEdit = editableFields.length === 1;
+
+      if (canInlineEdit) {
+        const itemId = `${Date.now()}`;
+        (newItem as any).__tempId = itemId;
+        newItem.onSave(firestoreDoc, {}, firestoreDoc, true, setRefreshCounter);
+        setAutoFocusItemId(itemId);
+        setTimeout(() => setAutoFocusItemId(null), 100);
+      } else {
+        showEditDialog(newItem, firestoreDoc, firestoreDoc, true);
+      }
     };
 
     return (
@@ -113,6 +125,7 @@ const MainApp = () => {
             showEditDialog={showEditDialog}
             refreshing={isLoading}
             sectionColor={sectionColor}
+            autoFocusItemId={autoFocusItemId}
           />
         ) : (
           <View style={[styles.content, styles.emptyContainer]}>

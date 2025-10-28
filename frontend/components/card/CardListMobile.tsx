@@ -17,9 +17,10 @@ interface CardListMobileProps {
   ) => void;
   refreshing: boolean;
   sectionColor: string;
+  autoFocusItemId?: string | null;
 }
 
-const CardListMobile = ({ firestoreDoc, showEditDialog, refreshing, sectionColor }: CardListMobileProps) => {
+const CardListMobile = ({ firestoreDoc, showEditDialog, refreshing, sectionColor, autoFocusItemId }: CardListMobileProps) => {
   const { refreshCounter, setRefreshCounter } = useAppContext();
   const [localItems, setLocalItems] = React.useState<CardAbstract[]>(firestoreDoc.items);
   const [isDragging, setIsDragging] = React.useState(false);
@@ -51,6 +52,7 @@ const CardListMobile = ({ firestoreDoc, showEditDialog, refreshing, sectionColor
       showEditDialog={showEditDialog}
       drag={drag}
       isActive={isActive}
+      autoFocusItemId={autoFocusItemId}
     />
   );
 

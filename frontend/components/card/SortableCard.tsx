@@ -16,9 +16,10 @@ interface SortableCardProps {
     firestoreDoc: FirestoreDocAbstract,
     isNew: boolean
   ) => void;
+  autoFocusItemId?: string | null;
 }
 
-const SortableCard = ({ id, item, index, firestoreDoc, showEditDialog }: SortableCardProps) => {
+const SortableCard = ({ id, item, index, firestoreDoc, showEditDialog, autoFocusItemId }: SortableCardProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
 
   const style = {
@@ -35,6 +36,7 @@ const SortableCard = ({ id, item, index, firestoreDoc, showEditDialog }: Sortabl
         showEditDialog={showEditDialog}
         dragListeners={listeners}
         isDragging={isDragging}
+        autoFocusItemId={autoFocusItemId}
       />
     </div>
   );

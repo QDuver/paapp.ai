@@ -14,9 +14,10 @@ interface CardListProps {
   ) => void;
   refreshing: boolean;
   sectionColor: string;
+  autoFocusItemId?: string | null;
 }
 
-const CardList = ({ firestoreDoc, showEditDialog, refreshing, sectionColor }: CardListProps) => {
+const CardList = ({ firestoreDoc, showEditDialog, refreshing, sectionColor, autoFocusItemId }: CardListProps) => {
   const { width } = useWindowDimensions();
   const isMobile = Platform.OS !== "web" || width < 768;
 
@@ -27,6 +28,7 @@ const CardList = ({ firestoreDoc, showEditDialog, refreshing, sectionColor }: Ca
         showEditDialog={showEditDialog}
         refreshing={refreshing}
         sectionColor={sectionColor}
+        autoFocusItemId={autoFocusItemId}
       />
     );
   }
@@ -37,6 +39,7 @@ const CardList = ({ firestoreDoc, showEditDialog, refreshing, sectionColor }: Ca
       showEditDialog={showEditDialog}
       refreshing={refreshing}
       sectionColor={sectionColor}
+      autoFocusItemId={autoFocusItemId}
     />
   );
 };
