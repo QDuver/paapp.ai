@@ -67,18 +67,19 @@ def build_with_ai(collection: str, id: str, request: dict, user: User = Depends(
 
 @app.get("/delete-incomplete")
 def delete_incomplete():
-    deleted_count = 0
     for db_name in get_all_database_names():
         CONFIG.USER_FS = firestore.Client(project=PROJECT, database=db_name)
         for collection in ['exercises', 'meals', 'routines']:
             docs = CONFIG.USER_FS.collection(collection).stream()
             for doc in docs:
+                if doc.id == CONFIG.today:
+                    continue
                 data = doc.to_dict()
-                if data.get('completed') == False:
-                    doc.reference.delete()
-                    deleted_count += 1
+                if 'items' in data and isinstance(data['items'], list):
+                    data['items'] = [item for item in data['items'] if item.get('isCompleted') != False]
+                    doc.reference.set(data)
 
-    return {"deleted": deleted_count}
+    return {}
 
 @app.get("/schedule")
 def schedule_day():

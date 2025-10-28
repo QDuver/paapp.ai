@@ -2,14 +2,12 @@
 
 import datetime
 from typing import List, Optional, Literal, ClassVar
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from config import CONFIG
 from models.exercises import Exercise, Exercises
 from models.meals import Meal, Meals
 from models.abstracts import Entity, FirestoreDoc
 
-
-today = datetime.datetime.now().strftime("%Y-%m-%d")
 
 class Routine(Entity):
     name: str
@@ -21,7 +19,7 @@ class Routine(Entity):
 
 class Routines(FirestoreDoc):
     collection: str = 'routines'
-    wakeupTime: Optional[str] = datetime.datetime.now().strftime("%H:%M")
+    wakeupTime: Optional[str] = Field(default_factory=lambda: datetime.datetime.now().strftime("%H:%M"))
     items: List[Routine] = [
     Routine(name="1/2L of water"),
     Routine(name='Journaling / Coding', durationMin=60),

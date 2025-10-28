@@ -4,7 +4,6 @@ from pydantic import BaseModel, Field
 from config import CONFIG
 from clients.vertex import Agent
 from utils import json_to_model
-today = datetime.datetime.now().strftime('%Y-%m-%d')
 T = TypeVar('T', bound=BaseModel)
 
 class Entity(BaseModel):
@@ -12,7 +11,7 @@ class Entity(BaseModel):
     items: List[Any] = Field(default_factory=list, description="List of nested Entity objects")
 
 class FirestoreDoc(BaseModel):
-    id: str = today
+    id: str = Field(default_factory=lambda: CONFIG.today)
     collection: str = ''
     items: Optional[List[Entity]] = None
     uniques: Optional[List[Dict]] = None

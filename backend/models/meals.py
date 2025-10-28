@@ -8,7 +8,6 @@ from config import CONFIG
 from models.abstracts import Entity, FirestoreDoc
 from utils import json_to_model
 
-today = datetime.datetime.now().strftime("%Y-%m-%d")
 system_prompt = """
 You are a nutrition assistant creating daily meal plans based on historical data.
 

@@ -4,6 +4,7 @@ Handles environment-specific settings and URL configurations.
 """
 import time
 import os
+import datetime
 from typing import Optional
 from google.cloud import firestore
 from google.api_core import exceptions
@@ -58,7 +59,7 @@ def get_environment_name():
 # Configuration constants
 class Config:
     """Configuration class with environment-specific settings."""
-    
+
     BASE_URL = get_base_url()
     ENVIRONMENT = get_environment_name()
     IS_LOCAL = is_local_environment()
@@ -67,6 +68,10 @@ class Config:
     USER_FS = None
     user = None
     cache = {}
+
+    @property
+    def today(self):
+        return datetime.datetime.now().strftime('%Y-%m-%d')
     
     
     def set_user(self, user):
