@@ -4,6 +4,7 @@ import { Text, TextInput, Switch } from "react-native-paper";
 import { theme, commonStyles } from "../../styles/theme";
 import { IFieldMetadata } from "../../models/Abstracts";
 import AutocompleteInput from "../card/AutocompleteInput";
+import { DataType } from "../../contexts/AppContext";
 
 export interface SharedDialogStyles {
   modalContainer: any;
@@ -114,7 +115,7 @@ interface RenderFieldProps {
   formData: { [key: string]: any };
   errors: { [key: string]: string | null };
   collection?: string;
-  data?: any;
+  data?: DataType;
   onInputChange: (fieldName: string, value: string | boolean) => void;
   onSuggestionSelect?: (suggestion: any) => void;
 }
@@ -122,6 +123,7 @@ interface RenderFieldProps {
 export const renderField = ({ fieldMetadata, formData, errors, collection, data, onInputChange, onSuggestionSelect }: RenderFieldProps) => {
   const { field: fieldName, label: fieldLabel, type: fieldType, keyboardType, multiline, suggestions } = fieldMetadata;
   const sectionColor = getSectionColor(collection);
+  console.log('data:', data);
 
   const value = formData[fieldName];
   const displayValue = value === null || value === undefined ? "" : value.toString();
@@ -147,9 +149,8 @@ export const renderField = ({ fieldMetadata, formData, errors, collection, data,
     );
   }
 
-  const shouldUseAutocomplete = (hasSuggestions && !isMultiline) || (fieldName === "name" && collection === "exercises" && !isMultiline);
+  const shouldUseAutocomplete = (hasSuggestions && !isMultiline) || (fieldName === "name" && !isMultiline);
   console.log('collection:', data, 'shouldUseAutocomplete:', shouldUseAutocomplete);
-  const fallbackSuggestions = collection ? data?.[collection]?.uniques : undefined;
 
   return (
     <View key={fieldName} testID="form-field" style={sharedDialogStyles.fieldContainer}>
@@ -160,8 +161,8 @@ export const renderField = ({ fieldMetadata, formData, errors, collection, data,
           placeholder={fieldLabel}
           placeholderTextColor={theme.colors.textMuted}
           suggestions={suggestions}
-          fallbackSuggestions={fallbackSuggestions}
           collection={collection}
+          data={data}
           style={[sharedDialogStyles.textInput]}
           keyboardType={keyboardType || "default"}
           inputMode={fieldType === "number" ? "numeric" : "text"}

@@ -5,7 +5,7 @@ import { Meals } from "../models/Meals";
 import { Routines } from "../models/Routines";
 import { Settings } from "../models/Settings";
 
-interface DataType {
+export interface DataType {
   routines: Routines;
   exercises: Exercises;
   meals: Meals;

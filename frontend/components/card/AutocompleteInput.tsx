@@ -22,8 +22,8 @@ interface AutocompleteInputProps {
   backgroundColor?: string;
   color?: string;
   onSuggestionSelect?: (suggestion: any) => void;
-  fallbackSuggestions?: any[];
   collection?: string;
+  data?: any;
 }
 
 const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
@@ -45,27 +45,25 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   backgroundColor,
   color,
   onSuggestionSelect,
-  fallbackSuggestions,
   collection,
+  data,
 }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<any[]>([]);
   const [dropdownLayout, setDropdownLayout] = useState<{ top: number; left: number; width: number } | null>(null);
   const containerRef = useRef<View>(null);
 
-  // Determine suggestions based on field name and context
   const suggestions = useMemo(() => {
-    // Use external suggestions if provided, otherwise fall back to internal logic
     if (externalSuggestions && externalSuggestions.length > 0) {
       return externalSuggestions;
     }
 
-    if (fieldName === "name" && collection === "exercises") {
-      return fallbackSuggestions || [];
+    if (fieldName === "name" && collection && data?.[collection]?.uniques) {
+      return data[collection].uniques;
     }
 
     return [];
-  }, [externalSuggestions, fieldName, collection, fallbackSuggestions]);
+  }, [externalSuggestions, fieldName, collection, data]);
 
   const measureLayout = () => {
     if (containerRef.current) {
