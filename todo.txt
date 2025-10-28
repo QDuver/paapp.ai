@@ -8,6 +8,8 @@ FRONTEND
 - Meals - calories shouldn't be 0 by default
 - 1st login experience
 - quantity metrics for food
+- handle ux when adding new cards bottom screen
+- upon completion, slide card to top
 
 
 POST MVP
