@@ -33,8 +33,9 @@ const BuildWithAiDialog = ({ visible, firestoreDoc, setIsLoading, setData, onClo
 
   const handleGenerate = async () => {
     if (!firestoreDoc) return;
-    await firestoreDoc.buildWithAi(formData, setIsLoading, setData);
+    setIsLoading(true);
     onClose();
+    await firestoreDoc.buildWithAi(formData, setIsLoading, setData);
   };
 
   if (!visible || !firestoreDoc) {

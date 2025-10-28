@@ -164,7 +164,7 @@ export class Exercises extends FirestoreDocAbstract {
     return [
       {
         field: "notes",
-        label: "Notes (Optional)",
+        label: "I want a lighter workout program today, I only have access to home equipment, etc...",
         type: "string",
         keyboardType: "default",
         converter: fieldConverter.string,

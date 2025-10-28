@@ -239,9 +239,9 @@ const styles = StyleSheet.create({
     gap: theme.spacing.xs,
   },
   logo: {
-    width: 28,
+    width: 42,
     height: 28,
-    marginTop: 6,
+    marginTop: 5,
   },
   appBarTitle: {
     color: theme.colors.text,

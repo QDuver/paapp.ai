@@ -10,6 +10,7 @@ echo.
 echo Uploading DAGs to Composer...
 call gcloud composer environments storage dags import --environment aiapps --location europe-west2 --source dags/scheduler.py
 call gcloud composer environments storage dags import --environment aiapps --location europe-west2 --source dags/uniques.py
+call gcloud composer environments storage dags import --environment aiapps --location europe-west2 --source dags/delete_incomplete.py
 
 echo.
 echo Deployment complete!

@@ -3,8 +3,8 @@ import { CardAbstract, FirestoreDocAbstract, IFieldMetadata, SubCardAbstract } f
 
 export class Ingredient extends SubCardAbstract {
   private _name: string = "";
-  quantity: number = 0.0;
-  calories: number = 0;
+  quantity: number;
+  calories: number;
 
   constructor(data: any = {}) {
     super(data);
@@ -43,7 +43,7 @@ export class Ingredient extends SubCardAbstract {
         type: "number",
         keyboardType: "number-pad",
         converter: fieldConverter.number,
-        placeholder: "0",
+        placeholder: "500 kcal",
       },
     ];
   }
@@ -89,7 +89,7 @@ export class Meal extends CardAbstract {
         type: "number",
         keyboardType: "number-pad",
         converter: fieldConverter.number,
-        placeholder: "0",
+        placeholder: "1200 kcal",
       },
     ];
   }
@@ -148,7 +148,7 @@ export class Meals extends FirestoreDocAbstract {
     return [
       {
         field: "notes",
-        label: "Notes (Optional)",
+        label: "I have carrots left in the fridge, I want something quick to cook, etc...",
         type: "string",
         keyboardType: "default",
         converter: fieldConverter.string,
