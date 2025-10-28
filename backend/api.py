@@ -55,6 +55,31 @@ def warmup_user_connection(user: User = Depends(User.from_firebase_token)):
     CONFIG.USER_FS.collection('_warmup').document('_warmup').get()
     return {}
 
+@app.post("/build-with-ai/{collection}/{id}")
+def build_with_ai(collection: str, id: str, request: dict, user: User = Depends(User.from_firebase_token)):
+    model_class = get_model_class(collection)
+    instance = model_class(id=id)
+    instance = instance.build_with_ai(**request)
+    return instance.model_dump()
+
+
+# DAGS ----------------
+
+@app.get("/delete-incomplete")
+def delete_incomplete():
+    deleted_count = 0
+    for db_name in get_all_database_names():
+        CONFIG.USER_FS = firestore.Client(project=PROJECT, database=db_name)
+        for collection in ['exercises', 'meals', 'routines']:
+            docs = CONFIG.USER_FS.collection(collection).stream()
+            for doc in docs:
+                data = doc.to_dict()
+                if data.get('completed') == False:
+                    doc.reference.delete()
+                    deleted_count += 1
+
+    return {"deleted": deleted_count}
+
 @app.get("/schedule")
 def schedule_day():
     for db_name in get_all_database_names():
@@ -76,13 +101,10 @@ def uniques():
 
     return {}
 
+# ----------------------------
 
-@app.post("/build-with-ai/{collection}/{id}")
-def build_with_ai(collection: str, id: str, request: dict, user: User = Depends(User.from_firebase_token)):
-    model_class = get_model_class(collection)
-    instance = model_class(id=id)
-    instance = instance.build_with_ai(**request)
-    return instance.model_dump()
+
+
 
 
 # ALWAYS KEEP LAST ---------------

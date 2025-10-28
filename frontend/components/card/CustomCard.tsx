@@ -41,7 +41,7 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
 
   // Check if item has only one editable field for inline editing
   const editableFields = item.getEditableFields();
-  const canInlineEdit = editableFields.length === 1 && !hasSubCards;
+  const canInlineEdit = editableFields.length === 1;
   const singleField = editableFields[0];
 
   const handleCheckbox = (e?: any) => {
@@ -101,7 +101,6 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
       testID="exercise-card"
     >
       <Pressable
-        onPress={hasSubCards ? handleToggleExpand : canInlineEdit ? handleStartInlineEdit : () => showEditDialog(item, firestoreDoc, firestoreDoc, false)}
         onLongPress={() => showEditDialog(item, firestoreDoc, firestoreDoc, false)}
         style={[styles.accordionItem, { backgroundColor: cardBackgroundColor }]}
       >
@@ -115,7 +114,10 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
               <View style={[styles.emptyCircle, { borderColor: sectionAccentColor }]} />
             )}
           </Pressable>
-          <View style={styles.headerText}>
+          <Pressable
+            onPress={canInlineEdit ? handleStartInlineEdit : () => showEditDialog(item, firestoreDoc, firestoreDoc, false)}
+            style={styles.headerText}
+          >
             {isInlineEditing ? (
               <View onStartShouldSetResponder={() => true}>
                 <AutocompleteInput
@@ -140,7 +142,7 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
                 {description ? <Text style={[styles.accordionDescription, { opacity: descriptionOpacity }]}>{description}</Text> : null}
               </>
             )}
-          </View>
+          </Pressable>
           {!isInlineEditing && (
             <View style={styles.rightContainer}>
               {canAddSubCards && (
