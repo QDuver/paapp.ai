@@ -11,6 +11,7 @@ FRONTEND
 
 
 POST MVP
+- ordering still not stable on Android
 - feedback form
 - Calendar Icon + Swipability
 - Hypertrophy vs. Strength (for me only)

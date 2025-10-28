@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, ActivityIndicator, Platform, StyleSheet } from "react-native";
+import { View, Text, Image, TouchableOpacity, ActivityIndicator, Platform, StyleSheet } from "react-native";
 import { GoogleAuthProvider, signInWithPopup, signInWithCredential } from "firebase/auth";
 import { getFirebaseAuth } from "../../services/Firebase";
 import { theme } from "../../styles/theme";
@@ -11,7 +11,11 @@ import { BRANDING } from "../../constants/branding";
 
 WebBrowser.maybeCompleteAuthSession();
 
-export default function LoginScreen() {
+interface LoginScreenProps {
+  showButton?: boolean;
+}
+
+export default function LoginScreen({ showButton = true }: LoginScreenProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -73,13 +77,26 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
+        <Image
+          source={require("../../assets/logo.png")}
+          style={styles.logo}
+          resizeMode="contain"
+        />
         <Text style={styles.title}>{BRANDING.appName}</Text>
-        <Text style={styles.subtitle}>{BRANDING.tagline}</Text>
+        <Text style={styles.subtitle} numberOfLines={2}>
+          {BRANDING.tagline}
+        </Text>
 
-        <TouchableOpacity disabled={loading} onPress={onGooglePress} style={[styles.button, loading && styles.buttonDisabled]}>
-          {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign in with Google</Text>}
-        </TouchableOpacity>
-        {error && <Text style={styles.errorText}>{error}</Text>}
+        <View style={[styles.buttonContainer, !showButton && styles.hidden]}>
+          <TouchableOpacity
+            disabled={!showButton || loading}
+            onPress={onGooglePress}
+            style={[styles.button, loading && styles.buttonDisabled]}
+          >
+            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign in with Google</Text>}
+          </TouchableOpacity>
+          {error && <Text style={styles.errorText}>{error}</Text>}
+        </View>
       </View>
     </View>
   );
@@ -88,7 +105,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.primary,
+    backgroundColor: "#ffffff",
     justifyContent: "center",
     alignItems: "center",
     padding: theme.spacing.xxl,
@@ -98,20 +115,34 @@ const styles = StyleSheet.create({
     maxWidth: 400,
     alignItems: "center",
   },
+  logo: {
+    width: 150,
+    height: 150,
+    marginBottom: 30,
+  },
   title: {
-    fontSize: theme.typography.sizes.xxxl,
-    fontWeight: theme.typography.weights.bold,
-    color: theme.colors.text,
-    marginBottom: theme.spacing.md,
+    fontSize: 32,
+    fontWeight: "bold",
+    color: theme.colors.accent,
+    marginBottom: 10,
     textAlign: "center",
     letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: theme.typography.sizes.md,
-    color: theme.colors.textSecondary,
+    fontSize: 16,
+    color: "#666",
     marginBottom: theme.spacing.xxxl,
     textAlign: "center",
     lineHeight: 22,
+    width: "100%",
+    paddingHorizontal: 20,
+  },
+  buttonContainer: {
+    width: "100%",
+    alignItems: "center",
+  },
+  hidden: {
+    opacity: 0,
   },
   button: {
     backgroundColor: theme.colors.accent,

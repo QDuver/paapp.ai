@@ -178,10 +178,10 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
                 <TouchableOpacity
                   onLongPress={drag}
                   delayLongPress={0}
-                  style={styles.actionIcon}
+                  style={[styles.actionIcon, Platform.OS === "web" && styles.dragHandle]}
                   hitSlop={8}
                   activeOpacity={0.6}
-                  {...(dragListeners || {})}
+                  {...(Platform.OS === "web" ? dragListeners : {})}
                 >
                   <MaterialCommunityIcons name="drag-vertical" size={20} color={theme.colors.textMuted} />
                 </TouchableOpacity>
@@ -275,6 +275,12 @@ const styles = StyleSheet.create({
     ...(Platform.OS === "web" && {
       cursor: "pointer",
     }),
+  },
+  dragHandle: {
+    touchAction: "none",
+    width: 40,
+    height: 40,
+    cursor: "grab",
   },
   accordionTitle: {
     fontWeight: theme.typography.weights.semibold,

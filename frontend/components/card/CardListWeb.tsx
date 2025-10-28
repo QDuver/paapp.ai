@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, View, ScrollView, RefreshControl, Platform } from "react-native";
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { arrayMove, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { FirestoreDocAbstract, CardAbstract, DialogableAbstract } from "../../models/Abstracts";
 import SortableCard from "./SortableCard";
@@ -29,7 +29,16 @@ const CardListWeb = ({ firestoreDoc, showEditDialog, refreshing, sectionColor, a
   }, [firestoreDoc.items, refreshCounter]);
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        tolerance: 5,
+      },
+    }),
     useSensor(KeyboardSensor)
   );
 

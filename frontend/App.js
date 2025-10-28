@@ -6,7 +6,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import MainApp from "./components/MainApp";
 import { AppProvider } from "./contexts/AppContext";
 import LoginScreen from "./components/auth/LoginScreen";
-import SplashScreen from "./components/SplashScreen";
 import { onAuthStateChanged } from "firebase/auth";
 import { getFirebaseAuth } from "./services/Firebase";
 import { theme } from "./styles/theme";
@@ -99,7 +98,9 @@ export default function App() {
   if (!isFirebaseInitialized || !userReady) {
     return (
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <SplashScreen />
+        <PaperProvider theme={paperTheme}>
+          <LoginScreen showButton={false} />
+        </PaperProvider>
       </GestureHandlerRootView>
     );
   }

@@ -18,8 +18,7 @@ interface CardListProps {
 }
 
 const CardList = ({ firestoreDoc, showEditDialog, refreshing, sectionColor, autoFocusItemId }: CardListProps) => {
-  const { width } = useWindowDimensions();
-  const isMobile = Platform.OS !== "web" || width < 768;
+  const isMobile = Platform.OS !== "web";
 
   if (isMobile) {
     return (
