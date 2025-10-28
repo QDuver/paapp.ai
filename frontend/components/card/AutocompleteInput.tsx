@@ -7,55 +7,44 @@ interface AutocompleteInputProps {
   value: string;
   onChangeText: (text: string) => void;
   placeholder?: string;
-  placeholderTextColor?: string;
   fieldName?: string;
   suggestions?: any[];
-  style?: any;
-  keyboardType?: any;
-  inputMode?: any;
-  autoComplete?: any;
-  multiline?: boolean;
-  numberOfLines?: number;
-  textAlignVertical?: any;
+  textStyle?: any;
   hasError?: boolean;
   borderColor?: string;
   backgroundColor?: string;
-  color?: string;
   onSuggestionSelect?: (suggestion: any) => void;
   collection?: string;
   data?: any;
   onBlur?: () => void;
   onSubmitEditing?: () => void;
+  autoFocus?: boolean;
 }
 
 const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   value,
   onChangeText,
   placeholder,
-  placeholderTextColor,
   fieldName,
   suggestions: externalSuggestions,
-  style,
-  keyboardType,
-  inputMode,
-  autoComplete,
-  multiline,
-  numberOfLines,
-  textAlignVertical,
+  textStyle,
   hasError,
-  borderColor,
-  backgroundColor,
-  color,
+  borderColor = theme.colors.border,
+  backgroundColor = theme.colors.modalSecondary,
   onSuggestionSelect,
   collection,
   data,
   onBlur,
   onSubmitEditing,
+  autoFocus,
 }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<any[]>([]);
   const [dropdownLayout, setDropdownLayout] = useState<{ top: number; left: number; width: number } | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const containerRef = useRef<View>(null);
+  const isSelectingRef = useRef(false);
+  const blurTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const suggestions = useMemo(() => {
     if (externalSuggestions && externalSuggestions.length > 0) {
@@ -90,6 +79,7 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
       });
 
       setFilteredSuggestions(filtered);
+      setSelectedIndex(-1);
       const shouldShow = filtered.length > 0 && filtered[0].name.toLowerCase() !== text.toLowerCase();
       setShowSuggestions(shouldShow);
       if (shouldShow) {
@@ -100,15 +90,49 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
     }
   };
 
+  const handleKeyPress = (e: any) => {
+    if (!showSuggestions || filteredSuggestions.length === 0) return;
+
+    const key = e.nativeEvent.key;
+
+    if (key === "ArrowDown") {
+      e.preventDefault();
+      setSelectedIndex(prev => (prev + 1) % filteredSuggestions.slice(0, 5).length);
+    } else if (key === "ArrowUp") {
+      e.preventDefault();
+      setSelectedIndex(prev => {
+        if (prev <= 0) return filteredSuggestions.slice(0, 5).length - 1;
+        return prev - 1;
+      });
+    } else if (key === "Enter" && selectedIndex >= 0) {
+      e.preventDefault();
+      const selected = filteredSuggestions.slice(0, 5)[selectedIndex];
+      if (selected) {
+        selectSuggestion(selected);
+      }
+    }
+  };
+
   const resolvedBorderColor = hasError ? "#FF3B30" : borderColor || theme.colors.border;
 
   const selectSuggestion = (suggestion: any) => {
+    isSelectingRef.current = true;
+
+    if (blurTimeoutRef.current) {
+      clearTimeout(blurTimeoutRef.current);
+      blurTimeoutRef.current = null;
+    }
+
     onChangeText(suggestion.name);
     setShowSuggestions(false);
 
     if (onSuggestionSelect && typeof suggestion === "object") {
       onSuggestionSelect(suggestion);
     }
+
+    setTimeout(() => {
+      isSelectingRef.current = false;
+    }, 0);
   };
 
   return (
@@ -116,18 +140,17 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
       <View ref={containerRef} style={styles.container}>
         <PaperTextInput
           testID="autocomplete-input"
-          mode="outlined"
-          style={[style, { backgroundColor, color }]}
+          mode="flat"
+          style={[textStyle, { backgroundColor, color: theme.colors.text }]}
           value={value}
           onChangeText={handleTextChange}
           placeholder={placeholder}
-          placeholderTextColor={placeholderTextColor}
-          keyboardType={keyboardType}
-          inputMode={inputMode}
-          autoComplete={autoComplete}
-          multiline={multiline}
-          numberOfLines={numberOfLines}
-          textAlignVertical={textAlignVertical}
+          placeholderTextColor={theme.colors.textMuted}
+          keyboardType="default"
+          inputMode="text"
+          autoComplete="off"
+          autoFocus={autoFocus}
+          onKeyPress={handleKeyPress}
           onFocus={() => {
             if (value.length > 0 && filteredSuggestions.length > 0) {
               setShowSuggestions(true);
@@ -135,12 +158,21 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
             }
           }}
           onBlur={() => {
-            setShowSuggestions(false);
-            onBlur?.();
+            if (blurTimeoutRef.current) {
+              clearTimeout(blurTimeoutRef.current);
+            }
+
+            blurTimeoutRef.current = setTimeout(() => {
+              if (!isSelectingRef.current) {
+                setShowSuggestions(false);
+                onBlur?.();
+              }
+              blurTimeoutRef.current = null;
+            }, 150);
           }}
           onSubmitEditing={onSubmitEditing}
-          outlineColor={resolvedBorderColor}
-          activeOutlineColor={resolvedBorderColor}
+          underlineColor={resolvedBorderColor}
+          activeUnderlineColor={resolvedBorderColor}
           dense
         />
       </View>
@@ -163,11 +195,21 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
             <FlatList
               data={filteredSuggestions.slice(0, 5)}
               keyExtractor={(item, index) => `${item}-${index}`}
-              renderItem={({ item }) => (
-                <TouchableOpacity style={[styles.suggestionItem, { borderBottomColor: borderColor }]} onPress={() => selectSuggestion(item)}>
-                  <Text style={[styles.suggestionText, { color }]}>{item.name}</Text>
-                </TouchableOpacity>
-              )}
+              renderItem={({ item, index }) => {
+                const isSelected = index === selectedIndex;
+                return (
+                  <TouchableOpacity
+                    style={[
+                      styles.suggestionItem,
+                      { borderBottomColor: borderColor },
+                      isSelected && { backgroundColor: borderColor + "20" },
+                    ]}
+                    onPress={() => selectSuggestion(item)}
+                  >
+                    <Text style={[styles.suggestionText, { color: theme.colors.text }, isSelected && { fontWeight: "600" }]}>{item.name}</Text>
+                  </TouchableOpacity>
+                );
+              }}
               showsVerticalScrollIndicator={false}
               nestedScrollEnabled
             />

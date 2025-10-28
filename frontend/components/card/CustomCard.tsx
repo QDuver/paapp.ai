@@ -122,18 +122,16 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
                   value={inlineEditValue}
                   onChangeText={setInlineEditValue}
                   placeholder={singleField?.placeholder || "Enter value"}
-                  placeholderTextColor={theme.colors.textMuted}
                   fieldName={singleField?.field}
                   collection={firestoreDoc.collection}
                   data={data}
-                  style={styles.inlineEditInput}
+                  textStyle={styles.inlineEditInput}
                   backgroundColor={theme.colors.primary}
                   borderColor={sectionAccentColor}
-                  color={theme.colors.text}
                   onSuggestionSelect={handleInlineSuggestionSelect}
                   onBlur={handleSaveInlineEdit}
                   onSubmitEditing={handleSaveInlineEdit}
-                  hasError={false}
+                  autoFocus={true}
                 />
               </View>
             ) : (

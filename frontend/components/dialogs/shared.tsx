@@ -159,18 +159,11 @@ export const renderField = ({ fieldMetadata, formData, errors, collection, data,
           value={displayValue}
           onChangeText={text => onInputChange(fieldName, text)}
           placeholder={fieldLabel}
-          placeholderTextColor={theme.colors.textMuted}
           suggestions={suggestions}
           collection={collection}
           data={data}
-          style={[sharedDialogStyles.textInput]}
-          keyboardType={keyboardType || "default"}
-          inputMode={fieldType === "number" ? "numeric" : "text"}
-          autoComplete={fieldType === "number" ? "off" : undefined}
+          textStyle={sharedDialogStyles.textInput}
           hasError={hasError}
-          borderColor={theme.colors.border}
-          backgroundColor={theme.colors.modalSecondary}
-          color={theme.colors.text}
           onSuggestionSelect={onSuggestionSelect}
           fieldName={fieldName}
         />
