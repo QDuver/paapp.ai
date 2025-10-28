@@ -22,6 +22,7 @@ const MainApp = () => {
 
   const [navigationIndex, setNavigationIndex] = useState(1);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [fabGroupOpen, setFabGroupOpen] = useState(false);
   const [autoFocusItemId, setAutoFocusItemId] = useState<string | null>(null);
 
   const [buildAiDialogVisible, setBuildAiDialogVisible] = useState(false);
@@ -134,16 +135,41 @@ const MainApp = () => {
         )}
 
         {!isLoading && (
-          <View style={styles.fabContainer}>
-            <FAB
-              style={[styles.fabButton, { backgroundColor: sectionColor }]}
-              icon="plus"
-              color={theme.colors.secondary}
-              customSize={56}
-              onPress={createCard}
-              testID="add-fab"
-            />
-          </View>
+          <>
+            {currentRoute?.settingsOptions && currentRoute.settingsOptions.length > 0 && (
+              <FAB.Group
+                open={fabGroupOpen}
+                visible={true}
+                icon={fabGroupOpen ? "close" : "cog"}
+                actions={
+                  currentRoute.settingsOptions.map((option) => ({
+                    icon: option.icon,
+                    label: option.label,
+                    onPress: () => {
+                      handleSettingsAction(option.action, firestoreDoc);
+                      setFabGroupOpen(false);
+                    },
+                    color: theme.colors.secondary,
+                    style: { backgroundColor: sectionColor },
+                  }))
+                }
+                onStateChange={({ open }) => setFabGroupOpen(open)}
+                fabStyle={[styles.fab, { backgroundColor: sectionColor }]}
+                color={theme.colors.secondary}
+                style={styles.settingsFabGroup}
+              />
+            )}
+            <View style={styles.fabContainer}>
+              <FAB
+                style={[styles.fab, { backgroundColor: sectionColor }]}
+                icon="plus"
+                color={theme.colors.secondary}
+                customSize={56}
+                onPress={createCard}
+                testID="add-fab"
+              />
+            </View>
+          </>
         )}
       </View>
     );
@@ -164,15 +190,6 @@ const MainApp = () => {
           onDismiss={() => setMenuVisible(false)}
           anchor={<Appbar.Action icon="dots-vertical" color={theme.colors.text} onPress={() => setMenuVisible(true)} />}
         >
-          {currentRoute?.settingsOptions?.map((option, index) => (
-            <Menu.Item
-              key={index}
-              onPress={() => handleSettingsAction(option.action, data[currentRoute.key])}
-              title={option.label}
-              leadingIcon={option.icon}
-            />
-          ))}
-          {currentRoute?.settingsOptions && <Divider />}
           <Menu.Item onPress={handleSignOut} title="Sign Out" leadingIcon="logout" />
         </Menu>
       </Appbar.Header>
@@ -297,14 +314,14 @@ const styles = StyleSheet.create({
   fabContainer: {
     position: "absolute",
     right: theme.spacing.lg,
-    bottom: 20,
-    flexDirection: "column",
-    gap: theme.spacing.sm,
+    bottom: 35,
     zIndex: 9999,
   },
-  fabButton: {
+  fab: {
     margin: 0,
-    ...theme.shadows.fab,
+  },
+  settingsFabGroup: {
+    paddingBottom: 84,
   },
 });
 

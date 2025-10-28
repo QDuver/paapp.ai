@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     paddingVertical: theme.spacing.md,
-    paddingBottom: theme.spacing.xxl,
+    paddingBottom: 100,
   },
 });
 

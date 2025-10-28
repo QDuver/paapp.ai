@@ -77,7 +77,10 @@ def delete_incomplete():
                 data = doc.to_dict()
                 if 'items' in data and isinstance(data['items'], list):
                     data['items'] = [item for item in data['items'] if item.get('isCompleted') != False]
-                    doc.reference.set(data)
+                    if len(data['items']) == 0:
+                        doc.reference.delete()
+                    else:
+                        doc.reference.set(data)
 
     return {}
 

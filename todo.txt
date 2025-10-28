@@ -5,16 +5,17 @@ BACKEND
 - meals : feed into errands
 
 FRONTEND
-- routines : day vs. template
+- settings back to FAB, return of avatar
+- why loading when editing objectives?
 - logo alignment
-- Meals - calories shouldn't be 0 by default
 - 1st login experience
 - quantity metrics for food
-- loads of different loading messages while AI Building
-- settings back to FAB, return of avatar
+- Don't add a card if name was never set
+- Fill in all fab-settings buttons
 
 
 POST MVP
+- loads of different loading messages while AI Building
 - ordering still not stable on Android
 - feedback form
 - Calendar Icon + Swipability

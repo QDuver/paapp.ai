@@ -190,7 +190,7 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
           )}
         </View>
       </Pressable>
-      {item.isExpanded &&
+      {item.isExpanded && !isDragging && !isActive &&
         item.items?.map((subItem: SubCardAbstract, subIndex: number) => {
           const tags = subItem.getTags();
           const tagString = tags.length > 0 ? tags.join(" • ") : undefined;

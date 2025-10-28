@@ -58,7 +58,7 @@ export class Ingredient extends SubCardAbstract {
 
 export class Meal extends CardAbstract {
   instructions: string = "";
-  calories: number = 0;
+  calories: number;
 
   constructor(data) {
     super(data, Ingredient);
