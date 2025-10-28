@@ -24,6 +24,8 @@ interface AutocompleteInputProps {
   onSuggestionSelect?: (suggestion: any) => void;
   collection?: string;
   data?: any;
+  onBlur?: () => void;
+  onSubmitEditing?: () => void;
 }
 
 const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
@@ -47,6 +49,8 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   onSuggestionSelect,
   collection,
   data,
+  onBlur,
+  onSubmitEditing,
 }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<any[]>([]);
@@ -130,6 +134,11 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
               measureLayout();
             }
           }}
+          onBlur={() => {
+            setShowSuggestions(false);
+            onBlur?.();
+          }}
+          onSubmitEditing={onSubmitEditing}
           outlineColor={resolvedBorderColor}
           activeOutlineColor={resolvedBorderColor}
           dense

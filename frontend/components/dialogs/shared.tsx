@@ -24,7 +24,7 @@ export interface SharedDialogStyles {
   rightActions: any;
 }
 
-export const sharedDialogStyles = StyleSheet.create<SharedDialogStyles>({
+export const sharedDialogStyles = StyleSheet.create({
   modalContainer: {
     ...commonStyles.modalContainer,
     margin: theme.spacing.lg,

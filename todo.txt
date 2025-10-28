@@ -10,6 +10,7 @@ FRONTEND
 - splashscreen cut off on android
 - logo alignment
 - Meals - calories shouldn't be 0 by default
+- 1st login experience
 
 POST MVP
 - feedback form

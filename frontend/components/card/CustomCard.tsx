@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { StyleSheet, View, Pressable, Text, Platform, TouchableOpacity, TextInput } from "react-native";
+import { StyleSheet, View, Pressable, Text, Platform, TouchableOpacity } from "react-native";
 import { Card, List } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { CardAbstract, FirestoreDocAbstract, SubCardAbstract, DialogableAbstract } from "../../models/Abstracts";
 import { useAppContext } from "../../contexts/AppContext";
 import { theme } from "../../styles/theme";
+import AutocompleteInput from "./AutocompleteInput";
 
 interface CustomCardProps {
   firestoreDoc: FirestoreDocAbstract;
@@ -23,7 +24,7 @@ interface CustomCardProps {
 }
 
 const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive, dragListeners, isDragging }: CustomCardProps) => {
-  const { refreshCounter, setRefreshCounter } = useAppContext();
+  const { refreshCounter, setRefreshCounter, data } = useAppContext();
   const [isInlineEditing, setIsInlineEditing] = useState(false);
   const [inlineEditValue, setInlineEditValue] = useState("");
 
@@ -83,6 +84,14 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
     setIsInlineEditing(false);
   };
 
+  const handleInlineSuggestionSelect = (suggestion: any) => {
+    if (!singleField) return;
+    (item as CardAbstract).handleSuggestionSelect(suggestion);
+    const formData = { [singleField.field]: suggestion.name };
+    item.onSave(firestoreDoc, formData, firestoreDoc, false, setRefreshCounter);
+    setIsInlineEditing(false);
+  };
+
   return (
     <Card
       style={[
@@ -108,16 +117,25 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
           </Pressable>
           <View style={styles.headerText}>
             {isInlineEditing ? (
-              <TextInput
-                style={styles.inlineEditInput}
-                value={inlineEditValue}
-                onChangeText={setInlineEditValue}
-                autoFocus
-                placeholder={singleField?.placeholder || "Enter value"}
-                placeholderTextColor={theme.colors.textMuted}
-                onSubmitEditing={handleSaveInlineEdit}
-                onBlur={handleSaveInlineEdit}
-              />
+              <View onStartShouldSetResponder={() => true}>
+                <AutocompleteInput
+                  value={inlineEditValue}
+                  onChangeText={setInlineEditValue}
+                  placeholder={singleField?.placeholder || "Enter value"}
+                  placeholderTextColor={theme.colors.textMuted}
+                  fieldName={singleField?.field}
+                  collection={firestoreDoc.collection}
+                  data={data}
+                  style={styles.inlineEditInput}
+                  backgroundColor={theme.colors.primary}
+                  borderColor={sectionAccentColor}
+                  color={theme.colors.text}
+                  onSuggestionSelect={handleInlineSuggestionSelect}
+                  onBlur={handleSaveInlineEdit}
+                  onSubmitEditing={handleSaveInlineEdit}
+                  hasError={false}
+                />
+              </View>
             ) : (
               <>
                 <Text style={[styles.accordionTitle, { opacity: titleOpacity }]}>{item.name || `Item ${index + 1}`}</Text>
@@ -283,13 +301,6 @@ const styles = StyleSheet.create({
   inlineEditInput: {
     fontSize: theme.typography.sizes.lg,
     fontWeight: theme.typography.weights.semibold,
-    color: theme.colors.text,
-    borderWidth: 1,
-    borderColor: theme.colors.accent,
-    borderRadius: theme.borderRadius.sm,
-    paddingHorizontal: theme.spacing.sm,
-    paddingVertical: theme.spacing.xs,
-    backgroundColor: theme.colors.primary,
     letterSpacing: -0.3,
   },
 });
