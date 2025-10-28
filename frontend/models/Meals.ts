@@ -121,7 +121,7 @@ export class Meals extends FirestoreDocAbstract {
       generateTitle: "New Meal Plan",
       settingsOptions: [
         {
-          label: "Generate Meal Plan",
+          label: "New Meal Plan",
           action: "generate" as const,
           icon: "auto-fix",
         },

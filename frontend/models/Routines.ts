@@ -42,18 +42,6 @@ export class Routines extends FirestoreDocAbstract {
       title: "Routines",
       focusedIcon: "clock",
       unfocusedIcon: "clock-outline",
-      settingsOptions: [
-        {
-          label: "Configure Routines",
-          action: "configure" as const,
-          icon: "cog",
-        },
-        {
-          label: "Delete",
-          action: "delete" as const,
-          icon: "delete",
-        },
-      ],
     };
   }
 }

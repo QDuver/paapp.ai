@@ -137,7 +137,7 @@ export class Exercises extends FirestoreDocAbstract {
       generateTitle: "New Exercise Program",
       settingsOptions: [
         {
-          label: "Generate Program",
+          label: "New Program",
           action: "generate" as const,
           icon: "auto-fix",
         },

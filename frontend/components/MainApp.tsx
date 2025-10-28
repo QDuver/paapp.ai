@@ -8,6 +8,7 @@ import CardList from "./card/CardList";
 import BuildWithAiDialog from "./dialogs/BuildWithAiDialog";
 import EditItemDialog from "./dialogs/EditItemDialog";
 import EditPromptDialog from "./dialogs/EditPromptDialog";
+import UserAvatar from "./auth/UserAvatar";
 import { getFirebaseAuth } from "../services/Firebase";
 import { signOut } from "firebase/auth";
 import { CardAbstract, FirestoreDocAbstract, IUIMetadata, SettingsAction, DialogableAbstract } from "../models/Abstracts";
@@ -42,6 +43,11 @@ const MainApp = () => {
     if (auth) {
       await signOut(auth);
     }
+    setMenuVisible(false);
+  };
+
+  const handleUserSettings = () => {
+    console.log("User settings clicked");
     setMenuVisible(false);
   };
 
@@ -188,8 +194,17 @@ const MainApp = () => {
         <Menu
           visible={menuVisible}
           onDismiss={() => setMenuVisible(false)}
-          anchor={<Appbar.Action icon="dots-vertical" color={theme.colors.text} onPress={() => setMenuVisible(true)} />}
+          anchor={
+            <View style={styles.avatarContainer}>
+              <UserAvatar
+                user={getFirebaseAuth()?.currentUser}
+                size={36}
+                onPress={() => setMenuVisible(true)}
+              />
+            </View>
+          }
         >
+          <Menu.Item onPress={handleUserSettings} title="Settings" leadingIcon="cog" />
           <Menu.Item onPress={handleSignOut} title="Sign Out" leadingIcon="logout" />
         </Menu>
       </Appbar.Header>
@@ -322,6 +337,9 @@ const styles = StyleSheet.create({
   },
   settingsFabGroup: {
     paddingBottom: 84,
+  },
+  avatarContainer: {
+    marginRight: theme.spacing.sm,
   },
 });
 

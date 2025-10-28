@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, View, ActivityIndicator } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 import { Modal, Portal, Text, TextInput, Button } from "react-native-paper";
-import { Settings } from "../../models/Settings";
 import { theme } from "../../styles/theme";
 import { sharedDialogStyles, getSectionColor } from "./shared";
+import { useAppContext } from "../../contexts/AppContext";
 
 interface EditPromptDialogProps {
   visible: boolean;
@@ -13,28 +13,20 @@ interface EditPromptDialogProps {
 
 const EditPromptDialog = ({ visible, collection, onClose }: EditPromptDialogProps) => {
   const [prompt, setPrompt] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [settings, setSettings] = useState<Settings | null>(null);
+  const { data } = useAppContext();
 
   useEffect(() => {
-    const loadSettings = async () => {
-      if (visible && collection) {
-        setIsLoading(true);
-          const settingsDoc = await Settings.fromApi<Settings>(setSettings);
-          const modulePrompt = (settingsDoc as any)[collection]?.prompt || "";
-          setPrompt(modulePrompt);
-          setIsLoading(false);
-      }
-    };
-
-    loadSettings();
-  }, [visible, collection]);
+    if (visible && collection && data?.settings) {
+      const modulePrompt = (data.settings as any)[collection]?.prompt || "";
+      setPrompt(modulePrompt);
+    }
+  }, [visible, collection, data?.settings]);
 
   const handleSave = async () => {
-    if (!settings || !collection) return;
+    if (!data?.settings || !collection) return;
 
-    (settings as any)[collection].prompt = prompt;
-    await settings.onSave();
+    (data.settings as any)[collection].prompt = prompt;
+    await data.settings.onSave();
     onClose();
   };
 
@@ -61,25 +53,19 @@ const EditPromptDialog = ({ visible, collection, onClose }: EditPromptDialogProp
           </View>
 
           <ScrollView style={sharedDialogStyles.formContainer} showsVerticalScrollIndicator={false}>
-            {isLoading ? (
-              <View style={{ padding: 20, alignItems: "center" }}>
-                <ActivityIndicator size="large" color={sectionColor} />
-              </View>
-            ) : (
-              <TextInput
-                testID="prompt-input"
-                mode="outlined"
-                style={[sharedDialogStyles.textInput, { minHeight: 300 }]}
-                value={prompt}
-                onChangeText={setPrompt}
-                placeholder="Enter AI prompt for this collection..."
-                placeholderTextColor={theme.colors.textMuted}
-                multiline
-                numberOfLines={15}
-                outlineColor={theme.colors.border}
-                activeOutlineColor={sectionColor}
-              />
-            )}
+            <TextInput
+              testID="prompt-input"
+              mode="outlined"
+              style={[sharedDialogStyles.textInput, { minHeight: 300 }]}
+              value={prompt}
+              onChangeText={setPrompt}
+              placeholder="Enter AI prompt for this collection..."
+              placeholderTextColor={theme.colors.textMuted}
+              multiline
+              numberOfLines={15}
+              outlineColor={theme.colors.border}
+              activeOutlineColor={sectionColor}
+            />
           </ScrollView>
 
           <View style={sharedDialogStyles.actionContainer}>
@@ -89,7 +75,7 @@ const EditPromptDialog = ({ visible, collection, onClose }: EditPromptDialogProp
                   Cancel
                 </Button>
 
-                <Button testID="save-button" mode="contained" onPress={handleSave} buttonColor={sectionColor} disabled={isLoading}>
+                <Button testID="save-button" mode="contained" onPress={handleSave} buttonColor={sectionColor}>
                   Save
                 </Button>
               </View>

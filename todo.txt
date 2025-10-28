@@ -5,8 +5,6 @@ BACKEND
 - meals : feed into errands
 
 FRONTEND
-- settings back to FAB, return of avatar
-- why loading when editing objectives?
 - logo alignment
 - 1st login experience
 - quantity metrics for food
