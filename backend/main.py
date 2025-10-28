@@ -4,7 +4,7 @@ import json
 import requests
 
 from google.cloud import firestore
-from config import CONFIG, PROJECT
+from config import CONFIG, PROJECT, build_fs_db
 from models.exercises import Exercises
 from models.groceries import Groceries
 from models.meals import Meal, Meals
@@ -16,7 +16,9 @@ if __name__ == "__main__":
 
     CONFIG.USER_FS = firestore.Client(project=PROJECT, database='qd-umileigiudber2rbzjguipjfys23')
 
-    Groceries().save()
+    # build_fs_db('test2')
+    
+    # Groceries().save()
     # Exercises().build_with_ai()
     # routines = Routines().query()
     # Routines().delete()

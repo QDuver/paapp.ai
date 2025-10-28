@@ -30,7 +30,7 @@
       "edgeToEdgeEnabled": true
     },
     "web": {
-      "favicon": "./assets/logo.png",
+      "favicon": "./assets/favicons/favicon.ico",
       "bundler": "metro"
     },
     "plugins": [

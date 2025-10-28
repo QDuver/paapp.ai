@@ -8,9 +8,9 @@ call gcloud composer environments run aiapps --location europe-west2 variables s
 
 echo.
 echo Uploading DAGs to Composer...
-call gcloud composer environments storage dags import --environment aiapps --location europe-west2 --source dags/scheduler.py
-call gcloud composer environments storage dags import --environment aiapps --location europe-west2 --source dags/uniques.py
-call gcloud composer environments storage dags import --environment aiapps --location europe-west2 --source dags/delete_incomplete.py
+call gcloud composer environments storage dags import --environment aiapps --location europe-west2 --source dags/scheduler.dag.py
+call gcloud composer environments storage dags import --environment aiapps --location europe-west2 --source dags/uniques.dag.py
+call gcloud composer environments storage dags import --environment aiapps --location europe-west2 --source dags/delete_incomplete.dag.py
 
 echo.
 echo Deployment complete!

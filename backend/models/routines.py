@@ -12,24 +12,19 @@ from models.abstracts import Entity, FirestoreDoc
 class Routine(Entity):
     name: str
     isCompleted: bool = False
-    durationMin: Optional[int] = 0
-    routineType: Literal['other', 'exercises', 'meals'] = 'other'
 
 
 class Routines(FirestoreDoc):
     collection: str = 'routines'
     wakeupTime: Optional[str] = Field(default_factory=lambda: datetime.datetime.now().strftime("%H:%M"))
     items: List[Routine] = [
-    Routine(name="1/2L of water"),
-    Routine(name='Journaling / Coding', durationMin=60),
-    Routine(name='Exercises', routineType='exercises'),
-    Routine(name='Meal', routineType='meals'),
-    Routine(name='Running', durationMin=45),
-    Routine(name='Meal', routineType='meals'),
+    Routine(name='Journaling'),
+    Routine(name='Meditating'),
+    Routine(name='Exercises'),
 ]
 
     def default(self):
-        previous_date = (CONFIG.today - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        previous_date = (datetime.datetime.strptime(CONFIG.today, "%Y-%m-%d") - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
         previous_data = CONFIG.USER_FS.collection(self.collection).document(previous_date).get().to_dict()
 
         if previous_data:

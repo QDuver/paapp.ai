@@ -14,15 +14,17 @@ from google.cloud.firestore_admin_v1.types import Database
 PROJECT = 'final-app-429707'
 
 def build_fs_db(name):
-    admin_client = firestore_admin_v1.FirestoreAdminClient()
+    # admin_client = firestore_admin_v1.FirestoreAdminClient()
     parent = f"projects/{PROJECT}"
-    database = Database(
-        name=f"{parent}/databases/{name}",
-        location_id="europe-west2",
-        type_=Database.DatabaseType.FIRESTORE_NATIVE
-    )
-    operation = admin_client.create_database(parent=parent, database=database, database_id=name)
-    operation.result()
+    print(firestore_admin_v1.FirestoreAdminClient().list_databases(parent=parent))
+    
+    # database = Database(
+    #     name=f"{parent}/databases/{name}",
+    #     location_id="europe-west2",
+    #     type_=Database.DatabaseType.FIRESTORE_NATIVE
+    # )
+    # operation = admin_client.create_database(parent=parent, database=database, database_id=name)
+    # operation.result()
 
 def get_all_database_names():
     admin_client = firestore_admin_v1.FirestoreAdminClient()
@@ -80,13 +82,35 @@ class Config:
         if user.fs_name not in self.cache:
             admin_client = firestore_admin_v1.FirestoreAdminClient()
             db_path = f"projects/{PROJECT}/databases/{user.fs_name}"
+            db_created = False
             try:
                 admin_client.get_database(name=db_path)
                 print('DATABASE EXISTS')
             except exceptions.NotFound:
                 print('DATABASE DOES NOT EXIST')
                 build_fs_db(user.fs_name)
-            self.cache[user.fs_name] = firestore.Client(project=PROJECT, database=user.fs_name)
+                db_created = True
+
+            if db_created:
+                max_retries = 5
+                retry_delay = 1
+                for attempt in range(max_retries):
+                    try:
+                        client = firestore.Client(project=PROJECT, database=user.fs_name)
+                        client.collection('_warmup').document('_warmup').get()
+                        self.cache[user.fs_name] = client
+                        print(f'DATABASE CLIENT READY after {attempt + 1} attempts')
+                        break
+                    except Exception as e:
+                        if attempt < max_retries - 1:
+                            print(f'Database not ready yet (attempt {attempt + 1}/{max_retries}), waiting {retry_delay}s...')
+                            time.sleep(retry_delay)
+                            retry_delay *= 2
+                        else:
+                            print(f'Failed to connect to database after {max_retries} attempts')
+                            raise
+            else:
+                self.cache[user.fs_name] = firestore.Client(project=PROJECT, database=user.fs_name)
         self.USER_FS = self.cache[user.fs_name]
 
 CONFIG = Config()

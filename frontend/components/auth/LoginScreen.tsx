@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect } from "react";
-import { View, Text, Image, TouchableOpacity, ActivityIndicator, Platform, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, ActivityIndicator, Platform, StyleSheet } from "react-native";
 import { GoogleAuthProvider, signInWithPopup, signInWithCredential } from "firebase/auth";
 import { getFirebaseAuth } from "../../services/Firebase";
 import { theme } from "../../styles/theme";
@@ -8,6 +8,7 @@ import * as WebBrowser from "expo-web-browser";
 import { makeRedirectUri, ResponseType } from "expo-auth-session";
 import { getOAuthClientIds } from "../../config/firebase";
 import { BRANDING } from "../../constants/branding";
+import ShimmerLogo from "../ShimmerLogo";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -77,11 +78,7 @@ export default function LoginScreen({ showButton = true }: LoginScreenProps) {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Image
-          source={require("../../assets/logo.png")}
-          style={styles.logo}
-          resizeMode="contain"
-        />
+        <ShimmerLogo loading={loading} style={styles.logo} source={require("../../assets/logo.png")} />
         <Text style={styles.title}>{BRANDING.appName}</Text>
         <Text style={styles.subtitle} numberOfLines={2}>
           {BRANDING.tagline}

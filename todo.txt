@@ -7,6 +7,7 @@ FRONTEND
 - 1st login experience
 - quantity metrics for food
 - Fill in all fab-settings buttons
+- Add inline card, don't change name, focus out => it's saved
 
 
 POST MVP
