@@ -7,6 +7,7 @@ from typing import Optional
 from google.cloud import firestore
 
 from config import CONFIG, PROJECT, get_all_database_names
+from models.groceries import Groceries
 from models.routines import Routines
 from models.exercises import Exercises
 from models.meals import Meals
@@ -19,6 +20,7 @@ COLLECTION_CLASS_MAPPING = {
     'exercises': Exercises,
     'meals': Meals,
     'routines': Routines,
+    'groceries': Groceries,
     'settings': Settings,
 }
 
@@ -28,16 +30,6 @@ def get_model_class(collection: str):
         raise HTTPException(
             status_code=400, detail=f"Collection '{collection}' not found in mapping. Available collections: {list(COLLECTION_CLASS_MAPPING.keys())}")
     return COLLECTION_CLASS_MAPPING[collection]
-
-
-class InitDayRequest(BaseModel):
-    notes: Optional[str] = "None"
-
-
-class ScheduleExercisesRequest(BaseModel):
-    user_id: str
-    name: str
-    notes: Optional[str] = None
 
 
 app = FastAPI()
@@ -69,14 +61,17 @@ def build_with_ai(collection: str, id: str, request: dict, user: User = Depends(
 def delete_incomplete():
     for db_name in get_all_database_names():
         CONFIG.USER_FS = firestore.Client(project=PROJECT, database=db_name)
-        for collection in ['exercises', 'meals']:
+        for collection in ['exercises', 'meals', 'groceries']:
             docs = CONFIG.USER_FS.collection(collection).stream()
             for doc in docs:
                 if doc.id == CONFIG.today:
                     continue
                 data = doc.to_dict()
                 if 'items' in data and isinstance(data['items'], list):
-                    data['items'] = [item for item in data['items'] if item.get('isCompleted') != False]
+                    if(collection == 'groceries'):
+                        data['items'] = [item for item in data['items'] if item.get('isCompleted') == False]
+                    else: 
+                        data['items'] = [item for item in data['items'] if item.get('isCompleted') == True]
                     if len(data['items']) == 0:
                         doc.reference.delete()
                     else:

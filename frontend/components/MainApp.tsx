@@ -11,12 +11,13 @@ import EditPromptDialog from "./dialogs/EditPromptDialog";
 import UserAvatar from "./auth/UserAvatar";
 import { getFirebaseAuth } from "../services/Firebase";
 import { signOut } from "firebase/auth";
-import { CardAbstract, FirestoreDocAbstract, IUIMetadata, SettingsAction, DialogableAbstract } from "../models/Abstracts";
+import { CardAbstract, FirestoreDocAbstract, IUIMetadata, SettingsAction, DialogableAbstract, SectionKey } from "../models/Abstracts";
 import { useAppContext } from "../contexts/AppContext";
 import { theme, commonStyles } from "../styles/theme";
 import { Routines } from "../models/Routines";
 import { Exercises } from "../models/Exercises";
 import { Meals } from "../models/Meals";
+import { Groceries } from "../models/Groceries";
 
 const MainApp = () => {
   const { data, isLoading, setIsLoading, setData, setRefreshCounter } = useAppContext();
@@ -90,14 +91,14 @@ const MainApp = () => {
     setEditDialogVisible(true);
   };
 
-  const routes: (IUIMetadata & { color: string })[] = [Routines, Exercises, Meals].map(ModelClass => ({
+  const routes: (IUIMetadata & { color: string })[] = [Routines, Exercises, Meals, Groceries].map(ModelClass => ({
     ...ModelClass.getUIMetadata(),
-    color: theme.colors.sections[ModelClass.getUIMetadata().key as "routines" | "exercises" | "meals"]?.accent || theme.colors.accent,
+    color: theme.colors.sections[ModelClass.getUIMetadata().key]?.accent || theme.colors.accent,
   }));
 
   const renderScene = ({ route }: { route: { key: string } }) => {
     const firestoreDoc: FirestoreDocAbstract = data?.[route.key];
-    const sectionColor = theme.colors.sections[route.key as "routines" | "exercises" | "meals"]?.accent || theme.colors.accent;
+    const sectionColor = theme.colors.sections[route.key as SectionKey]?.accent || theme.colors.accent;
     const currentRoute = routes.find(r => r.key === route.key);
 
     const createCard = () => {

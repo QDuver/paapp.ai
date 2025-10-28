@@ -6,6 +6,7 @@ import requests
 from google.cloud import firestore
 from config import CONFIG, PROJECT
 from models.exercises import Exercises
+from models.groceries import Groceries
 from models.meals import Meal, Meals
 from models.settings import Settings
 from models.routines import Routines
@@ -15,9 +16,7 @@ if __name__ == "__main__":
 
     CONFIG.USER_FS = firestore.Client(project=PROJECT, database='qd-umileigiudber2rbzjguipjfys23')
 
-    result = FirestoreDoc.sync_all_uniques()
-    print("Sync result:", result)
-
+    Groceries().save()
     # Exercises().build_with_ai()
     # routines = Routines().query()
     # Routines().delete()

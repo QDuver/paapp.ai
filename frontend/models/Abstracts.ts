@@ -21,6 +21,8 @@ export interface IFieldMetadata {
 
 export type SettingsAction = "generate" | "editPrompt" | "duplicate" | "delete" | "configure";
 
+export type SectionKey = "routines" | "exercises" | "meals" | "groceries";
+
 export interface ISettingsOption {
   label: string;
   action: SettingsAction;
@@ -28,7 +30,7 @@ export interface ISettingsOption {
 }
 
 export interface IUIMetadata {
-  key: string;
+  key: SectionKey;
   title: string;
   focusedIcon: string;
   unfocusedIcon: string;

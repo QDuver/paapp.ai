@@ -1,5 +1,5 @@
 import { fieldConverter, getCurrentDate } from "../utils/utils";
-import { CardAbstract, FirestoreDocAbstract, IFieldMetadata, SubCardAbstract } from "./Abstracts";
+import { CardAbstract, FirestoreDocAbstract, IFieldMetadata, SubCardAbstract, IUIMetadata } from "./Abstracts";
 
 export class Ingredient extends SubCardAbstract {
   private _name: string = "";
@@ -112,7 +112,7 @@ export class Meals extends FirestoreDocAbstract {
     super(data, Meal);
   }
 
-  static getUIMetadata() {
+  static getUIMetadata(): IUIMetadata {
     return {
       key: "meals",
       title: "Meals",

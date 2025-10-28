@@ -1,8 +1,6 @@
 MVP
 BACKEND
-- grocery shopping
 - meals : plan for x days ahead
-- meals : feed into errands
 
 FRONTEND
 - logo alignment
@@ -12,6 +10,7 @@ FRONTEND
 
 
 POST MVP
+- meals : feed into groceries
 - loads of different loading messages while AI Building
 - ordering still not stable on Android
 - feedback form

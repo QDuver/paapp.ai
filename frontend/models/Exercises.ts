@@ -1,6 +1,6 @@
 import React from "react";
 import { fieldConverter } from "../utils/utils";
-import { CardAbstract, FirestoreDocAbstract, IFieldMetadata, SubCardAbstract } from "./Abstracts";
+import { CardAbstract, FirestoreDocAbstract, IFieldMetadata, SubCardAbstract, IUIMetadata } from "./Abstracts";
 export class ExerciseSet extends SubCardAbstract {
   weightKg?: number;
   repetitions?: number;
@@ -96,7 +96,7 @@ export class Exercise extends CardAbstract {
         keyboardType: "default",
         converter: fieldConverter.string,
         suggestions: [],
-        placeholder: "e.g., Push-ups, Squats, Deadlifts",
+        placeholder: "",
       },
     ];
   }
@@ -128,7 +128,7 @@ export class Exercises extends FirestoreDocAbstract {
     super(data, Exercise);
   }
 
-  static getUIMetadata() {
+  static getUIMetadata(): IUIMetadata {
     return {
       key: "exercises",
       title: "Exercises",

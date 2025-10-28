@@ -2,7 +2,7 @@ import { fieldConverter } from "../utils/utils";
 import { CardAbstract, FirestoreDocAbstract, IFieldMetadata, IUIMetadata } from "./Abstracts";
 
 
-export class Routine extends CardAbstract {
+export class Grocery extends CardAbstract {
   durationMin: number = 0;
 
   getEditableFields(): IFieldMetadata[] {
@@ -13,25 +13,26 @@ export class Routine extends CardAbstract {
         type: "string",
         keyboardType: "default",
         converter: fieldConverter.string,
-        placeholder: "Enter routine name",
+        placeholder: "",
       },
     ];
   }
 }
 
-export class Routines extends FirestoreDocAbstract {
-  collection = "routines";
+export class Groceries extends FirestoreDocAbstract {
+  collection = "groceries";
+  id = "all";
 
   constructor(data?) {
-    super(data, Routine);
+    super(data, Grocery);
   }
 
   static getUIMetadata(): IUIMetadata {
     return {
-      key: "routines",
-      title: "Routines",
-      focusedIcon: "clock",
-      unfocusedIcon: "clock-outline",
+      key: "groceries",
+      title: "Groceries",
+      focusedIcon: "cart",
+      unfocusedIcon: "cart-outline",
     };
   }
 }

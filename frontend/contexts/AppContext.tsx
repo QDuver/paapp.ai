@@ -4,6 +4,7 @@ import { Exercises } from "../models/Exercises";
 import { Meals } from "../models/Meals";
 import { Routines } from "../models/Routines";
 import { Settings } from "../models/Settings";
+import { Groceries } from "../models/Groceries";
 
 export interface DataType {
   routines: Routines;
@@ -43,6 +44,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
         Routines.fromApi(setData),
         Exercises.fromApi(setData),
         Meals.fromApi(setData),
+        Groceries.fromApi(setData),
       ]);
 
       setIsLoading(false);
