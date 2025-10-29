@@ -17,7 +17,7 @@ def build_fs_db(name):
     # admin_client = firestore_admin_v1.FirestoreAdminClient()
     parent = f"projects/{PROJECT}"
     print(firestore_admin_v1.FirestoreAdminClient().list_databases(parent=parent))
-    
+    time.sleep(10000)
     # database = Database(
     #     name=f"{parent}/databases/{name}",
     #     location_id="europe-west2",

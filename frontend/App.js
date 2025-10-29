@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, View, Text, Platform, Image } from "react-native";
+import { Platform } from "react-native";
 import { PaperProvider, MD3LightTheme } from "react-native-paper";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MainApp from "./components/MainApp";
 import { AppProvider } from "./contexts/AppContext";
 import LoginScreen from "./components/auth/LoginScreen";
+import WarmupErrorScreen from "./components/WarmupErrorScreen";
 import { onAuthStateChanged } from "firebase/auth";
 import { getFirebaseAuth } from "./services/Firebase";
 import { theme } from "./styles/theme";
-import { BRANDING } from "./constants/branding";
+import { useWarmup } from "./hooks/useWarmup";
 
 // Load icon fonts CSS for web
 if (Platform.OS === "web") {
@@ -33,6 +34,7 @@ export default function App() {
   const [isFirebaseInitialized, setIsFirebaseInitialized] = useState(false);
   const [userReady, setUserReady] = useState(false);
   const [user, setUser] = useState(null);
+  const { warmupError, isWarmingUp, performWarmup } = useWarmup();
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -56,25 +58,7 @@ export default function App() {
             );
             if (u?.uid) {
               AsyncStorage.setItem("userId", u.uid);
-              // Warmup the backend connection - wait for it to complete
-              try {
-                const token = await u.getIdToken();
-                const { DEV_CONFIG, PROD_CONFIG } = await import("./config/env");
-                const baseUrl = __DEV__
-                  ? typeof window !== "undefined" && window.location
-                    ? `http://localhost:${DEV_CONFIG.LOCAL_PORT}`
-                    : `http://${DEV_CONFIG.LOCAL_IP}:${DEV_CONFIG.LOCAL_PORT}`
-                  : PROD_CONFIG.API_URL;
-
-                await fetch(`${baseUrl}/warmup`, {
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                  },
-                });
-              } catch (error) {
-                console.error("[WARMUP] Error:", error);
-              }
+              await performWarmup();
             } else {
               AsyncStorage.removeItem("userId");
             }
@@ -110,6 +94,24 @@ export default function App() {
       <GestureHandlerRootView style={{ flex: 1 }}>
         <PaperProvider theme={paperTheme}>
           <LoginScreen />
+        </PaperProvider>
+      </GestureHandlerRootView>
+    );
+
+  if (isWarmingUp)
+    return (
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <PaperProvider theme={paperTheme}>
+          <LoginScreen showButton={false} />
+        </PaperProvider>
+      </GestureHandlerRootView>
+    );
+
+  if (warmupError)
+    return (
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <PaperProvider theme={paperTheme}>
+          <WarmupErrorScreen error={warmupError} onRetry={performWarmup} />
         </PaperProvider>
       </GestureHandlerRootView>
     );
