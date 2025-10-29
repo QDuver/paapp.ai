@@ -1,6 +1,7 @@
 MVP
 BACKEND
-- meals : plan for x days ahead
+-DAGS not working 
+
 
 FRONTEND
 - logo alignment
@@ -8,10 +9,13 @@ FRONTEND
 - quantity metrics for food
 - Fill in all fab-settings buttons
 - Login / loading flow
+- BottomNav to Side Menu
+- Keep last visited section in memory
 - Add inline card, don't change name, focus out => it's saved
 
 
 POST MVP
+- meals : plan for x days ahead
 - meals : feed into groceries
 - loads of different loading messages while AI Building
 - ordering still not stable on Android

@@ -12,7 +12,8 @@
       "Bash(npm uninstall:*)",
       "Bash(pip install:*)",
       "Bash(findstr:*)",
-      "Bash(npx expo install:*)"
+      "Bash(npx expo install:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

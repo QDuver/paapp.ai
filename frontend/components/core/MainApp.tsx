@@ -1,23 +1,22 @@
-import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import { ScrollView, StyleSheet, Text, View, ActivityIndicator, RefreshControl, Image } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { FAB, Appbar, BottomNavigation, Menu, Icon, MD3Colors, Divider } from "react-native-paper";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import CardList from "./card/CardList";
-import BuildWithAiDialog from "./dialogs/BuildWithAiDialog";
-import EditItemDialog from "./dialogs/EditItemDialog";
-import EditPromptDialog from "./dialogs/EditPromptDialog";
-import UserAvatar from "./auth/UserAvatar";
-import { getFirebaseAuth } from "../services/Firebase";
 import { signOut } from "firebase/auth";
-import { CardAbstract, FirestoreDocAbstract, IUIMetadata, SettingsAction, DialogableAbstract, SectionKey } from "../models/Abstracts";
-import { useAppContext } from "../contexts/AppContext";
-import { theme, commonStyles } from "../styles/theme";
-import { Routines } from "../models/Routines";
-import { Exercises } from "../models/Exercises";
-import { Meals } from "../models/Meals";
-import { Groceries } from "../models/Groceries";
+import React, { useState } from "react";
+import { ActivityIndicator, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Appbar, BottomNavigation, FAB, Menu } from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useAppContext } from "../../contexts/AppContext";
+import { CardAbstract, DialogableAbstract, FirestoreDocAbstract, IUIMetadata, SectionKey, SettingsAction } from "../../models/Abstracts";
+import { Exercises } from "../../models/Exercises";
+import { Groceries } from "../../models/Groceries";
+import { Meals } from "../../models/Meals";
+import { Routines } from "../../models/Routines";
+import { getFirebaseAuth } from "../../services/Firebase";
+import { commonStyles, theme } from "../../styles/theme";
+import UserAvatar from "../auth/UserAvatar";
+import CardList from "../cards/CardList";
+import BuildWithAiDialog from "../dialogs/BuildWithAiDialog";
+import EditItemDialog from "../dialogs/EditItemDialog";
+import EditPromptDialog from "../dialogs/EditPromptDialog";
 
 const MainApp = () => {
   const { data, isLoading, setIsLoading, setData, setRefreshCounter } = useAppContext();
@@ -143,7 +142,7 @@ const MainApp = () => {
 
         {!isLoading && (
           <>
-            {currentRoute?.settingsOptions && currentRoute.settingsOptions.length > 0 && (
+            {currentRoute?.settingsOptions && currentRoute.settingsOptions.length > 0 && Platform.OS !== 'web' && (
               <FAB.Group
                 open={fabGroupOpen}
                 visible={true}
@@ -156,8 +155,6 @@ const MainApp = () => {
                       handleSettingsAction(option.action, firestoreDoc);
                       setFabGroupOpen(false);
                     },
-                    color: theme.colors.secondary,
-                    style: { backgroundColor: sectionColor },
                   }))
                 }
                 onStateChange={({ open }) => setFabGroupOpen(open)}
@@ -165,6 +162,35 @@ const MainApp = () => {
                 color={theme.colors.secondary}
                 style={styles.settingsFabGroup}
               />
+            )}
+            {currentRoute?.settingsOptions && currentRoute.settingsOptions.length > 0 && Platform.OS === 'web' && (
+              <Menu
+                visible={fabGroupOpen}
+                onDismiss={() => setFabGroupOpen(false)}
+                anchor={
+                  <View style={styles.settingsFabContainer}>
+                    <FAB
+                      style={[styles.fab, { backgroundColor: sectionColor }]}
+                      icon="cog"
+                      color={theme.colors.secondary}
+                      customSize={56}
+                      onPress={() => setFabGroupOpen(!fabGroupOpen)}
+                    />
+                  </View>
+                }
+              >
+                {currentRoute.settingsOptions.map((option) => (
+                  <Menu.Item
+                    key={option.action}
+                    onPress={() => {
+                      handleSettingsAction(option.action, firestoreDoc);
+                      setFabGroupOpen(false);
+                    }}
+                    title={option.label}
+                    leadingIcon={option.icon}
+                  />
+                ))}
+              </Menu>
             )}
             <View style={styles.fabContainer}>
               <FAB
@@ -189,20 +215,22 @@ const MainApp = () => {
       {/* Header */}
       <Appbar.Header style={styles.appBar}>
         <View style={styles.headerContent}>
-          <Image source={require("../assets/logo.png")} style={styles.logo} resizeMode="contain" />
+          <Image source={require("../../assets/logo.png")} style={styles.logo} resizeMode="contain" />
           <Text style={styles.appBarTitle}>paapp.ai</Text>
         </View>
         <Menu
           visible={menuVisible}
           onDismiss={() => setMenuVisible(false)}
           anchor={
-            <View style={styles.avatarContainer}>
+            <TouchableOpacity
+              style={styles.avatarContainer}
+              onPress={() => setMenuVisible(true)}
+            >
               <UserAvatar
                 user={getFirebaseAuth()?.currentUser}
                 size={36}
-                onPress={() => setMenuVisible(true)}
               />
-            </View>
+            </TouchableOpacity>
           }
         >
           <Menu.Item onPress={handleUserSettings} title="Settings" leadingIcon="cog" />
@@ -338,6 +366,12 @@ const styles = StyleSheet.create({
   },
   settingsFabGroup: {
     paddingBottom: 84,
+  },
+  settingsFabContainer: {
+    position: "absolute",
+    right: theme.spacing.lg,
+    bottom: 100,
+    zIndex: 9998,
   },
   avatarContainer: {
     marginRight: theme.spacing.sm,

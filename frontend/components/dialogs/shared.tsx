@@ -3,7 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { Text, TextInput, Switch } from "react-native-paper";
 import { theme, commonStyles } from "../../styles/theme";
 import { IFieldMetadata } from "../../models/Abstracts";
-import AutocompleteInput from "../card/AutocompleteInput";
+import AutocompleteInput from "../cards/AutocompleteInput";
 import { DataType } from "../../contexts/AppContext";
 
 export interface SharedDialogStyles {
