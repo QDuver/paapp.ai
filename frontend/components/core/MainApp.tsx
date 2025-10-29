@@ -17,6 +17,7 @@ import CardList from "../cards/CardList";
 import BuildWithAiDialog from "../dialogs/BuildWithAiDialog";
 import EditItemDialog from "../dialogs/EditItemDialog";
 import EditPromptDialog from "../dialogs/EditPromptDialog";
+import EmptyState from "../states/EmptyState";
 
 const MainApp = () => {
   const { data, isLoading, setIsLoading, setData, setRefreshCounter } = useAppContext();
@@ -117,6 +118,8 @@ const MainApp = () => {
       }
     };
 
+  console.log('firestoreDoc:', firestoreDoc);
+
     return (
       <View style={styles.sceneContainer}>
         {isLoading ? (
@@ -126,7 +129,7 @@ const MainApp = () => {
               Loading {route.key}...
             </Text>
           </View>
-        ) : firestoreDoc ? (
+        ) : firestoreDoc.items.length ? (
           <CardList
             firestoreDoc={firestoreDoc}
             showEditDialog={showEditDialog}
@@ -135,9 +138,7 @@ const MainApp = () => {
             autoFocusItemId={autoFocusItemId}
           />
         ) : (
-          <View style={[styles.content, styles.emptyContainer]}>
-            <Text style={[styles.emptyText, { color: theme.colors.textMuted }]}>No {route.key} found</Text>
-          </View>
+          <EmptyState />
         )}
 
         {!isLoading && (
@@ -334,17 +335,6 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.sizes.md,
     color: theme.colors.textSecondary,
     fontWeight: theme.typography.weights.medium,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: theme.spacing.xxl,
-  },
-  emptyText: {
-    fontSize: theme.typography.sizes.md,
-    marginBottom: theme.spacing.xl,
-    textAlign: "center",
   },
   bottomNavBar: {
     backgroundColor: theme.colors.secondary,
