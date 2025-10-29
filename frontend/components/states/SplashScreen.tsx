@@ -5,11 +5,12 @@ import { BRANDING } from "../../constants/branding";
 import ShimmerLogo from "../../assets/ShimmerLogo";
 import GoogleSignInButton from "../auth/GoogleSignInButton";
 
-interface LoginScreenProps {
+interface SplashScreenProps {
   showButton?: boolean;
+  loading?: boolean;
 }
 
-export default function LoginScreen({ showButton = true }: LoginScreenProps) {
+export default function SplashScreen({ showButton = true, loading = false }: SplashScreenProps) {
   const [error, setError] = useState<string | null>(null);
 
   const handleError = (errorMessage: string) => {
@@ -23,18 +24,16 @@ export default function LoginScreen({ showButton = true }: LoginScreenProps) {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <ShimmerLogo loading={false} style={styles.logo} source={require("../../assets/logo.png")} />
+        <ShimmerLogo loading={loading} style={styles.logo} source={require("../../assets/logo.png")} />
         <Text style={styles.title}>{BRANDING.appName}</Text>
         <Text style={styles.subtitle} numberOfLines={2}>
           {BRANDING.tagline}
         </Text>
 
-        <View style={[styles.buttonContainer, !showButton && styles.hidden]}>
-          {showButton && (
-            <View onTouchStart={handleButtonPress}>
-              <GoogleSignInButton onError={handleError} />
-            </View>
-          )}
+        <View style={styles.buttonContainer}>
+          <View style={[!showButton && styles.hidden]} onTouchStart={handleButtonPress}>
+            <GoogleSignInButton onError={handleError} />
+          </View>
           {error && <Text style={styles.errorText}>{error}</Text>}
         </View>
       </View>

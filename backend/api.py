@@ -14,6 +14,7 @@ from models.meals import Meals
 from models.settings import Settings
 from models.users import User
 from models.abstracts import FirestoreDoc
+from dags import router as dags_router
 
 # Mapping of collection names to their corresponding classes
 COLLECTION_CLASS_MAPPING = {
@@ -35,6 +36,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(dags_router)
+
 @app.get("/warmup")
 def warmup_user_connection(user: User = Depends(User.from_firebase_token)):
     CONFIG.USER_FS.collection('_warmup').document('_warmup').get()
@@ -45,58 +48,6 @@ def build_with_ai(collection: str, id: str, request: dict, user: User = Depends(
     instance = COLLECTION_CLASS_MAPPING[collection](id=id)
     instance = instance.build_with_ai(**request)
     return instance.model_dump()
-
-
-# DAGS ----------------
-
-@app.get("/delete-incomplete")
-def delete_incomplete():
-    for db_name in get_all_database_names():
-        CONFIG.USER_FS = firestore.Client(project=PROJECT, database=db_name)
-        for collection in ['exercises', 'meals', 'groceries']:
-            docs = CONFIG.USER_FS.collection(collection).stream()
-            for doc in docs:
-                if doc.id == CONFIG.today:
-                    continue
-                data = doc.to_dict()
-                if 'items' in data and isinstance(data['items'], list):
-                    if(collection == 'groceries'):
-                        data['items'] = [item for item in data['items'] if item.get('isCompleted') == False]
-                    else: 
-                        data['items'] = [item for item in data['items'] if item.get('isCompleted') == True]
-                    if len(data['items']) == 0:
-                        doc.reference.delete()
-                    else:
-                        doc.reference.set(data)
-
-    return {}
-
-@app.get("/schedule")
-def schedule_day():
-    for db_name in get_all_database_names():
-        CONFIG.USER_FS = firestore.Client(project=PROJECT, database=db_name)
-        for collection in ['exercises', 'meals']:
-            instance =  COLLECTION_CLASS_MAPPING[collection]()
-            instance.build_with_ai()
-
-    return {}
-    
-
-@app.get("/uniques")
-def uniques():
-    for db_name in get_all_database_names():
-        CONFIG.USER_FS = firestore.Client(project=PROJECT, database=db_name)
-        for collection in ['meals', 'routines', 'exercises']:
-            unique_items = COLLECTION_CLASS_MAPPING[collection]().get_unique()
-            CONFIG.USER_FS.collection(collection).document('uniques').set({'uniques': unique_items})
-
-    return {}
-
-# ----------------------------
-
-
-
-
 
 # ALWAYS KEEP LAST ---------------
 

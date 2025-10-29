@@ -3,19 +3,14 @@ import { View, Text, StyleSheet } from "react-native";
 import { Button } from "react-native-paper";
 import { theme } from "../../styles/theme";
 
-interface WarmupErrorScreenProps {
-  error: string;
-  onRetry: () => void;
+interface ErrorScreenProps {
 }
 
-export default function WarmupErrorScreen({ error, onRetry }: WarmupErrorScreenProps) {
+export default function ErrorScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Connection Error</Text>
-      <Text style={styles.message}>{error}</Text>
-      <Button mode="contained" onPress={onRetry} style={styles.button}>
-        Retry Connection
-      </Button>
+      <Text style={styles.message}>Please Try Again Later</Text>
     </View>
   );
 }

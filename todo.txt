@@ -1,11 +1,12 @@
 MVP
 BACKEND
 -DAGS not working 
-
+- Porfessional email adress for Oauth
 
 FRONTEND
 - logo alignment
 - 1st login experience
+- Fonts for Dialogs / for Branding
 - quantity metrics for food
 - Fill in all fab-settings buttons
 - Login / loading flow

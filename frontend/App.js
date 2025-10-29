@@ -3,7 +3,8 @@ import { Platform } from "react-native";
 import { PaperProvider, MD3LightTheme } from "react-native-paper";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import MainApp from "./components/core/MainApp";
-import { AppProvider } from "./contexts/AppContext";
+import { AppContextProvider } from "./contexts/AppContext";
+import { AppInitProvider } from "./contexts/AppInit";
 import PreApp from "./components/core/PreApp";
 import { theme } from "./styles/theme";
 
@@ -29,11 +30,11 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <PaperProvider theme={paperTheme}>
-        <AppProvider>
-          <PreApp>
-            <MainApp />
-          </PreApp>
-        </AppProvider>
+        <AppInitProvider>
+          <AppContextProvider>
+            <PreApp />
+          </AppContextProvider>
+        </AppInitProvider>
       </PaperProvider>
     </GestureHandlerRootView>
   );

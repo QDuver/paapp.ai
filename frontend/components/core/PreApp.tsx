@@ -1,31 +1,28 @@
 import React from "react";
-import { useAppContext } from "../../contexts/AppContext";
-import LoginScreen from "../states/SplashScreen";
-import WarmupErrorScreen from "../states/ErrorScreen";
+import { useAppInit } from "../../contexts/AppInit";
+import SplashScreen from "../states/SplashScreen";
+import ErrorScreen from "../states/ErrorScreen";
+import MainApp from "./MainApp";
 
-interface PreAppProps {
-  children: React.ReactNode;
-}
+// isFirebaseInitialized
 
-export default function PreApp({ children }: PreAppProps) {
-  const { isFirebaseInitialized, userReady, user, isWarmingUp, warmupError, performWarmup } =
-    useAppContext();
+export default function PreApp() {
+  const { isFirebaseInitialized, authReady, user, isWarmingUp, warmupError } =
+    useAppInit();
 
-  if (!isFirebaseInitialized || !userReady) {
-    return <LoginScreen showButton={false} />;
+  if (!isFirebaseInitialized || !authReady || isWarmingUp) {
+    return <SplashScreen showButton={false} loading={true} />;
   }
 
   if (!user) {
-    return <LoginScreen />;
+    return <SplashScreen />;
   }
 
-  if (isWarmingUp) {
-    return <LoginScreen showButton={false} />;
-  }
 
   if (warmupError) {
-    return <WarmupErrorScreen error={warmupError} onRetry={performWarmup} />;
+    return <ErrorScreen/>;
   }
 
-  return <>{children}</>;
+  return <MainApp />
+  ;
 }
