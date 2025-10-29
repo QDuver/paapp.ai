@@ -24,16 +24,19 @@ class Routines(FirestoreDoc):
 ]
 
     def default(self):
-        previous_date = (datetime.datetime.strptime(CONFIG.today, "%Y-%m-%d") - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
-        previous_data = CONFIG.USER_FS.collection(self.collection).document(previous_date).get().to_dict()
+        all_docs = CONFIG.USER_FS.collection(self.collection).stream()
 
-        if previous_data:
-            previous_data['id'] = self.id
-            if 'items' in previous_data:
-                for item in previous_data['items']:
+        filtered_docs = [doc for doc in all_docs if doc.id < self.id]
+
+        if filtered_docs:
+            latest_doc = max(filtered_docs, key=lambda doc: doc.id)
+            latest_data = latest_doc.to_dict()
+            latest_data['id'] = self.id
+            if 'items' in latest_data:
+                for item in latest_data['items']:
                     item['isCompleted'] = False
 
-            instance = self.__class__(**previous_data)
+            instance = self.__class__(**latest_data)
             instance.save()
             return instance
 

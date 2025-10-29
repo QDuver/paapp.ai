@@ -14,15 +14,16 @@ export default function PreApp() {
     return <SplashScreen showButton={false} loading={true} />;
   }
 
-  if (!user) {
+  else if (!user) {
     return <SplashScreen />;
   }
 
 
-  if (warmupError) {
+  else if (warmupError) {
     return <ErrorScreen/>;
   }
 
-  return <MainApp />
-  ;
+  else{
+    return <MainApp />
+  }
 }

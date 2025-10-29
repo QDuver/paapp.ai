@@ -33,10 +33,10 @@ export const AppContextProvider = ({ children }: AppProviderProps) => {
   const [data, setData] = useState<DataType>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [refreshCounter, setRefreshCounter] = useState<number>(0);
-  const { user, authReady } = useAppInit();
+  const { user, authReady, warmupError } = useAppInit();
 
   useEffect(() => {
-    if (!user || !authReady) return;
+    if (!user || !authReady || warmupError) return;
 
     const fetchData = async () => {
       setIsLoading(true);
@@ -54,7 +54,7 @@ export const AppContextProvider = ({ children }: AppProviderProps) => {
       setIsLoading(false);
     };
     fetchData();
-  }, [user, authReady]);
+  }, [user, authReady, warmupError]);
 
   const contextValue: AppContextType = {
     data,

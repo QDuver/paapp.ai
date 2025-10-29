@@ -1,14 +1,13 @@
 from fastapi import APIRouter
-from google.cloud import firestore
-
-from config import CONFIG, PROJECT, get_all_database_names
+from clients.firestore import FirestoreClient
+from config import CONFIG, COLLECTION_CLASS_MAPPING
 
 router = APIRouter()
 
 @router.get("/delete-incomplete")
 def delete_incomplete():
-    for db_name in get_all_database_names():
-        CONFIG.USER_FS = firestore.Client(project=PROJECT, database=db_name)
+    for db_name in FirestoreClient.get_all_dbs():
+        CONFIG.USER_FS = FirestoreClient.get_user_db(db_name)
         for collection in ['exercises', 'meals', 'groceries']:
             docs = CONFIG.USER_FS.collection(collection).stream()
             for doc in docs:
@@ -29,16 +28,8 @@ def delete_incomplete():
 
 @router.get("/schedule")
 def schedule_day():
-    from models.exercises import Exercises
-    from models.meals import Meals
-
-    COLLECTION_CLASS_MAPPING = {
-        'exercises': Exercises,
-        'meals': Meals,
-    }
-
-    for db_name in get_all_database_names():
-        CONFIG.USER_FS = firestore.Client(project=PROJECT, database=db_name)
+    for db_name in FirestoreClient.get_all_dbs():
+        CONFIG.USER_FS = FirestoreClient.get_user_db(db_name)
         for collection in ['exercises', 'meals']:
             instance =  COLLECTION_CLASS_MAPPING[collection]()
             instance.build_with_ai()
@@ -48,20 +39,22 @@ def schedule_day():
 
 @router.get("/uniques")
 def uniques():
-    from models.exercises import Exercises
-    from models.meals import Meals
-    from models.routines import Routines
-
-    COLLECTION_CLASS_MAPPING = {
-        'exercises': Exercises,
-        'meals': Meals,
-        'routines': Routines,
-    }
-
-    for db_name in get_all_database_names():
-        CONFIG.USER_FS = firestore.Client(project=PROJECT, database=db_name)
+    for db_name in FirestoreClient.get_all_dbs():
+        CONFIG.USER_FS = FirestoreClient.get_user_db(db_name)
         for collection in ['meals', 'routines', 'exercises']:
             unique_items = COLLECTION_CLASS_MAPPING[collection]().get_unique()
             CONFIG.USER_FS.collection(collection).document('uniques').set({'uniques': unique_items})
 
     return {}
+
+
+
+@router.get("/build-dbs")
+def build_dbs():
+    created_dbs = FirestoreClient.build_dbs(count=5)
+    all_dbs = FirestoreClient.get_all_dbs()
+
+    for db_name in all_dbs:
+        print('DB:', db_name)
+
+    return {'created': created_dbs, 'all_databases': all_dbs}

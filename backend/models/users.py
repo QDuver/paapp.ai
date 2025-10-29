@@ -6,8 +6,7 @@ from fastapi import Depends, HTTPException, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from config import CONFIG
 import os
-
-# Initialize Firebase Admin SDK
+from clients.firestore import FirestoreClient
 if not firebase_admin._apps:
     cred = credentials.ApplicationDefault()
     firebase_admin.initialize_app(cred)
@@ -39,17 +38,11 @@ class User(BaseModel):
     email_verified: Optional[bool] = None
     firebase: Optional[FirebaseInfo] = None
     uid: Optional[str] = None
-    
-    @computed_field
-    @property
-    def fs_name(self) -> str:
-        name_parts = self.name.split()
-        initials = ''.join([part[0].lower() for part in name_parts if part])
-        return f"{initials}-{self.user_id.lower()}"
-    
+
     @classmethod
     def from_firebase_token(cls, credentials: HTTPAuthorizationCredentials = Depends(security)) -> "User":
         decoded_token = auth.verify_id_token(credentials.credentials)
         user = cls(**decoded_token)
-        CONFIG.set_user(user)
+        CONFIG.user = user
+        CONFIG.USER_FS = FirestoreClient().find_db_by_user(user)
         return user

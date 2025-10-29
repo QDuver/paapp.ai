@@ -1,36 +1,8 @@
-"""
-Configuration module for the life automation backend.
-Handles environment-specific settings and URL configurations.
-"""
-import time
-import os
+
 import datetime
-from typing import Optional
-from google.cloud import firestore
-from google.api_core import exceptions
-from google.cloud import firestore_admin_v1
-from google.cloud.firestore_admin_v1.types import Database
+import os
 
 PROJECT = 'final-app-429707'
-
-def build_fs_db(name):
-    # admin_client = firestore_admin_v1.FirestoreAdminClient()
-    parent = f"projects/{PROJECT}"
-    print(firestore_admin_v1.FirestoreAdminClient().list_databases(parent=parent))
-    time.sleep(10000)
-    # database = Database(
-    #     name=f"{parent}/databases/{name}",
-    #     location_id="europe-west2",
-    #     type_=Database.DatabaseType.FIRESTORE_NATIVE
-    # )
-    # operation = admin_client.create_database(parent=parent, database=database, database_id=name)
-    # operation.result()
-
-def get_all_database_names():
-    admin_client = firestore_admin_v1.FirestoreAdminClient()
-    parent = f"projects/{PROJECT}"
-    response = admin_client.list_databases(parent=parent)
-    return [db.name.split('/')[-1] for db in response.databases]
     
 def get_base_url():
     if os.getenv('K_SERVICE') or os.getenv('GOOGLE_CLOUD_PROJECT'):
@@ -58,63 +30,33 @@ def get_environment_name():
         return 'local'
 
 
-# Configuration constants
 class Config:
-    """Configuration class with environment-specific settings."""
-
     BASE_URL = get_base_url()
     ENVIRONMENT = get_environment_name()
     IS_LOCAL = is_local_environment()
     CLOUD_RUN_URL = 'https://life-automation-api-1050310982145.europe-west2.run.app'
     LOCAL_URL = "http://localhost:8000"
-    USER_FS = None
     user = None
-    cache = {}
+    USER_FS = None
 
     @property
     def today(self):
         return datetime.datetime.now().strftime('%Y-%m-%d')
-    
-    
-    def set_user(self, user):
-        print('SET USER', user)
-        self.user = user
-        if user.fs_name not in self.cache:
-            admin_client = firestore_admin_v1.FirestoreAdminClient()
-            db_path = f"projects/{PROJECT}/databases/{user.fs_name}"
-            db_created = False
-            try:
-                admin_client.get_database(name=db_path)
-                print('DATABASE EXISTS')
-            except exceptions.NotFound:
-                print('DATABASE DOES NOT EXIST')
-                build_fs_db(user.fs_name)
-                db_created = True
-
-            if db_created:
-                max_retries = 5
-                retry_delay = 1
-                for attempt in range(max_retries):
-                    try:
-                        client = firestore.Client(project=PROJECT, database=user.fs_name)
-                        client.collection('_warmup').document('_warmup').get()
-                        self.cache[user.fs_name] = client
-                        print(f'DATABASE CLIENT READY after {attempt + 1} attempts')
-                        break
-                    except Exception as e:
-                        if attempt < max_retries - 1:
-                            print(f'Database not ready yet (attempt {attempt + 1}/{max_retries}), waiting {retry_delay}s...')
-                            time.sleep(retry_delay)
-                            retry_delay *= 2
-                        else:
-                            print(f'Failed to connect to database after {max_retries} attempts')
-                            raise
-            else:
-                self.cache[user.fs_name] = firestore.Client(project=PROJECT, database=user.fs_name)
-        self.USER_FS = self.cache[user.fs_name]
 
 CONFIG = Config()
+from models.exercises import Exercises
+from models.groceries import Groceries
+from models.meals import Meals
+from models.routines import Routines
+from models.settings import Settings
 
+COLLECTION_CLASS_MAPPING = {
+    'exercises': Exercises,
+    'meals': Meals,
+    'routines': Routines,
+    'groceries': Groceries,
+    'settings': Settings,
+}
 
 if __name__ == "__main__":
     pass

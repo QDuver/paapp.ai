@@ -1,29 +1,8 @@
-import datetime
-import json
-from fastapi import FastAPI, HTTPException, Depends
+from config import CONFIG, COLLECTION_CLASS_MAPPING
+from dags.endpoints import router as dags_router
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import Optional
-from google.cloud import firestore
-
-from config import CONFIG, PROJECT, get_all_database_names
-from models.groceries import Groceries
-from models.routines import Routines
-from models.exercises import Exercises
-from models.meals import Meals
-from models.settings import Settings
 from models.users import User
-from models.abstracts import FirestoreDoc
-from dags import router as dags_router
-
-# Mapping of collection names to their corresponding classes
-COLLECTION_CLASS_MAPPING = {
-    'exercises': Exercises,
-    'meals': Meals,
-    'routines': Routines,
-    'groceries': Groceries,
-    'settings': Settings,
-}
 
 
 app = FastAPI()

@@ -2,8 +2,10 @@ MVP
 BACKEND
 -DAGS not working 
 - Porfessional email adress for Oauth
+- Security - don't allow to access other databases if not user's
 
 FRONTEND
+- No exercises / meals => hint to generate
 - logo alignment
 - 1st login experience
 - Fonts for Dialogs / for Branding
