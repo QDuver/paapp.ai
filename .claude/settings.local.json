@@ -14,7 +14,9 @@
       "Bash(findstr:*)",
       "Bash(npx expo install:*)",
       "Bash(cat:*)",
-      "Bash(move \"C:\\projects\\life-automation\\backend\\dags.py\" \"C:\\projects\\life-automation\\backend\\dags\\dag_endpoints.py\")"
+      "Bash(move \"C:\\projects\\life-automation\\backend\\dags.py\" \"C:\\projects\\life-automation\\backend\\dags\\dag_endpoints.py\")",
+      "Bash(git log:*)",
+      "Bash(git check-ignore:*)"
     ],
     "deny": [],
     "ask": []

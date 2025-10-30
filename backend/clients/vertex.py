@@ -4,12 +4,12 @@ import json
 import os
 from datetime import datetime
 
-from config import is_local_environment
+from config import is_local_environment, PROJECT
 
 
 class Agent:
     def __init__(self):
-        self.client = genai.Client( vertexai=True, project="final-app-429707", location="us-central1" )
+        self.client = genai.Client( vertexai=True, project=PROJECT, location="us-central1" )
         self.output_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'outputs')
         os.makedirs(self.output_dir, exist_ok=True)
 

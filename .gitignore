@@ -126,3 +126,25 @@ airflow/logs/
 airflow/.env
 airflow/__pycache__/
 airflow/airflow-webserver.pid
+
+# Backend sensitive files
+backend/outputs/
+backend/*.env
+backend/deploy.env
+
+# Frontend sensitive files
+frontend/config/firebase.js
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+frontend/.env.development
+
+# Firebase configuration files
+google-services.json
+GoogleService-Info.plist
+.firebaserc
+firebase.json
+
+# Additional credential files
+*-firebase-adminsdk-*.json
+credentials.json

@@ -1,17 +1,21 @@
 
 import datetime
 import os
+from dotenv import load_dotenv
 
-PROJECT = 'final-app-429707'
-    
+load_dotenv()
+
+PROJECT = os.getenv('GOOGLE_CLOUD_PROJECT', 'your-project-id')
+CLOUD_RUN_URL = os.getenv('CLOUD_RUN_URL', 'https://your-cloud-run-url.run.app')
+
 def get_base_url():
     if os.getenv('K_SERVICE') or os.getenv('GOOGLE_CLOUD_PROJECT'):
-        return 'https://life-automation-api-1050310982145.europe-west2.run.app'
-    
+        return CLOUD_RUN_URL
+
     if os.getenv('PORT') and not os.getenv('LOCALDEV'):
-        return 'https://life-automation-api-1050310982145.europe-west2.run.app'
-    
-    return "http://localhost:8000"
+        return CLOUD_RUN_URL
+
+    return os.getenv('LOCAL_URL', 'http://localhost:8000')
 
 
 def is_local_environment():
@@ -34,8 +38,8 @@ class Config:
     BASE_URL = get_base_url()
     ENVIRONMENT = get_environment_name()
     IS_LOCAL = is_local_environment()
-    CLOUD_RUN_URL = 'https://life-automation-api-1050310982145.europe-west2.run.app'
-    LOCAL_URL = "http://localhost:8000"
+    CLOUD_RUN_URL = CLOUD_RUN_URL
+    LOCAL_URL = os.getenv('LOCAL_URL', 'http://localhost:8000')
     user = None
     USER_FS = None
 

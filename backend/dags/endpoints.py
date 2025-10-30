@@ -1,11 +1,25 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
 from clients.firestore import FirestoreClient
 from config import CONFIG, COLLECTION_CLASS_MAPPING
+from models.users import User
+import os
 
 router = APIRouter()
 
+def get_admin_emails():
+    admin_emails_str = os.getenv('ADMIN_EMAILS', '')
+    return [email.strip() for email in admin_emails_str.split(',') if email.strip()]
+
+def verify_admin(user: User = Depends(User.from_firebase_token)):
+    admin_emails = get_admin_emails()
+    if not admin_emails:
+        raise HTTPException(status_code=503, detail="Admin functionality not configured")
+    if user.email not in admin_emails:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return user
+
 @router.get("/delete-incomplete")
-def delete_incomplete():
+def delete_incomplete(user: User = Depends(verify_admin)):
     for db_name in FirestoreClient.get_all_dbs():
         CONFIG.USER_FS = FirestoreClient.get_user_db(db_name)
         for collection in ['exercises', 'meals', 'groceries']:
@@ -27,7 +41,7 @@ def delete_incomplete():
     return {}
 
 @router.get("/schedule")
-def schedule_day():
+def schedule_day(user: User = Depends(verify_admin)):
     for db_name in FirestoreClient.get_all_dbs():
         CONFIG.USER_FS = FirestoreClient.get_user_db(db_name)
         for collection in ['exercises', 'meals']:
@@ -38,7 +52,7 @@ def schedule_day():
 
 
 @router.get("/uniques")
-def uniques():
+def uniques(user: User = Depends(verify_admin)):
     for db_name in FirestoreClient.get_all_dbs():
         CONFIG.USER_FS = FirestoreClient.get_user_db(db_name)
         for collection in ['meals', 'routines', 'exercises']:
@@ -50,11 +64,8 @@ def uniques():
 
 
 @router.get("/build-dbs")
-def build_dbs():
+def build_dbs(user: User = Depends(verify_admin)):
     created_dbs = FirestoreClient.build_dbs(count=5)
     all_dbs = FirestoreClient.get_all_dbs()
-
-    for db_name in all_dbs:
-        print('DB:', db_name)
 
     return {'created': created_dbs, 'all_databases': all_dbs}

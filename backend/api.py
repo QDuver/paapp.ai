@@ -3,10 +3,27 @@ from dags.endpoints import router as dags_router
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from models.users import User
+import os
 
 
 app = FastAPI()
-origins = ["*"]
+
+def get_allowed_origins():
+    origins_str = os.getenv('ALLOWED_ORIGINS', '')
+    if origins_str:
+        return [origin.strip() for origin in origins_str.split(',') if origin.strip()]
+    if CONFIG.IS_LOCAL:
+        return [
+            "http://localhost:19006",
+            "http://localhost:19000",
+            "http://localhost:8081",
+            "http://127.0.0.1:19006",
+            "http://127.0.0.1:19000",
+            "http://127.0.0.1:8081",
+        ]
+    return []
+
+origins = get_allowed_origins()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -43,7 +60,6 @@ def get_document(collection: str, document: str, user: User = Depends(User.from_
 def overwrite_with_format(collection: str, document: str, request: dict, user: User = Depends(User.from_firebase_token)):
     validated_data = COLLECTION_CLASS_MAPPING[collection](**request)
     data = validated_data.model_dump()
-    print('data', data)
     CONFIG.USER_FS.collection(collection).document(document).set(data)
 
 
