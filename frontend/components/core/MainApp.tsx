@@ -2,7 +2,7 @@ import { StatusBar } from "expo-status-bar";
 import { signOut } from "firebase/auth";
 import React, { useState } from "react";
 import { ActivityIndicator, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Appbar, Drawer, FAB, IconButton, Menu } from "react-native-paper";
+import { Appbar, BottomNavigation, Drawer, FAB, IconButton, Menu } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppContext } from "../../contexts/AppContext";
 import { FirestoreDocAbstract, SettingsAction } from "../../models/Abstracts";
@@ -40,10 +40,6 @@ const MainApp = () => {
     setMenuVisible(false);
   };
 
-  const handleUserSettings = () => {
-    console.log("User settings clicked");
-    setMenuVisible(false);
-  };
 
   const handleSettingsAction = (action: SettingsAction, firestoreDoc: FirestoreDocAbstract) => {
     setMenuVisible(false);
@@ -109,7 +105,6 @@ const MainApp = () => {
             </TouchableOpacity>
           }
         >
-          <Menu.Item onPress={handleUserSettings} title="Settings" leadingIcon="cog" />
           <Menu.Item onPress={handleSignOut} title="Sign Out" leadingIcon="logout" />
         </Menu>
       </Appbar.Header>
@@ -189,6 +184,26 @@ const MainApp = () => {
         </View>
 
       </View>
+
+      <BottomNavigation.Bar
+        navigationState={{
+          index: sections.findIndex(s => s === activeSection),
+          routes: sections.map(section => ({
+            key: section.uiMetadata.key,
+            title: section.uiMetadata.title,
+            focusedIcon: section.uiMetadata.focusedIcon,
+            unfocusedIcon: section.uiMetadata.unfocusedIcon,
+          }))
+        }}
+        onTabPress={({ route }) => {
+          const section = sections.find(s => s.uiMetadata.key === route.key);
+          if (section) {
+            setActiveSection(section);
+          }
+        }}
+        activeColor={sectionColor}
+        style={styles.bottomNav}
+      />
 
       <StatusBar style="dark" />
 
@@ -372,6 +387,11 @@ const styles = StyleSheet.create({
   },
   drawerItem: {
     marginVertical: theme.spacing.xs,
+  },
+  bottomNav: {
+    backgroundColor: theme.colors.secondary,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
   },
 });
 

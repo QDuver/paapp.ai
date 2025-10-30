@@ -1,7 +1,7 @@
 import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { onAuthStateChanged } from "firebase/auth";
-import { getFirebaseAuth } from "../services/Firebase";
+import initializeFirebase, { getFirebaseAuth } from "../services/Firebase";
 import { apiClient } from "../utils/apiClient";
 
 interface UserType {
@@ -49,8 +49,7 @@ export const AppInitProvider = ({ children }: AppInitProviderProps) => {
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        const { default: initializeFirebase } = await import("../services/Firebase");
-        await initializeFirebase();
+        initializeFirebase();
         setIsFirebaseInitialized(true);
         const auth = getFirebaseAuth();
         if (auth) {
