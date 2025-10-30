@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { Text, TextInput, Switch } from "react-native-paper";
+import { Text, TextInput, Switch, HelperText } from "react-native-paper";
 import { theme, commonStyles } from "../../styles/theme";
 import { IFieldMetadata } from "../../models/Abstracts";
 import AutocompleteInput from "../cards/AutocompleteInput";
@@ -155,42 +155,54 @@ export const renderField = ({ fieldMetadata, formData, errors, collection, data,
   return (
     <View key={fieldName} testID="form-field" style={sharedDialogStyles.fieldContainer}>
       {shouldUseAutocomplete ? (
-        <AutocompleteInput
-          value={displayValue}
-          onChangeText={text => onInputChange(fieldName, text)}
-          placeholder={fieldLabel}
-          suggestions={suggestions}
-          collection={collection}
-          data={data}
-          textStyle={sharedDialogStyles.textInput}
-          hasError={hasError}
-          onSuggestionSelect={onSuggestionSelect}
-          fieldName={fieldName}
-        />
+        <>
+          <Text variant="bodyLarge" style={sharedDialogStyles.fieldLabel}>
+            {fieldLabel}
+          </Text>
+          <AutocompleteInput
+            value={displayValue}
+            onChangeText={text => onInputChange(fieldName, text)}
+            placeholder={fieldMetadata.placeholder || fieldLabel}
+            suggestions={suggestions}
+            collection={collection}
+            data={data}
+            textStyle={sharedDialogStyles.textInput}
+            hasError={hasError}
+            onSuggestionSelect={onSuggestionSelect}
+            fieldName={fieldName}
+          />
+          {hasError && (
+            <HelperText type="error" visible={hasError}>
+              {errors[fieldName]}
+            </HelperText>
+          )}
+        </>
       ) : (
-        <TextInput
-          testID="form-input"
-          mode="outlined"
-          style={[sharedDialogStyles.textInput, isMultiline && sharedDialogStyles.multilineInput]}
-          value={displayValue}
-          onChangeText={text => onInputChange(fieldName, text)}
-          placeholder={fieldLabel}
-          placeholderTextColor={theme.colors.textMuted}
-          keyboardType={keyboardType || "default"}
-          inputMode={fieldType === "number" ? "numeric" : "text"}
-          autoComplete={fieldType === "number" ? "off" : undefined}
-          multiline={isMultiline}
-          numberOfLines={isMultiline ? 3 : 1}
-          error={hasError}
-          outlineColor={theme.colors.border}
-          activeOutlineColor={sectionColor}
-        />
-      )}
-
-      {hasError && (
-        <Text variant="bodySmall" style={sharedDialogStyles.errorText}>
-          {errors[fieldName]}
-        </Text>
+        <>
+          <TextInput
+            testID="form-input"
+            mode="outlined"
+            label={fieldLabel}
+            style={[sharedDialogStyles.textInput, isMultiline && sharedDialogStyles.multilineInput]}
+            value={displayValue}
+            onChangeText={text => onInputChange(fieldName, text)}
+            placeholder={fieldMetadata.placeholder}
+            placeholderTextColor={theme.colors.textMuted}
+            keyboardType={keyboardType || "default"}
+            inputMode={fieldType === "number" ? "numeric" : "text"}
+            autoComplete={fieldType === "number" ? "off" : undefined}
+            multiline={isMultiline}
+            numberOfLines={isMultiline ? 3 : 1}
+            error={hasError}
+            outlineColor={theme.colors.border}
+            activeOutlineColor={sectionColor}
+          />
+          {hasError && (
+            <HelperText type="error" visible={hasError}>
+              {errors[fieldName]}
+            </HelperText>
+          )}
+        </>
       )}
     </View>
   );

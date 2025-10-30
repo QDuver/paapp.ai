@@ -22,5 +22,6 @@ if __name__ == "__main__":
     # ex = requests.get("http://localhost:8000/unique/exercises", headers=headers)
     # ex = requests.post("http://localhost:8000/schedule/exercises/2025-10-25", json={})
     # print(ex.json())
+    print(Settings())
 
-    db = FirestoreClient().build_dbs(count=20)
+    # db = FirestoreClient().build_dbs(count=20)

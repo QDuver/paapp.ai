@@ -40,7 +40,6 @@ export interface IUIMetadata {
 }
 
 export abstract class DialogableAbstract {
-
   constructor(data: any = {}) {
     Object.assign(this, data);
   }
@@ -198,7 +197,9 @@ export abstract class FirestoreDocAbstract extends DialogableAbstract {
   }
 
   createCard(): CardAbstract {
-    return new this.ChildModel();
+    const newCard = new this.ChildModel();
+    this.items.push(newCard);
+    return newCard;
   }
 
   async onSave() {

@@ -15,26 +15,23 @@ interface CustomCardProps {
   isActive?: boolean;
   dragListeners?: any;
   isDragging?: boolean;
-  autoFocusItemId?: string | null;
 }
 
-const CustomCard = ({ item, index, firestoreDoc, drag, isActive, dragListeners, isDragging, autoFocusItemId }: CustomCardProps) => {
-  const { refreshCounter, setRefreshCounter, data, setEditableItem } = useAppContext();
-  const [isInlineEditing, setIsInlineEditing] = useState(false);
+const CustomCard = ({ item, index, firestoreDoc, drag, isActive, dragListeners, isDragging }: CustomCardProps) => {
+  const { refreshCounter, setRefreshCounter, data, editDialogState, setEditDialogState, editableItem, setEditableItem } = useAppContext();
   const [inlineEditValue, setInlineEditValue] = useState("");
 
+  const editableFields = item.getEditableFields();
+  const canInlineEdit = editableFields.length === 1;
+  const singleField = editableFields[0];
+  const isInlineEditing = editableItem === item && canInlineEdit && !editDialogState.firestoreDoc;
+
   useEffect(() => {
-    if (autoFocusItemId && (item as any).__tempId === autoFocusItemId) {
-      const editableFields = item.getEditableFields();
-      const canInlineEdit = editableFields.length === 1;
-      if (canInlineEdit) {
-        const singleField = editableFields[0];
-        const currentValue = (item as any)[singleField.field] || "";
-        setInlineEditValue(currentValue);
-        setIsInlineEditing(true);
-      }
+    if (isInlineEditing && singleField) {
+      const currentValue = (item as any)[singleField.field] || "";
+      setInlineEditValue(currentValue);
     }
-  }, [autoFocusItemId]);
+  }, [isInlineEditing]);
 
   const cardBackgroundColor = item.isCompleted ? theme.colors.cardCompleted : theme.colors.secondary;
   const hasSubCards = item.items && item.items.length > 0;
@@ -43,18 +40,12 @@ const CustomCard = ({ item, index, firestoreDoc, drag, isActive, dragListeners, 
   const titleOpacity = item.isCompleted ? 0.5 : 1;
   const descriptionOpacity = item.isCompleted ? 0.4 : 0.7;
 
-  // Get section color based on collection
   const sectionKey = firestoreDoc.collection as "routines" | "exercises" | "meals";
   const sectionAccentColor = theme.colors.sections[sectionKey]?.accent || theme.colors.accent;
 
-  // Check if item has only one editable field for inline editing
-  const editableFields = item.getEditableFields();
-  const canInlineEdit = editableFields.length === 1;
-  const singleField = editableFields[0];
-
   const showEditDialog = () => {
     setEditableItem(item);
-    console.log("Show edit dialog for item:", item);
+    setEditDialogState({ parent: firestoreDoc, firestoreDoc, isNew: false });
   };
 
   const handleCheckbox = (e?: any) => {
@@ -70,52 +61,52 @@ const CustomCard = ({ item, index, firestoreDoc, drag, isActive, dragListeners, 
   };
 
   const handleAddSubCard = (e?: any) => {
-    // e?.stopPropagation?.();
-    // const newSubCard = item.createNewSubCard();
-    // item.isExpanded = true;
-    // if (item.skipDialogForNewChild()) {
-    //   newSubCard.onSave(firestoreDoc, newSubCard.toFormData(), item, true, setRefreshCounter);
-    // } else {
-    //   showEditDialog(newSubCard, item, firestoreDoc, true);
-    // }
-    // setRefreshCounter(prev => prev + 1);
+    e?.stopPropagation?.();
+    const newSubCard = item.createNewSubCard();
+    item.isExpanded = true;
+    if (item.skipDialogForNewChild()) {
+      newSubCard.onSave(firestoreDoc, newSubCard.toFormData(), item, true, setRefreshCounter);
+    } else {
+      setEditableItem(newSubCard);
+      setEditDialogState({ parent: item, firestoreDoc, isNew: true });
+    }
+    setRefreshCounter(prev => prev + 1);
   };
 
   const handleStartInlineEdit = (e?: any) => {
-    // e?.stopPropagation?.();
-    // if (!canInlineEdit) return;
-    // const currentValue = (item as any)[singleField.field] || "";
-    // setInlineEditValue(currentValue);
-    // setIsInlineEditing(true);
+    e?.stopPropagation?.();
+    if (!canInlineEdit) return;
+    setEditableItem(item);
   };
 
   const handleSaveInlineEdit = () => {
-    // if (!singleField) return;
+    if (!singleField) return;
 
-    // const trimmedValue = inlineEditValue.trim();
-    // const isNewItem = !!(item as any).__tempId;
+    const trimmedValue = inlineEditValue.trim();
+    if (!trimmedValue) {
+      const itemIsEmpty = !(item as any)[singleField.field] || (item as any)[singleField.field].trim() === '';
+      if (itemIsEmpty && firestoreDoc.items) {
+        const index = firestoreDoc.items.indexOf(item as any);
+        if (index > -1) {
+          firestoreDoc.items.splice(index, 1);
+          setRefreshCounter(prev => prev + 1);
+        }
+      }
+      setEditableItem(null);
+      return;
+    }
 
-    // if (!trimmedValue && isNewItem) {
-    //   const parent = firestoreDoc;
-    //   if (parent.items) {
-    //     parent.items = parent.items.filter((i: CardAbstract) => (i as any).__tempId !== (item as any).__tempId);
-    //   }
-    //   setIsInlineEditing(false);
-    //   setRefreshCounter(prev => prev + 1);
-    //   return;
-    // }
-
-    // const formData = { [singleField.field]: inlineEditValue };
-    // item.onSave(firestoreDoc, formData, firestoreDoc, false, setRefreshCounter);
-    // setIsInlineEditing(false);
+    const formData = { [singleField.field]: inlineEditValue };
+    item.onSave(firestoreDoc, formData, firestoreDoc, false, setRefreshCounter);
+    setEditableItem(null);
   };
 
   const handleInlineSuggestionSelect = (suggestion: any) => {
-    // if (!singleField) return;
-    // (item as CardAbstract).handleSuggestionSelect(suggestion);
-    // const formData = { [singleField.field]: suggestion.name };
-    // item.onSave(firestoreDoc, formData, firestoreDoc, false, setRefreshCounter);
-    // setIsInlineEditing(false);
+    if (!singleField) return;
+    (item as CardAbstract).handleSuggestionSelect(suggestion);
+    const formData = { [singleField.field]: suggestion.name };
+    item.onSave(firestoreDoc, formData, firestoreDoc, false, setRefreshCounter);
+    setEditableItem(null);
   };
 
   return (
@@ -127,7 +118,7 @@ const CustomCard = ({ item, index, firestoreDoc, drag, isActive, dragListeners, 
       testID="exercise-card"
     >
       <Pressable
-        onLongPress={() => showEditDialog(item, firestoreDoc, firestoreDoc, false)}
+        onLongPress={showEditDialog}
         style={[styles.accordionItem, { backgroundColor: cardBackgroundColor }]}
       >
         <View style={styles.headerContent}>
@@ -141,9 +132,7 @@ const CustomCard = ({ item, index, firestoreDoc, drag, isActive, dragListeners, 
             )}
           </Pressable>
           <Pressable
-            // onPress={canInlineEdit ? handleStartInlineEdit : () => showEditDialog(item, firestoreDoc, firestoreDoc, false)}
-            // onLongPress={() => showEditDialog(item, firestoreDoc, firestoreDoc, false)}
-            onPress={showEditDialog}
+            onPress={canInlineEdit ? handleStartInlineEdit : showEditDialog}
             onLongPress={showEditDialog}
             style={styles.headerText}
           >
@@ -216,7 +205,7 @@ const CustomCard = ({ item, index, firestoreDoc, drag, isActive, dragListeners, 
               testID="subcard"
               title={subItem.name || `Set ${subIndex + 1}`}
               description={tagString}
-              // onPress={() => showEditDialog(subItem, item, firestoreDoc, false)}
+              onPress={() => {setEditableItem(subItem); setEditDialogState({ parent: item, firestoreDoc, isNew: false })}}
               style={[styles.subCard, isLastItem && styles.subCardLast]}
               titleStyle={styles.subCardTitle}
               descriptionStyle={styles.subCardDescription}

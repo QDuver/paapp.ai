@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef } from "react";
-import { StyleSheet, Text, TouchableOpacity, View, FlatList } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View, FlatList, Dimensions } from "react-native";
 import { TextInput as PaperTextInput, Portal } from "react-native-paper";
 import { theme } from "../../styles/theme";
 
@@ -41,6 +41,7 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<any[]>([]);
   const [dropdownLayout, setDropdownLayout] = useState<{ top: number; left: number; width: number } | null>(null);
+  const [showAbove, setShowAbove] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const containerRef = useRef<View>(null);
   const isSelectingRef = useRef(false);
@@ -61,8 +62,16 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   const measureLayout = () => {
     if (containerRef.current) {
       containerRef.current.measure((x, y, width, height, pageX, pageY) => {
+        const screenHeight = Dimensions.get("window").height;
+        const dropdownMaxHeight = 150;
+        const spaceBelow = screenHeight - (pageY + height);
+        const spaceAbove = pageY;
+
+        const shouldShowAbove = spaceBelow < dropdownMaxHeight && spaceAbove > dropdownMaxHeight;
+
+        setShowAbove(shouldShowAbove);
         setDropdownLayout({
-          top: pageY + height,
+          top: shouldShowAbove ? pageY - dropdownMaxHeight : pageY + height,
           left: pageX,
           width: width,
         });
@@ -182,6 +191,7 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
           <View
             style={[
               styles.suggestionsContainer,
+              showAbove ? styles.suggestionsAbove : styles.suggestionsBelow,
               {
                 backgroundColor,
                 borderColor: borderColor,
@@ -227,16 +237,23 @@ const styles = StyleSheet.create({
   suggestionsContainer: {
     maxHeight: 150,
     borderWidth: 1,
-    borderTopWidth: 0,
     borderRadius: theme.borderRadius.sm,
-    borderTopLeftRadius: 0,
-    borderTopRightRadius: 0,
     zIndex: 99999,
     elevation: 100,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
+  },
+  suggestionsBelow: {
+    borderTopWidth: 0,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+  },
+  suggestionsAbove: {
+    borderBottomWidth: 0,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
   },
   suggestionItem: {
     paddingHorizontal: theme.spacing.md,

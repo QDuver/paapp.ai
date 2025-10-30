@@ -2,25 +2,18 @@ import React from "react";
 import { StyleSheet, View, ScrollView, RefreshControl, Platform } from "react-native";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { arrayMove, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { FirestoreDocAbstract, CardAbstract, DialogableAbstract } from "../../models/Abstracts";
+import { FirestoreDocAbstract, CardAbstract } from "../../models/Abstracts";
 import SortableCard from "./SortableCard";
 import { theme } from "../../styles/theme";
 import { useAppContext } from "../../contexts/AppContext";
 
 interface CardListWebProps {
   firestoreDoc: FirestoreDocAbstract;
-  showEditDialog: (
-    item: DialogableAbstract,
-    parent: FirestoreDocAbstract | CardAbstract,
-    firestoreDoc: FirestoreDocAbstract,
-    isNew: boolean
-  ) => void;
   refreshing: boolean;
   sectionColor: string;
-  autoFocusItemId?: string | null;
 }
 
-const CardListWeb = ({ firestoreDoc, showEditDialog, refreshing, sectionColor, autoFocusItemId }: CardListWebProps) => {
+const CardListWeb = ({ firestoreDoc, refreshing, sectionColor }: CardListWebProps) => {
   const { refreshCounter, setRefreshCounter } = useAppContext();
   const [localItems, setLocalItems] = React.useState<CardAbstract[]>(firestoreDoc.items);
 
@@ -80,8 +73,6 @@ const CardListWeb = ({ firestoreDoc, showEditDialog, refreshing, sectionColor, a
                 item={item}
                 index={index}
                 firestoreDoc={firestoreDoc}
-                showEditDialog={showEditDialog}
-                autoFocusItemId={autoFocusItemId}
               />
             ))}
           </View>

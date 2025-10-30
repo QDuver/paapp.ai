@@ -8,23 +8,28 @@ from config import CONFIG
 from models.abstracts import Entity, FirestoreDoc
 from utils import json_to_model
 
-system_prompt = """
-You are a nutrition assistant creating daily meal plans based on historical data.
+default_prompt: str = """
+- Support overall health and fitness objectives
+- Only two meals a day
+- Loose weight while preserving muscle mass
+- Emphasize whole, minimally processed foods
+- No red meats
+- No sugary snacks
 
+"""
+
+system_prompt = """
+You are a nutrition assistant creating daily meal plans based on historical data and user's objectives.
+
+USER OBJECTIVES:
 {USER_PROMPT}
 
-OBJECTIVE: Muscle gain and belly fat reduction (not weight loss)
-
-CONSTRAINTS:
-- Only generate Lunch and Dinner (no breakfast)
-- Gluten only allowed at Dinner
-- Maximize ingredient diversity and nutritional balance
 
 INPUTS:
-- HISTORICAL_DATA: Past training records (use for field structure consistency)
-- USER_NOTES: Additional preferences
+- HISTORICAL_DATA: Past records. Should be used to ensure diversity and consistency in meal structure
+- USER_NOTES: Additional preferences for that specific day
 
-OUTPUT: Two meals in JSON format matching historical data structure
+OUTPUT: Meals in JSON format matching historical data structure
 """
 
 

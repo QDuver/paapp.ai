@@ -114,11 +114,11 @@ export class Meals extends FirestoreDocAbstract {
     title: "Meals",
     focusedIcon: "food-apple",
     unfocusedIcon: "food-apple-outline",
-    generateTitle: "New Meal Plan",
+    generateTitle: "Generate Meal Plan",
     color: theme.colors.sections.meals.accent,
     settingsOptions: [
       {
-        label: "New Meal Plan",
+        label: "Generate",
         action: "generate" as const,
         icon: "auto-fix",
       },
@@ -126,16 +126,6 @@ export class Meals extends FirestoreDocAbstract {
         label: "Objectives",
         action: "editPrompt" as const,
         icon: "pencil",
-      },
-      {
-        label: "Duplicate",
-        action: "duplicate" as const,
-        icon: "content-copy",
-      },
-      {
-        label: "Delete",
-        action: "delete" as const,
-        icon: "delete",
       },
     ],
   };
@@ -148,12 +138,12 @@ export class Meals extends FirestoreDocAbstract {
     return [
       {
         field: "notes",
-        label: "I have carrots left in the fridge, I want something quick to cook, etc...",
+        label: "Notes for today (optional)",
         type: "string",
         keyboardType: "default",
         converter: fieldConverter.string,
         multiline: true,
-        placeholder: "e.g., Ingredients left in the fridge, budget, any other notes...",
+        placeholder: "I have carrots left in the fridge, I want something quick to cook, etc...",
       },
     ];
   }

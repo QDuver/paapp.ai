@@ -14,8 +14,8 @@ class FirestoreDoc(BaseModel):
     id: str = Field(default_factory=lambda: CONFIG.today)
     collection: str = ''
     items: Optional[List[Entity]] = None
-    uniques: Optional[List[Dict]] = None
     system_prompt: ClassVar[str] = ''
+    
     response_model: ClassVar[Type[BaseModel]] = None
     ai_model: ClassVar[str] = 'gemini-2.0-flash-lite-001'
 
@@ -32,13 +32,14 @@ class FirestoreDoc(BaseModel):
     def query(self):
         data = CONFIG.USER_FS.collection(self.collection).document(self.id).get().to_dict()
         if data is None:
-            return self.default()
+            return self.default(), []
+
+        instance = self.__class__(**data)
 
         uniques_doc = CONFIG.USER_FS.collection(self.collection).document('uniques').get().to_dict()
-        if uniques_doc:
-            data['uniques'] = uniques_doc.get('uniques', [])
+        uniques = uniques_doc.get('uniques', []) if uniques_doc else []
 
-        return self.__class__(**data)
+        return instance, uniques
 
     def delete(self):
         [doc.delete() for doc in CONFIG.USER_FS.collection(self.collection).list_documents()]

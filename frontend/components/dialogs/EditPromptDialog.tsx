@@ -48,7 +48,7 @@ const EditPromptDialog = ({ visible, collection, onClose }: EditPromptDialogProp
           <View style={sharedDialogStyles.titleContainer}>
             <View style={[sharedDialogStyles.titleAccent, { backgroundColor: sectionColor }]} />
             <Text variant="titleMedium" style={sharedDialogStyles.title}>
-              Edit {collection.charAt(0).toUpperCase() + collection.slice(1)} Prompt
+              Objectives
             </Text>
           </View>
 

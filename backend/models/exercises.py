@@ -8,6 +8,15 @@ from models.abstracts import Entity, FirestoreDoc
 
 from utils import json_to_model
 
+default_prompt = """
+- Build strength and improve overall fitness
+- Progressive overload over time
+- Balance between strength and cardio
+- 4 sessions a week
+"""
+
+
+
 system_prompt = """
 You are a fitness assistant creating daily workout plans based on historical data.
 

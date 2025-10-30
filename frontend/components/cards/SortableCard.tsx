@@ -3,23 +3,16 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { View, StyleSheet } from "react-native";
 import CustomCard from "./CustomCard";
-import { FirestoreDocAbstract, CardAbstract, DialogableAbstract } from "../../models/Abstracts";
+import { FirestoreDocAbstract, CardAbstract } from "../../models/Abstracts";
 
 interface SortableCardProps {
   id: string;
   item: CardAbstract;
   index: number;
   firestoreDoc: FirestoreDocAbstract;
-  showEditDialog: (
-    item: DialogableAbstract,
-    parent: FirestoreDocAbstract | CardAbstract,
-    firestoreDoc: FirestoreDocAbstract,
-    isNew: boolean
-  ) => void;
-  autoFocusItemId?: string | null;
 }
 
-const SortableCard = ({ id, item, index, firestoreDoc, showEditDialog, autoFocusItemId }: SortableCardProps) => {
+const SortableCard = ({ id, item, index, firestoreDoc }: SortableCardProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
 
   const style = {
@@ -33,10 +26,8 @@ const SortableCard = ({ id, item, index, firestoreDoc, showEditDialog, autoFocus
         firestoreDoc={firestoreDoc}
         item={item}
         index={index}
-        showEditDialog={showEditDialog}
         dragListeners={listeners}
         isDragging={isDragging}
-        autoFocusItemId={autoFocusItemId}
       />
     </div>
   );

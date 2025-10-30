@@ -36,12 +36,14 @@ def build_with_ai(collection: str, id: str, request: dict, user: User = Depends(
 
 @app.get("/{collection}/{document}")
 def get_document(collection: str, document: str, user: User = Depends(User.from_firebase_token)):
-    return COLLECTION_CLASS_MAPPING[collection](id=document).query()
+    instance, uniques = COLLECTION_CLASS_MAPPING[collection](id=document).query()
+    return {**instance.model_dump(), 'uniques': uniques}
 
 @app.post("/{collection}/{document}")
 def overwrite_with_format(collection: str, document: str, request: dict, user: User = Depends(User.from_firebase_token)):
     validated_data = COLLECTION_CLASS_MAPPING[collection](**request)
     data = validated_data.model_dump()
+    print('data', data)
     CONFIG.USER_FS.collection(collection).document(document).set(data)
 
 

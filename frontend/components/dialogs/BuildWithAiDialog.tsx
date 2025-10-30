@@ -43,7 +43,7 @@ const BuildWithAiDialog = ({ visible, firestoreDoc, setIsLoading, setData, onClo
   }
 
   const sectionColor = getSectionColor(firestoreDoc.collection);
-  const generateTitle = (firestoreDoc.constructor as typeof FirestoreDocAbstract).getUIMetadata().generateTitle || "Generate with AI";
+  const generateTitle = (firestoreDoc.constructor as typeof FirestoreDocAbstract).uiMetadata.generateTitle || "Generate with AI";
 
   return (
     <Portal>

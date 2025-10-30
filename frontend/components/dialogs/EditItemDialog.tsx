@@ -6,22 +6,20 @@ import { CardAbstract, FirestoreDocAbstract, DialogableAbstract } from "../../mo
 import { theme } from "../../styles/theme";
 import { sharedDialogStyles, getSectionColor, renderField } from "./shared";
 
-interface EditItemDialogProps {
-  visible: boolean;
-  item: DialogableAbstract | null;
-  parent: FirestoreDocAbstract | CardAbstract | null;
-  firestoreDoc: FirestoreDocAbstract | null;
-  isNew: boolean;
-  onClose: () => void;
-}
-
-const EditItemDialog = ({ visible, item, parent, firestoreDoc, isNew, onClose }: EditItemDialogProps) => {
+const EditItemDialog = () => {
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
   const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
 
-  const { data, setRefreshCounter, editableItem } = useAppContext();
+  const { data, setRefreshCounter, editDialogState, setEditDialogState, editableItem: item, setEditableItem } = useAppContext();
 
-  console.log('data from EditItemDialog', editableItem);
+  const { parent, firestoreDoc, isNew } = editDialogState;
+
+  const editableFields = item?.getEditableFields() || [];
+  const visible = !!item;
+
+  const closeEditDialog = () => {
+    setEditableItem(null);
+  }
 
   useEffect(() => {
     if (visible && item && firestoreDoc) {
@@ -46,13 +44,15 @@ const EditItemDialog = ({ visible, item, parent, firestoreDoc, isNew, onClose }:
     }
 
     item.delete(firestoreDoc, parent);
-    onClose();
+    closeEditDialog();
+
   };
 
   const handleSave = () => {
     if (!item || !firestoreDoc || !parent) return;
     item.onSave(firestoreDoc, formData, parent, isNew, setRefreshCounter);
-    onClose();
+    closeEditDialog();
+
   };
 
   const handleSuggestionSelect = (suggestion: any) => {
@@ -60,7 +60,7 @@ const EditItemDialog = ({ visible, item, parent, firestoreDoc, isNew, onClose }:
 
     (item as CardAbstract).handleSuggestionSelect(suggestion);
     item.onSave(firestoreDoc, { name: suggestion.name }, parent, isNew, setRefreshCounter);
-    onClose();
+    closeEditDialog();
   };
 
   if (!visible || !item || !firestoreDoc || !parent) {
@@ -68,13 +68,11 @@ const EditItemDialog = ({ visible, item, parent, firestoreDoc, isNew, onClose }:
   }
 
   const sectionColor = getSectionColor(firestoreDoc.collection);
-
-  const editableFields = item.getEditableFields();
   const filteredFields = editableFields.filter(fieldMetadata => isNew || formData[fieldMetadata.field] != null);
 
   const dialogTitle =
-    isNew && item instanceof FirestoreDocAbstract && (item.constructor as typeof FirestoreDocAbstract).getUIMetadata().generateTitle
-      ? (item.constructor as typeof FirestoreDocAbstract).getUIMetadata().generateTitle
+    isNew && item instanceof FirestoreDocAbstract && (item.constructor as typeof FirestoreDocAbstract).uiMetadata.generateTitle
+      ? (item.constructor as typeof FirestoreDocAbstract).uiMetadata.generateTitle
       : isNew
         ? "New Item"
         : "Edit Item";
@@ -83,7 +81,7 @@ const EditItemDialog = ({ visible, item, parent, firestoreDoc, isNew, onClose }:
     <Portal>
       <Modal
         visible={visible}
-        onDismiss={onClose}
+        onDismiss={closeEditDialog}
         contentContainerStyle={[sharedDialogStyles.modalContainer, { backgroundColor: theme.colors.modalBackground }]}
         testID="edit-dialog"
       >
@@ -118,7 +116,7 @@ const EditItemDialog = ({ visible, item, parent, firestoreDoc, isNew, onClose }:
               )}
 
               <View style={sharedDialogStyles.rightActions}>
-                <Button testID="cancel-button" mode="text" textColor={theme.colors.textSecondary} onPress={onClose}>
+                <Button testID="cancel-button" mode="text" textColor={theme.colors.textSecondary} onPress={closeEditDialog}>
                   Cancel
                 </Button>
 

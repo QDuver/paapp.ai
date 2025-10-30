@@ -1,21 +1,17 @@
 MVP
 BACKEND
--DAGS not working 
+- DAGS not working 
 - Porfessional email adress for Oauth
 - Security - don't allow to access other databases if not user's
+- Improve AI outputs (+ process historics before feeding)
 
 FRONTEND
-- No exercises / meals => hint to generate
 - logo alignment
 - 1st login experience
 - Fonts for Dialogs / for Branding
 - quantity metrics for food
-- Fill in all fab-settings buttons
-- Login / loading flow
-- BottomNav to Side Menu
-- Keep last visited section in memory
-- Add inline card, don't change name, focus out => it's saved
-
+- FAB group - improve design
+- Adding meal is not possible
 
 POST MVP
 - meals : plan for x days ahead
@@ -31,3 +27,4 @@ POST MVP
 - Picture to count calories
 - Self contained model
 - Android
+- Exercise frequencies

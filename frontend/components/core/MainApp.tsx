@@ -2,10 +2,10 @@ import { StatusBar } from "expo-status-bar";
 import { signOut } from "firebase/auth";
 import React, { useState } from "react";
 import { ActivityIndicator, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Appbar, BottomNavigation, FAB, IconButton, Menu } from "react-native-paper";
+import { Appbar, Drawer, FAB, IconButton, Menu } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppContext } from "../../contexts/AppContext";
-import { CardAbstract, DialogableAbstract, FirestoreDocAbstract, SectionKey, SettingsAction } from "../../models/Abstracts";
+import { FirestoreDocAbstract, SettingsAction } from "../../models/Abstracts";
 import { getFirebaseAuth } from "../../services/Firebase";
 import { commonStyles, theme } from "../../styles/theme";
 import UserAvatar from "../auth/UserAvatar";
@@ -16,11 +16,11 @@ import EditPromptDialog from "../dialogs/EditPromptDialog";
 import EmptyState from "../states/EmptyState";
 
 const MainApp = () => {
-  const { data, isLoading, setIsLoading, setData, setRefreshCounter, sections, activeSection, setActiveSection } = useAppContext();
+  const { data, isLoading, setIsLoading, setData, setRefreshCounter, sections, activeSection, setActiveSection, setEditDialogState, setEditableItem } = useAppContext();
 
   const [menuVisible, setMenuVisible] = useState(false);
   const [settingsMenuVisible, setSettingsMenuVisible] = useState(false);
-  const [autoFocusItemId, setAutoFocusItemId] = useState<string | null>(null);
+  const [drawerVisible, setDrawerVisible] = useState(false);
 
   const [buildAiDialogVisible, setBuildAiDialogVisible] = useState(false);
   const [buildAiFirestoreDoc, setBuildAiFirestoreDoc] = useState<FirestoreDocAbstract | null>(null);
@@ -28,11 +28,9 @@ const MainApp = () => {
   const [editPromptDialogVisible, setEditPromptDialogVisible] = useState(false);
   const [editPromptCollection, setEditPromptCollection] = useState<string | null>(null);
 
-  const [editDialogVisible, setEditDialogVisible] = useState(false);
-  const [editDialogItem, setEditDialogItem] = useState<DialogableAbstract | null>(null);
-  const [editDialogParent, setEditDialogParent] = useState<FirestoreDocAbstract | CardAbstract | null>(null);
-  const [editDialogFirestoreDoc, setEditDialogFirestoreDoc] = useState<FirestoreDocAbstract | null>(null);
-  const [editDialogIsNew, setEditDialogIsNew] = useState(false);
+
+  const firestoreDoc = data?.[activeSection.uiMetadata.key];
+  const sectionColor = activeSection.uiMetadata.color;
 
   const handleSignOut = async () => {
     const auth = getFirebaseAuth();
@@ -48,7 +46,6 @@ const MainApp = () => {
   };
 
   const handleSettingsAction = (action: SettingsAction, firestoreDoc: FirestoreDocAbstract) => {
-    console.log(`[FAB] handleSettingsAction called with action: ${action}, collection: ${firestoreDoc.collection}`);
     setMenuVisible(false);
 
     switch (action) {
@@ -58,56 +55,24 @@ const MainApp = () => {
         setBuildAiDialogVisible(true);
         break;
       case "editPrompt":
-        console.log(`[FAB] Opening EditPrompt dialog`);
         setEditPromptCollection(firestoreDoc.collection);
         setEditPromptDialogVisible(true);
-        break;
-      case "duplicate":
-        console.log(`Duplicating ${firestoreDoc.collection}...`);
-        break;
-      case "delete":
-        console.log(`Deleting ${firestoreDoc.collection}...`);
-        break;
-      case "configure":
-        console.log(`Configuring ${firestoreDoc.collection}...`);
         break;
       default:
         console.warn(`Unknown action: ${action}`);
     }
   };
 
-  const showEditDialog = (
-    item: DialogableAbstract,
-    parent: FirestoreDocAbstract | CardAbstract,
-    firestoreDoc: FirestoreDocAbstract,
-    isNew: boolean
-  ) => {
-    item.isEditable = true;
-    console.log('item', item)
+  const createCard = () => {
+    const newCard = firestoreDoc.createCard();
+    setEditableItem(newCard);
     setRefreshCounter(prev => prev + 1);
   };
-
-  const createCard = () => {
-    console.log(`[FAB] createCard called for section: ${activeSection.uiMetadata.key}`);
-    // const firestoreDoc = data?.[activeSection.uiMetadata.key];
-    // if (!firestoreDoc) return;
-
-    // const newCard = firestoreDoc.createCard();
-    // showEditDialog(newCard, firestoreDoc, firestoreDoc, true);
-  };
-
-  const firestoreDoc = data?.[activeSection.uiMetadata.key];
-  const sectionColor = activeSection.uiMetadata.color;
-  const routes = sections.map(section => ({
-    key: section.uiMetadata.key,
-    title: section.uiMetadata.title,
-    focusedIcon: section.uiMetadata.focusedIcon,
-    unfocusedIcon: section.uiMetadata.unfocusedIcon,
-  }));
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right']}>
       <Appbar.Header style={styles.appBar}>
+        <Appbar.Action icon="menu" onPress={() => setDrawerVisible(true)} />
         <View style={styles.headerContent}>
           <Image source={require("../../assets/logo.png")} style={styles.logo} resizeMode="contain" />
           <Text style={styles.appBarTitle}>paapp.ai</Text>
@@ -138,19 +103,27 @@ const MainApp = () => {
             <View style={[styles.content, styles.loadingContainer]} testID="loading-container">
               <ActivityIndicator size="large" color={sectionColor} />
               <Text style={styles.loadingText} testID="loading-text">
-                Loading {activeSection.uiMetadata.key}...
+                Building {activeSection.uiMetadata.key}...
               </Text>
             </View>
           ) : firestoreDoc?.items.length ? (
             <CardList
               firestoreDoc={firestoreDoc}
-              showEditDialog={showEditDialog}
               refreshing={isLoading}
               sectionColor={sectionColor}
-              autoFocusItemId={autoFocusItemId}
             />
           ) : (
-            <EmptyState />
+            <EmptyState
+              onObjectivesPress={() => {
+                setEditPromptCollection(firestoreDoc.collection);
+                setEditPromptDialogVisible(true);
+              }}
+              onGeneratePress={() => {
+                setBuildAiFirestoreDoc(firestoreDoc);
+                setBuildAiDialogVisible(true);
+              }}
+              sectionColor={sectionColor}
+            />
           )}
 
           {!isLoading && (
@@ -198,22 +171,6 @@ const MainApp = () => {
           )}
         </View>
 
-        <BottomNavigation.Bar
-          navigationState={{ index: sections.findIndex(s => s === activeSection), routes }}
-          onTabPress={({ route }) => {
-            const section = sections.find(s => s.uiMetadata.key === route.key);
-            if (section) setActiveSection(() => section);
-          }}
-          style={styles.bottomNavBar}
-          theme={{
-            colors: {
-              secondaryContainer: sectionColor,
-              onSecondaryContainer: theme.colors.secondary,
-              onSurfaceVariant: theme.colors.textMuted,
-              onSurface: theme.colors.text,
-            },
-          }}
-        />
       </View>
 
       <StatusBar style="dark" />
@@ -232,14 +189,48 @@ const MainApp = () => {
         onClose={() => setEditPromptDialogVisible(false)}
       />
 
-      <EditItemDialog
-        visible={editDialogVisible}
-        item={editDialogItem}
-        parent={editDialogParent}
-        firestoreDoc={editDialogFirestoreDoc}
-        isNew={editDialogIsNew}
-        onClose={() => setEditDialogVisible(false)}
-      />
+      <EditItemDialog />
+
+      {drawerVisible && (
+        <TouchableOpacity
+          style={styles.drawerBackdrop}
+          activeOpacity={1}
+          onPress={() => setDrawerVisible(false)}
+        />
+      )}
+
+      <Drawer.Section
+        style={[styles.drawer, drawerVisible && styles.drawerVisible]}
+      >
+        {drawerVisible && (
+          <View style={styles.drawerContent}>
+            <View style={styles.drawerHeader}>
+              <Text style={styles.drawerTitle}>Navigation</Text>
+              <IconButton
+                icon="close"
+                size={24}
+                onPress={() => setDrawerVisible(false)}
+              />
+            </View>
+            {sections.map((section) => (
+              <Drawer.Item
+                key={section.uiMetadata.key}
+                label={section.uiMetadata.title}
+                icon={activeSection === section ? section.uiMetadata.focusedIcon : section.uiMetadata.unfocusedIcon}
+                active={activeSection === section}
+                onPress={() => {
+                  setActiveSection(section);
+                  setDrawerVisible(false);
+                }}
+                style={[
+                  styles.drawerItem,
+                  activeSection === section && { backgroundColor: sectionColor + '20' }
+                ]}
+              />
+            ))}
+          </View>
+        )}
+      </Drawer.Section>
     </SafeAreaView>
   );
 };
@@ -300,25 +291,16 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
     fontWeight: theme.typography.weights.medium,
   },
-  bottomNavBar: {
-    backgroundColor: theme.colors.secondary,
-    borderTopWidth: 0,
-    elevation: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-  },
   settingsMenuContainer: {
     position: "absolute",
     right: theme.spacing.lg,
-    bottom: 106,
+    bottom: 90,
     zIndex: 9999,
   },
   fabContainer: {
     position: "absolute",
     right: theme.spacing.lg,
-    bottom: 35,
+    bottom: 20,
     zIndex: 9998,
   },
   fab: {
@@ -326,6 +308,53 @@ const styles = StyleSheet.create({
   },
   avatarContainer: {
     marginRight: theme.spacing.sm,
+  },
+  drawerBackdrop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    zIndex: 9999,
+  },
+  drawer: {
+    position: "absolute",
+    top: 0,
+    left: -280,
+    bottom: 0,
+    width: 280,
+    backgroundColor: theme.colors.secondary,
+    zIndex: 10000,
+    shadowColor: "#000",
+    shadowOffset: { width: 2, height: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 16,
+  },
+  drawerVisible: {
+    left: 0,
+  },
+  drawerContent: {
+    flex: 1,
+    paddingTop: theme.spacing.md,
+  },
+  drawerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  drawerTitle: {
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.text,
+  },
+  drawerItem: {
+    marginVertical: theme.spacing.xs,
   },
 });
 

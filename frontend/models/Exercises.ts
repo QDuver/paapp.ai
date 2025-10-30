@@ -130,11 +130,11 @@ export class Exercises extends FirestoreDocAbstract {
     title: "Exercises",
     focusedIcon: "dumbbell",
     unfocusedIcon: "dumbbell",
-    generateTitle: "New Exercise Program",
+    generateTitle: "Generate Exercise Program",
     color: theme.colors.sections.exercises.accent,
     settingsOptions: [
       {
-        label: "New Program",
+        label: "Generate",
         action: "generate" as const,
         icon: "auto-fix",
       },
@@ -142,16 +142,6 @@ export class Exercises extends FirestoreDocAbstract {
         label: "Objectives",
         action: "editPrompt" as const,
         icon: "pencil",
-      },
-      {
-        label: "Duplicate",
-        action: "duplicate" as const,
-        icon: "content-copy",
-      },
-      {
-        label: "Delete",
-        action: "delete" as const,
-        icon: "delete",
       },
     ],
   };
@@ -164,12 +154,12 @@ export class Exercises extends FirestoreDocAbstract {
     return [
       {
         field: "notes",
-        label: "I want a lighter workout program today, I only have access to home equipment, etc...",
+        label: "Notes for today (optional)",
         type: "string",
         keyboardType: "default",
         converter: fieldConverter.string,
         multiline: true,
-        placeholder: "Add any additional notes about this workout session...",
+        placeholder: "I want a lighter workout program today, I only have access to home equipment, etc...",
       },
     ];
   }
