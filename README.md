@@ -1,13 +1,12 @@
 # Life Automation
 
-An AI-powered full-stack application that generates personalized daily plans including exercises, meals, and routines. The system learns from your historical patterns and preferences to create intelligent, context-aware recommendations using Google's Gemini AI.
+An AI-powered full-stack application that generates personalized daily plans including exercises, meals, and routines. The system learns from your historical patterns and preferences to create intelligent, context-aware recommendations.
 
 ## Features
 
 - **AI-Generated Daily Plans**: Get personalized exercise routines, meal plans, and daily routines
 - **Historical Pattern Learning**: AI analyzes your past habits to create relevant recommendations
 - **Cross-Platform**: iOS, Android, and Web support via React Native + Expo
-- **Per-User Data Isolation**: Each user gets a dedicated Firestore database
 - **Real-time Sync**: Changes sync across all devices using Firebase
 - **Customizable Prompts**: Fine-tune AI generation per collection (exercises, meals, routines)
 

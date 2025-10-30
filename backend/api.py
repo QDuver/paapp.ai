@@ -13,14 +13,7 @@ def get_allowed_origins():
     if origins_str:
         return [origin.strip() for origin in origins_str.split(',') if origin.strip()]
     if CONFIG.IS_LOCAL:
-        return [
-            "http://localhost:19006",
-            "http://localhost:19000",
-            "http://localhost:8081",
-            "http://127.0.0.1:19006",
-            "http://127.0.0.1:19000",
-            "http://127.0.0.1:8081",
-        ]
+        return ["*"]
     return []
 
 origins = get_allowed_origins()
@@ -39,9 +32,8 @@ def health_check():
     return {"status": "healthy"}
 
 @app.get("/warmup")
-def warmup_user_connection(user: User = Depends(User.from_firebase_token)):
-    CONFIG.USER_FS.collection('_warmup').document('_warmup').get()
-    return {}
+def warmup():
+    return {"status": "warm"}
 
 @app.post("/build-with-ai/{collection}/{id}")
 def build_with_ai(collection: str, id: str, request: dict, user: User = Depends(User.from_firebase_token)):
