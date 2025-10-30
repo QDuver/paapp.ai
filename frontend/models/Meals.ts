@@ -1,5 +1,6 @@
 import { fieldConverter, getCurrentDate } from "../utils/utils";
 import { CardAbstract, FirestoreDocAbstract, IFieldMetadata, SubCardAbstract, IUIMetadata } from "./Abstracts";
+import { theme } from "../styles/theme";
 
 export class Ingredient extends SubCardAbstract {
   private _name: string = "";
@@ -108,40 +109,39 @@ export class Meals extends FirestoreDocAbstract {
   notes: string = "";
   collection = "meals";
 
+  static uiMetadata = {
+    key: "meals" as const,
+    title: "Meals",
+    focusedIcon: "food-apple",
+    unfocusedIcon: "food-apple-outline",
+    generateTitle: "New Meal Plan",
+    color: theme.colors.sections.meals.accent,
+    settingsOptions: [
+      {
+        label: "New Meal Plan",
+        action: "generate" as const,
+        icon: "auto-fix",
+      },
+      {
+        label: "Objectives",
+        action: "editPrompt" as const,
+        icon: "pencil",
+      },
+      {
+        label: "Duplicate",
+        action: "duplicate" as const,
+        icon: "content-copy",
+      },
+      {
+        label: "Delete",
+        action: "delete" as const,
+        icon: "delete",
+      },
+    ],
+  };
+
   constructor(data?) {
     super(data, Meal);
-  }
-
-  static getUIMetadata(): IUIMetadata {
-    return {
-      key: "meals",
-      title: "Meals",
-      focusedIcon: "food-apple",
-      unfocusedIcon: "food-apple-outline",
-      generateTitle: "New Meal Plan",
-      settingsOptions: [
-        {
-          label: "New Meal Plan",
-          action: "generate" as const,
-          icon: "auto-fix",
-        },
-        {
-          label: "Objectives",
-          action: "editPrompt" as const,
-          icon: "pencil",
-        },
-        {
-          label: "Duplicate",
-          action: "duplicate" as const,
-          icon: "content-copy",
-        },
-        {
-          label: "Delete",
-          action: "delete" as const,
-          icon: "delete",
-        },
-      ],
-    };
   }
 
   getEditableFields(): IFieldMetadata[] {

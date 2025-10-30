@@ -5,11 +5,7 @@ import { ActivityIndicator, Image, Platform, StyleSheet, Text, TouchableOpacity,
 import { Appbar, BottomNavigation, FAB, IconButton, Menu } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppContext } from "../../contexts/AppContext";
-import { CardAbstract, DialogableAbstract, FirestoreDocAbstract, IUIMetadata, SectionKey, SettingsAction } from "../../models/Abstracts";
-import { Exercises } from "../../models/Exercises";
-import { Groceries } from "../../models/Groceries";
-import { Meals } from "../../models/Meals";
-import { Routines } from "../../models/Routines";
+import { CardAbstract, DialogableAbstract, FirestoreDocAbstract, SectionKey, SettingsAction } from "../../models/Abstracts";
 import { getFirebaseAuth } from "../../services/Firebase";
 import { commonStyles, theme } from "../../styles/theme";
 import UserAvatar from "../auth/UserAvatar";
@@ -20,9 +16,8 @@ import EditPromptDialog from "../dialogs/EditPromptDialog";
 import EmptyState from "../states/EmptyState";
 
 const MainApp = () => {
-  const { data, isLoading, setIsLoading, setData, setRefreshCounter } = useAppContext();
+  const { data, isLoading, setIsLoading, setData, setRefreshCounter, sections, activeSection, setActiveSection } = useAppContext();
 
-  const [navigationIndex, setNavigationIndex] = useState(1);
   const [menuVisible, setMenuVisible] = useState(false);
   const [settingsMenuVisible, setSettingsMenuVisible] = useState(false);
   const [autoFocusItemId, setAutoFocusItemId] = useState<string | null>(null);
@@ -87,111 +82,31 @@ const MainApp = () => {
     firestoreDoc: FirestoreDocAbstract,
     isNew: boolean
   ) => {
-    setEditDialogItem(item);
-    setEditDialogParent(parent);
-    setEditDialogFirestoreDoc(firestoreDoc);
-    setEditDialogIsNew(isNew);
-    setEditDialogVisible(true);
+    item.isEditable = true;
+    console.log('item', item)
+    setRefreshCounter(prev => prev + 1);
   };
 
-  const routes: (IUIMetadata & { color: string })[] = [Routines, Exercises, Meals, Groceries].map(ModelClass => ({
-    ...ModelClass.getUIMetadata(),
-    color: theme.colors.sections[ModelClass.getUIMetadata().key]?.accent || theme.colors.accent,
+  const createCard = () => {
+    console.log(`[FAB] createCard called for section: ${activeSection.uiMetadata.key}`);
+    // const firestoreDoc = data?.[activeSection.uiMetadata.key];
+    // if (!firestoreDoc) return;
+
+    // const newCard = firestoreDoc.createCard();
+    // showEditDialog(newCard, firestoreDoc, firestoreDoc, true);
+  };
+
+  const firestoreDoc = data?.[activeSection.uiMetadata.key];
+  const sectionColor = activeSection.uiMetadata.color;
+  const routes = sections.map(section => ({
+    key: section.uiMetadata.key,
+    title: section.uiMetadata.title,
+    focusedIcon: section.uiMetadata.focusedIcon,
+    unfocusedIcon: section.uiMetadata.unfocusedIcon,
   }));
-
-  const renderScene = ({ route }: { route: { key: string } }) => {
-    const firestoreDoc: FirestoreDocAbstract = data?.[route.key];
-    const sectionColor = theme.colors.sections[route.key as SectionKey]?.accent || theme.colors.accent;
-    const currentRoute = routes.find(r => r.key === route.key);
-
-    const createCard = () => {
-      if (!firestoreDoc) return;
-      const newItem = firestoreDoc.createCard();
-      const editableFields = newItem.getEditableFields();
-      const canInlineEdit = editableFields.length === 1;
-
-      if (canInlineEdit) {
-        const itemId = `${Date.now()}`;
-        (newItem as any).__tempId = itemId;
-        newItem.onSave(firestoreDoc, {}, firestoreDoc, true, setRefreshCounter);
-        setAutoFocusItemId(itemId);
-        setTimeout(() => setAutoFocusItemId(null), 100);
-      } else {
-        showEditDialog(newItem, firestoreDoc, firestoreDoc, true);
-      }
-    };
-
-
-    return (
-      <View style={styles.sceneContainer}>
-        {isLoading ? (
-          <View style={[styles.content, styles.loadingContainer]} testID="loading-container">
-            <ActivityIndicator size="large" color={sectionColor} />
-            <Text style={styles.loadingText} testID="loading-text">
-              Loading {route.key}...
-            </Text>
-          </View>
-        ) : firestoreDoc.items.length ? (
-          <CardList
-            firestoreDoc={firestoreDoc}
-            showEditDialog={showEditDialog}
-            refreshing={isLoading}
-            sectionColor={sectionColor}
-            autoFocusItemId={autoFocusItemId}
-          />
-        ) : (
-          <EmptyState />
-        )}
-
-        {!isLoading && (
-          <>
-            <View style={styles.settingsMenuContainer}>
-              <Menu
-                visible={settingsMenuVisible}
-                onDismiss={() => setSettingsMenuVisible(false)}
-                anchor={
-                  <FAB
-                    style={[styles.fab, { backgroundColor: sectionColor }]}
-                    icon="cog"
-                    color={theme.colors.secondary}
-                    customSize={56}
-                    onPress={() => setSettingsMenuVisible(true)}
-                  />
-                }
-              >
-                {currentRoute?.settingsOptions?.map((option, index) => (
-                  <Menu.Item
-                    key={index}
-                    onPress={() => {
-                      handleSettingsAction(option.action, firestoreDoc);
-                      setSettingsMenuVisible(false);
-                    }}
-                    title={option.label}
-                    leadingIcon={option.icon}
-                  />
-                ))}
-              </Menu>
-            </View>
-            <View style={styles.fabContainer}>
-              <FAB
-                style={[styles.fab, { backgroundColor: sectionColor }]}
-                icon="plus"
-                color={theme.colors.secondary}
-                customSize={56}
-                onPress={createCard}
-                testID="add-fab"
-              />
-            </View>
-          </>
-        )}
-      </View>
-    );
-  };
-
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right']}>
-      {/* Header */}
       <Appbar.Header style={styles.appBar}>
         <View style={styles.headerContent}>
           <Image source={require("../../assets/logo.png")} style={styles.logo} resizeMode="contain" />
@@ -217,21 +132,89 @@ const MainApp = () => {
         </Menu>
       </Appbar.Header>
 
-      <BottomNavigation
-        navigationState={{ index: navigationIndex, routes }}
-        onIndexChange={setNavigationIndex}
-        renderScene={renderScene}
-        barStyle={styles.bottomNavBar}
-        testID="bottom-navigation"
-        theme={{
-          colors: {
-            secondaryContainer: routes[navigationIndex].color,
-            onSecondaryContainer: theme.colors.secondary,
-            onSurfaceVariant: theme.colors.textMuted,
-            onSurface: theme.colors.text,
-          },
-        }}
-      />
+      <View style={styles.mainContent}>
+        <View style={styles.sceneContainer}>
+          {isLoading ? (
+            <View style={[styles.content, styles.loadingContainer]} testID="loading-container">
+              <ActivityIndicator size="large" color={sectionColor} />
+              <Text style={styles.loadingText} testID="loading-text">
+                Loading {activeSection.uiMetadata.key}...
+              </Text>
+            </View>
+          ) : firestoreDoc?.items.length ? (
+            <CardList
+              firestoreDoc={firestoreDoc}
+              showEditDialog={showEditDialog}
+              refreshing={isLoading}
+              sectionColor={sectionColor}
+              autoFocusItemId={autoFocusItemId}
+            />
+          ) : (
+            <EmptyState />
+          )}
+
+          {!isLoading && (
+            <>
+              {activeSection.uiMetadata.settingsOptions && (
+                <View style={styles.settingsMenuContainer}>
+                  <Menu
+                    visible={settingsMenuVisible}
+                    onDismiss={() => setSettingsMenuVisible(false)}
+                    anchor={
+                      <FAB
+                        style={[styles.fab, { backgroundColor: sectionColor }]}
+                        icon="cog"
+                        color={theme.colors.secondary}
+                        customSize={56}
+                        onPress={() => setSettingsMenuVisible(true)}
+                      />
+                    }
+                  >
+                    {activeSection.uiMetadata.settingsOptions.map((option, index) => (
+                      <Menu.Item
+                        key={index}
+                        onPress={() => {
+                          handleSettingsAction(option.action, firestoreDoc);
+                          setSettingsMenuVisible(false);
+                        }}
+                        title={option.label}
+                        leadingIcon={option.icon}
+                      />
+                    ))}
+                  </Menu>
+                </View>
+              )}
+              <View style={styles.fabContainer}>
+                <FAB
+                  style={[styles.fab, { backgroundColor: sectionColor }]}
+                  icon="plus"
+                  color={theme.colors.secondary}
+                  customSize={56}
+                  onPress={createCard}
+                  testID="add-fab"
+                />
+              </View>
+            </>
+          )}
+        </View>
+
+        <BottomNavigation.Bar
+          navigationState={{ index: sections.findIndex(s => s === activeSection), routes }}
+          onTabPress={({ route }) => {
+            const section = sections.find(s => s.uiMetadata.key === route.key);
+            if (section) setActiveSection(() => section);
+          }}
+          style={styles.bottomNavBar}
+          theme={{
+            colors: {
+              secondaryContainer: sectionColor,
+              onSecondaryContainer: theme.colors.secondary,
+              onSurfaceVariant: theme.colors.textMuted,
+              onSurface: theme.colors.text,
+            },
+          }}
+        />
+      </View>
 
       <StatusBar style="dark" />
 
@@ -293,6 +276,9 @@ const styles = StyleSheet.create({
   appBarSubtitle: {
     color: theme.colors.textSecondary,
     fontSize: theme.typography.sizes.sm,
+  },
+  mainContent: {
+    flex: 1,
   },
   sceneContainer: {
     flex: 1,

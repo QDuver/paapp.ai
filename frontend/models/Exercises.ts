@@ -1,6 +1,7 @@
 import React from "react";
 import { fieldConverter } from "../utils/utils";
 import { CardAbstract, FirestoreDocAbstract, IFieldMetadata, SubCardAbstract, IUIMetadata } from "./Abstracts";
+import { theme } from "../styles/theme";
 export class ExerciseSet extends SubCardAbstract {
   weightKg?: number;
   repetitions?: number;
@@ -124,40 +125,39 @@ export class Exercises extends FirestoreDocAbstract {
   notes?: string;
   collection = "exercises";
 
+  static uiMetadata = {
+    key: "exercises" as const,
+    title: "Exercises",
+    focusedIcon: "dumbbell",
+    unfocusedIcon: "dumbbell",
+    generateTitle: "New Exercise Program",
+    color: theme.colors.sections.exercises.accent,
+    settingsOptions: [
+      {
+        label: "New Program",
+        action: "generate" as const,
+        icon: "auto-fix",
+      },
+      {
+        label: "Objectives",
+        action: "editPrompt" as const,
+        icon: "pencil",
+      },
+      {
+        label: "Duplicate",
+        action: "duplicate" as const,
+        icon: "content-copy",
+      },
+      {
+        label: "Delete",
+        action: "delete" as const,
+        icon: "delete",
+      },
+    ],
+  };
+
   constructor(data?) {
     super(data, Exercise);
-  }
-
-  static getUIMetadata(): IUIMetadata {
-    return {
-      key: "exercises",
-      title: "Exercises",
-      focusedIcon: "dumbbell",
-      unfocusedIcon: "dumbbell",
-      generateTitle: "New Exercise Program",
-      settingsOptions: [
-        {
-          label: "New Program",
-          action: "generate" as const,
-          icon: "auto-fix",
-        },
-        {
-          label: "Objectives",
-          action: "editPrompt" as const,
-          icon: "pencil",
-        },
-        {
-          label: "Duplicate",
-          action: "duplicate" as const,
-          icon: "content-copy",
-        },
-        {
-          label: "Delete",
-          action: "delete" as const,
-          icon: "delete",
-        },
-      ],
-    };
   }
 
   getEditableFields(): IFieldMetadata[] {

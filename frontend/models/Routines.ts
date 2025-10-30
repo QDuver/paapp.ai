@@ -1,5 +1,6 @@
 import { fieldConverter } from "../utils/utils";
 import { CardAbstract, FirestoreDocAbstract, IFieldMetadata, IUIMetadata } from "./Abstracts";
+import { theme } from "../styles/theme";
 
 
 export class Routine extends CardAbstract {
@@ -22,16 +23,15 @@ export class Routine extends CardAbstract {
 export class Routines extends FirestoreDocAbstract {
   collection = "routines";
 
+  static uiMetadata = {
+    key: "routines" as const,
+    title: "Routines",
+    focusedIcon: "clock",
+    unfocusedIcon: "clock-outline",
+    color: theme.colors.sections.routines.accent,
+  };
+
   constructor(data?) {
     super(data, Routine);
-  }
-
-  static getUIMetadata(): IUIMetadata {
-    return {
-      key: "routines",
-      title: "Routines",
-      focusedIcon: "clock",
-      unfocusedIcon: "clock-outline",
-    };
   }
 }

@@ -1,5 +1,6 @@
 import { fieldConverter } from "../utils/utils";
 import { CardAbstract, FirestoreDocAbstract, IFieldMetadata, IUIMetadata } from "./Abstracts";
+import { theme } from "../styles/theme";
 
 
 export class Grocery extends CardAbstract {
@@ -23,16 +24,15 @@ export class Groceries extends FirestoreDocAbstract {
   collection = "groceries";
   id = "all";
 
+  static uiMetadata = {
+    key: "groceries" as const,
+    title: "Groceries",
+    focusedIcon: "cart",
+    unfocusedIcon: "cart-outline",
+    color: theme.colors.sections.groceries.accent,
+  };
+
   constructor(data?) {
     super(data, Grocery);
-  }
-
-  static getUIMetadata(): IUIMetadata {
-    return {
-      key: "groceries",
-      title: "Groceries",
-      focusedIcon: "cart",
-      unfocusedIcon: "cart-outline",
-    };
   }
 }

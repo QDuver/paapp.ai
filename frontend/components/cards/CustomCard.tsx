@@ -11,12 +11,6 @@ interface CustomCardProps {
   firestoreDoc: FirestoreDocAbstract;
   item: CardAbstract;
   index: number;
-  showEditDialog: (
-    item: DialogableAbstract,
-    parent: FirestoreDocAbstract | CardAbstract,
-    firestoreDoc: FirestoreDocAbstract,
-    isNew: boolean
-  ) => void;
   drag?: () => void;
   isActive?: boolean;
   dragListeners?: any;
@@ -24,8 +18,8 @@ interface CustomCardProps {
   autoFocusItemId?: string | null;
 }
 
-const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive, dragListeners, isDragging, autoFocusItemId }: CustomCardProps) => {
-  const { refreshCounter, setRefreshCounter, data } = useAppContext();
+const CustomCard = ({ item, index, firestoreDoc, drag, isActive, dragListeners, isDragging, autoFocusItemId }: CustomCardProps) => {
+  const { refreshCounter, setRefreshCounter, data, setEditableItem } = useAppContext();
   const [isInlineEditing, setIsInlineEditing] = useState(false);
   const [inlineEditValue, setInlineEditValue] = useState("");
 
@@ -58,6 +52,11 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
   const canInlineEdit = editableFields.length === 1;
   const singleField = editableFields[0];
 
+  const showEditDialog = () => {
+    setEditableItem(item);
+    console.log("Show edit dialog for item:", item);
+  };
+
   const handleCheckbox = (e?: any) => {
     e?.stopPropagation?.();
     item.onComplete(firestoreDoc);
@@ -71,52 +70,52 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
   };
 
   const handleAddSubCard = (e?: any) => {
-    e?.stopPropagation?.();
-    const newSubCard = item.createNewSubCard();
-    item.isExpanded = true;
-    if (item.skipDialogForNewChild()) {
-      newSubCard.onSave(firestoreDoc, newSubCard.toFormData(), item, true, setRefreshCounter);
-    } else {
-      showEditDialog(newSubCard, item, firestoreDoc, true);
-    }
-    setRefreshCounter(prev => prev + 1);
+    // e?.stopPropagation?.();
+    // const newSubCard = item.createNewSubCard();
+    // item.isExpanded = true;
+    // if (item.skipDialogForNewChild()) {
+    //   newSubCard.onSave(firestoreDoc, newSubCard.toFormData(), item, true, setRefreshCounter);
+    // } else {
+    //   showEditDialog(newSubCard, item, firestoreDoc, true);
+    // }
+    // setRefreshCounter(prev => prev + 1);
   };
 
   const handleStartInlineEdit = (e?: any) => {
-    e?.stopPropagation?.();
-    if (!canInlineEdit) return;
-    const currentValue = (item as any)[singleField.field] || "";
-    setInlineEditValue(currentValue);
-    setIsInlineEditing(true);
+    // e?.stopPropagation?.();
+    // if (!canInlineEdit) return;
+    // const currentValue = (item as any)[singleField.field] || "";
+    // setInlineEditValue(currentValue);
+    // setIsInlineEditing(true);
   };
 
   const handleSaveInlineEdit = () => {
-    if (!singleField) return;
+    // if (!singleField) return;
 
-    const trimmedValue = inlineEditValue.trim();
-    const isNewItem = !!(item as any).__tempId;
+    // const trimmedValue = inlineEditValue.trim();
+    // const isNewItem = !!(item as any).__tempId;
 
-    if (!trimmedValue && isNewItem) {
-      const parent = firestoreDoc;
-      if (parent.items) {
-        parent.items = parent.items.filter((i: CardAbstract) => (i as any).__tempId !== (item as any).__tempId);
-      }
-      setIsInlineEditing(false);
-      setRefreshCounter(prev => prev + 1);
-      return;
-    }
+    // if (!trimmedValue && isNewItem) {
+    //   const parent = firestoreDoc;
+    //   if (parent.items) {
+    //     parent.items = parent.items.filter((i: CardAbstract) => (i as any).__tempId !== (item as any).__tempId);
+    //   }
+    //   setIsInlineEditing(false);
+    //   setRefreshCounter(prev => prev + 1);
+    //   return;
+    // }
 
-    const formData = { [singleField.field]: inlineEditValue };
-    item.onSave(firestoreDoc, formData, firestoreDoc, false, setRefreshCounter);
-    setIsInlineEditing(false);
+    // const formData = { [singleField.field]: inlineEditValue };
+    // item.onSave(firestoreDoc, formData, firestoreDoc, false, setRefreshCounter);
+    // setIsInlineEditing(false);
   };
 
   const handleInlineSuggestionSelect = (suggestion: any) => {
-    if (!singleField) return;
-    (item as CardAbstract).handleSuggestionSelect(suggestion);
-    const formData = { [singleField.field]: suggestion.name };
-    item.onSave(firestoreDoc, formData, firestoreDoc, false, setRefreshCounter);
-    setIsInlineEditing(false);
+    // if (!singleField) return;
+    // (item as CardAbstract).handleSuggestionSelect(suggestion);
+    // const formData = { [singleField.field]: suggestion.name };
+    // item.onSave(firestoreDoc, formData, firestoreDoc, false, setRefreshCounter);
+    // setIsInlineEditing(false);
   };
 
   return (
@@ -142,8 +141,10 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
             )}
           </Pressable>
           <Pressable
-            onPress={canInlineEdit ? handleStartInlineEdit : () => showEditDialog(item, firestoreDoc, firestoreDoc, false)}
-            onLongPress={() => showEditDialog(item, firestoreDoc, firestoreDoc, false)}
+            // onPress={canInlineEdit ? handleStartInlineEdit : () => showEditDialog(item, firestoreDoc, firestoreDoc, false)}
+            // onLongPress={() => showEditDialog(item, firestoreDoc, firestoreDoc, false)}
+            onPress={showEditDialog}
+            onLongPress={showEditDialog}
             style={styles.headerText}
           >
             {isInlineEditing ? (
@@ -215,7 +216,7 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
               testID="subcard"
               title={subItem.name || `Set ${subIndex + 1}`}
               description={tagString}
-              onPress={() => showEditDialog(subItem, item, firestoreDoc, false)}
+              // onPress={() => showEditDialog(subItem, item, firestoreDoc, false)}
               style={[styles.subCard, isLastItem && styles.subCardLast]}
               titleStyle={styles.subCardTitle}
               descriptionStyle={styles.subCardDescription}

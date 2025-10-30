@@ -1,5 +1,5 @@
-import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import { FirestoreDocAbstract } from "../models/Abstracts";
+import React, { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
+import { DialogableAbstract, FirestoreDocAbstract, IUIMetadata, SectionKey } from "../models/Abstracts";
 import { Exercises } from "../models/Exercises";
 import { Meals } from "../models/Meals";
 import { Routines } from "../models/Routines";
@@ -21,6 +21,11 @@ interface AppContextType {
   setData: React.Dispatch<React.SetStateAction<DataType | undefined>>;
   refreshCounter: number;
   setRefreshCounter: React.Dispatch<React.SetStateAction<number>>;
+  sections: Array<typeof FirestoreDocAbstract>;
+  activeSection: typeof FirestoreDocAbstract;
+  setActiveSection: React.Dispatch<React.SetStateAction<typeof FirestoreDocAbstract>>;
+  editableItem: DialogableAbstract | null;
+  setEditableItem: React.Dispatch<React.SetStateAction<DialogableAbstract | null>>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -34,6 +39,9 @@ export const AppContextProvider = ({ children }: AppProviderProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [refreshCounter, setRefreshCounter] = useState<number>(0);
   const { user, authReady, warmupError } = useAppInit();
+  const sections: Array<typeof FirestoreDocAbstract> = [Routines, Exercises, Meals, Groceries];
+  const [activeSection, setActiveSection] = useState<typeof FirestoreDocAbstract>(() => sections[0]);
+  const [editableItem, setEditableItem] = useState<DialogableAbstract>(null);
 
   useEffect(() => {
     if (!user || !authReady || warmupError) return;
@@ -63,6 +71,11 @@ export const AppContextProvider = ({ children }: AppProviderProps) => {
     setData,
     refreshCounter,
     setRefreshCounter,
+    sections,
+    activeSection,
+    setActiveSection,
+    editableItem,
+    setEditableItem,
   };
 
   return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;

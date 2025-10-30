@@ -19,7 +19,9 @@ const EditItemDialog = ({ visible, item, parent, firestoreDoc, isNew, onClose }:
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
   const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
 
-  const { data, setRefreshCounter } = useAppContext();
+  const { data, setRefreshCounter, editableItem } = useAppContext();
+
+  console.log('data from EditItemDialog', editableItem);
 
   useEffect(() => {
     if (visible && item && firestoreDoc) {

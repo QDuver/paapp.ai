@@ -34,11 +34,13 @@ export interface IUIMetadata {
   title: string;
   focusedIcon: string;
   unfocusedIcon: string;
+  color: string;
   generateTitle?: string;
   settingsOptions?: ISettingsOption[];
 }
 
 export abstract class DialogableAbstract {
+
   constructor(data: any = {}) {
     Object.assign(this, data);
   }
@@ -158,16 +160,14 @@ export abstract class FirestoreDocAbstract extends DialogableAbstract {
   id: string = getCurrentDate();
   ChildModel: any;
 
+  static uiMetadata: IUIMetadata;
+
   constructor(data?, ChildModel?) {
     super(data);
     if (!ChildModel || !data) return;
     this.ChildModel = ChildModel;
     this.items = data.items?.map(item => new ChildModel(item)) || [];
     this.uniques = data.uniques || [];
-  }
-
-  static getUIMetadata(): IUIMetadata {
-    throw new Error("getUIMetadata must be implemented by subclass");
   }
 
   static async fromApi<T extends FirestoreDocAbstract>(

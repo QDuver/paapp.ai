@@ -79,6 +79,11 @@ export const theme = {
         iconBackground: "#FFEBEE",
         accent: "#F44336",
       },
+      groceries: {
+        icon: palette.color3,
+        iconBackground: `${palette.color3}20`,
+        accent: palette.color3,
+      },
     },
   },
 
