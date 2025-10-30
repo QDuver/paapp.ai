@@ -2,7 +2,7 @@ import { StatusBar } from "expo-status-bar";
 import { signOut } from "firebase/auth";
 import React, { useState } from "react";
 import { ActivityIndicator, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Appbar, BottomNavigation, FAB, Menu } from "react-native-paper";
+import { Appbar, BottomNavigation, FAB, IconButton, Menu } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppContext } from "../../contexts/AppContext";
 import { CardAbstract, DialogableAbstract, FirestoreDocAbstract, IUIMetadata, SectionKey, SettingsAction } from "../../models/Abstracts";
@@ -24,7 +24,7 @@ const MainApp = () => {
 
   const [navigationIndex, setNavigationIndex] = useState(1);
   const [menuVisible, setMenuVisible] = useState(false);
-  const [fabGroupOpen, setFabGroupOpen] = useState(false);
+  const [settingsMenuVisible, setSettingsMenuVisible] = useState(false);
   const [autoFocusItemId, setAutoFocusItemId] = useState<string | null>(null);
 
   const [buildAiDialogVisible, setBuildAiDialogVisible] = useState(false);
@@ -53,14 +53,17 @@ const MainApp = () => {
   };
 
   const handleSettingsAction = (action: SettingsAction, firestoreDoc: FirestoreDocAbstract) => {
+    console.log(`[FAB] handleSettingsAction called with action: ${action}, collection: ${firestoreDoc.collection}`);
     setMenuVisible(false);
 
     switch (action) {
       case "generate":
+        console.log(`[FAB] Opening BuildWithAI dialog`);
         setBuildAiFirestoreDoc(firestoreDoc);
         setBuildAiDialogVisible(true);
         break;
       case "editPrompt":
+        console.log(`[FAB] Opening EditPrompt dialog`);
         setEditPromptCollection(firestoreDoc.collection);
         setEditPromptDialogVisible(true);
         break;
@@ -118,7 +121,6 @@ const MainApp = () => {
       }
     };
 
-  console.log('firestoreDoc:', firestoreDoc);
 
     return (
       <View style={styles.sceneContainer}>
@@ -143,56 +145,33 @@ const MainApp = () => {
 
         {!isLoading && (
           <>
-            {currentRoute?.settingsOptions && currentRoute.settingsOptions.length > 0 && Platform.OS !== 'web' && (
-              <FAB.Group
-                open={fabGroupOpen}
-                visible={true}
-                icon={fabGroupOpen ? "close" : "cog"}
-                actions={
-                  currentRoute.settingsOptions.map((option) => ({
-                    icon: option.icon,
-                    label: option.label,
-                    onPress: () => {
-                      handleSettingsAction(option.action, firestoreDoc);
-                      setFabGroupOpen(false);
-                    },
-                  }))
-                }
-                onStateChange={({ open }) => setFabGroupOpen(open)}
-                fabStyle={[styles.fab, { backgroundColor: sectionColor }]}
-                color={theme.colors.secondary}
-                style={styles.settingsFabGroup}
-              />
-            )}
-            {currentRoute?.settingsOptions && currentRoute.settingsOptions.length > 0 && Platform.OS === 'web' && (
+            <View style={styles.settingsMenuContainer}>
               <Menu
-                visible={fabGroupOpen}
-                onDismiss={() => setFabGroupOpen(false)}
+                visible={settingsMenuVisible}
+                onDismiss={() => setSettingsMenuVisible(false)}
                 anchor={
-                  <View style={styles.settingsFabContainer}>
-                    <FAB
-                      style={[styles.fab, { backgroundColor: sectionColor }]}
-                      icon="cog"
-                      color={theme.colors.secondary}
-                      customSize={56}
-                      onPress={() => setFabGroupOpen(!fabGroupOpen)}
-                    />
-                  </View>
+                  <FAB
+                    style={[styles.fab, { backgroundColor: sectionColor }]}
+                    icon="cog"
+                    color={theme.colors.secondary}
+                    customSize={56}
+                    onPress={() => setSettingsMenuVisible(true)}
+                  />
                 }
               >
-                {currentRoute.settingsOptions.map((option) => (
+                {currentRoute?.settingsOptions?.map((option, index) => (
                   <Menu.Item
-                    key={option.action}
+                    key={index}
                     onPress={() => {
                       handleSettingsAction(option.action, firestoreDoc);
-                      setFabGroupOpen(false);
+                      setSettingsMenuVisible(false);
                     }}
                     title={option.label}
                     leadingIcon={option.icon}
                   />
                 ))}
               </Menu>
-            )}
+            </View>
             <View style={styles.fabContainer}>
               <FAB
                 style={[styles.fab, { backgroundColor: sectionColor }]}
@@ -209,7 +188,6 @@ const MainApp = () => {
     );
   };
 
-  const currentRoute = routes[navigationIndex];
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right']}>
@@ -345,23 +323,20 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 8,
   },
+  settingsMenuContainer: {
+    position: "absolute",
+    right: theme.spacing.lg,
+    bottom: 106,
+    zIndex: 9999,
+  },
   fabContainer: {
     position: "absolute",
     right: theme.spacing.lg,
     bottom: 35,
-    zIndex: 9999,
+    zIndex: 9998,
   },
   fab: {
     margin: 0,
-  },
-  settingsFabGroup: {
-    paddingBottom: 84,
-  },
-  settingsFabContainer: {
-    position: "absolute",
-    right: theme.spacing.lg,
-    bottom: 100,
-    zIndex: 9998,
   },
   avatarContainer: {
     marginRight: theme.spacing.sm,

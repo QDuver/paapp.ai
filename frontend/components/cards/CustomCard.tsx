@@ -59,7 +59,6 @@ const CustomCard = ({ item, index, firestoreDoc, showEditDialog, drag, isActive,
   const singleField = editableFields[0];
 
   const handleCheckbox = (e?: any) => {
-    console.log("handleCheckbox");
     e?.stopPropagation?.();
     item.onComplete(firestoreDoc);
     setRefreshCounter(prev => prev + 1);
@@ -290,12 +289,9 @@ const styles = StyleSheet.create({
       cursor: "pointer",
     }),
   },
-  dragHandle: {
-    touchAction: "none",
-    width: 40,
-    height: 40,
-    cursor: "grab",
-  },
+  dragHandle: Platform.OS === "web"
+    ? ({ touchAction: "none" as any, width: 40, height: 40, cursor: "grab" as any } as any)
+    : ({ width: 40, height: 40 } as any),
   accordionTitle: {
     fontWeight: theme.typography.weights.semibold,
     fontSize: theme.typography.sizes.lg,
