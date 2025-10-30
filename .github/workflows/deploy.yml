@@ -43,6 +43,15 @@ jobs:
           docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
           docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:latest
 
+      - name: Create env vars file
+        run: |
+          cat > env-vars.yaml << EOF
+          GOOGLE_CLOUD_PROJECT: "${{ secrets.GOOGLE_CLOUD_PROJECT }}"
+          CLOUD_RUN_URL: "${{ secrets.CLOUD_RUN_URL }}"
+          ADMIN_EMAILS: "${{ secrets.ADMIN_EMAILS }}"
+          ALLOWED_ORIGINS: "${{ secrets.ALLOWED_ORIGINS }}"
+          EOF
+
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ env.SERVICE_NAME }} \
@@ -50,7 +59,7 @@ jobs:
             --platform managed \
             --region ${{ env.REGION }} \
             --allow-unauthenticated \
-            --set-env-vars="GOOGLE_CLOUD_PROJECT=${{ secrets.GOOGLE_CLOUD_PROJECT }},CLOUD_RUN_URL=${{ secrets.CLOUD_RUN_URL }},ADMIN_EMAILS=${{ secrets.ADMIN_EMAILS }},ALLOWED_ORIGINS=${{ secrets.ALLOWED_ORIGINS }}"
+            --env-vars-file=env-vars.yaml
 
       - name: Update Composer environment variables
         run: |
