@@ -6,6 +6,7 @@ BACKEND
 - Improve AI outputs (+ process historics before feeding)
 
 FRONTEND
+- New exercise should not open dialog
 - logo alignment
 - 1st login experience
 - Fonts for Dialogs / for Branding

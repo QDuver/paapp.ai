@@ -65,8 +65,25 @@ const MainApp = () => {
 
   const createCard = () => {
     const newCard = firestoreDoc.createCard();
-    setEditableItem(newCard);
-    setRefreshCounter(prev => prev + 1);
+    const editableFields = newCard.getEditableFields();
+
+    if (editableFields.length > 1) {
+      firestoreDoc.items = firestoreDoc.items.filter(item => item !== newCard);
+      setEditableItem(newCard);
+      setEditDialogState({
+        parent: firestoreDoc,
+        firestoreDoc: firestoreDoc,
+        isNew: true
+      });
+    } else {
+      setEditableItem(newCard);
+      setEditDialogState({
+        parent: firestoreDoc,
+        firestoreDoc: firestoreDoc,
+        isNew: true
+      });
+      setRefreshCounter(prev => prev + 1);
+    }
   };
 
   return (
