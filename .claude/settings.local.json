@@ -19,7 +19,10 @@
       "Bash(git check-ignore:*)",
       "Bash(if not exist \"frontend\\services\" mkdir \"frontend\\services\")",
       "Bash(node debug-config.js:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(npm run build:web:*)",
+      "Bash(dir:*)",
+      "Bash(firebase deploy:*)"
     ],
     "deny": [],
     "ask": []

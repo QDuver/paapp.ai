@@ -139,11 +139,9 @@ frontend/.env.local
 frontend/.env.production
 frontend/.env.development
 
-# Firebase configuration files
+# Firebase credential files (platform-specific)
 google-services.json
 GoogleService-Info.plist
-.firebaserc
-firebase.json
 
 # Additional credential files
 *-firebase-adminsdk-*.json
