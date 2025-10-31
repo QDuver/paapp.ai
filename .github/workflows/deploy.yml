@@ -77,6 +77,11 @@ jobs:
           gcloud composer environments storage dags import \
             --environment aiapps \
             --location ${{ env.REGION }} \
+            --source backend/dags/common.py
+
+          gcloud composer environments storage dags import \
+            --environment aiapps \
+            --location ${{ env.REGION }} \
             --source backend/dags/scheduler.dag.py
 
           gcloud composer environments storage dags import \
