@@ -1,0 +1,31 @@
+MVP
+BACKEND
+- DAGS not working 
+- Porfessional email adress for Oauth
+- Security - don't allow to access other databases if not user's
+- Improve AI outputs (+ process historics before feeding)
+
+FRONTEND
+- New exercise should not open dialog
+- logo alignment
+- 1st login experience
+- Fonts for Dialogs / for Branding
+- quantity metrics for food
+- FAB group - improve design
+- Adding meal is not possible
+
+POST MVP
+- meals : plan for x days ahead
+- meals : feed into groceries
+- loads of different loading messages while AI Building
+- ordering still not stable on Android
+- feedback form
+- Calendar Icon + Swipability
+- Hypertrophy vs. Strength (for me only)
+- Delete card by Swipability
+- FavIcon to look professional
+- Calorie tracker
+- Picture to count calories
+- Self contained model
+- Android
+- Exercise frequencies
