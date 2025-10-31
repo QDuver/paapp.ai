@@ -73,11 +73,6 @@ const MainApp = () => {
       });
     } else {
       setEditableItem(newCard);
-      setEditDialogState({
-        parent: firestoreDoc,
-        firestoreDoc: firestoreDoc,
-        isNew: true
-      });
       setRefreshCounter(prev => prev + 1);
     }
   };
@@ -87,7 +82,7 @@ const MainApp = () => {
       <Appbar.Header style={styles.appBar}>
         <Appbar.Action icon="menu" onPress={() => setDrawerVisible(true)} />
         <View style={styles.headerContent}>
-          <Image source={require("../../assets/logo.png")} style={styles.logo} resizeMode="contain" />
+          {/* <Image source={require("../../assets/logo.png")} style={styles.logo} resizeMode="contain" /> */}
           <Text style={styles.appBarTitle}>paapp.ai</Text>
         </View>
         <Menu
@@ -285,8 +280,8 @@ const styles = StyleSheet.create({
     gap: theme.spacing.xs,
   },
   logo: {
-    width: 42,
-    height: 28,
+    width: 40,
+    height: 40,
     marginTop: 5,
   },
   appBarTitle: {
@@ -295,6 +290,7 @@ const styles = StyleSheet.create({
     fontWeight: theme.typography.weights.bold,
     letterSpacing: -0.5,
     includeFontPadding: false,
+marginBottom: 8
   },
   appBarSubtitle: {
     color: theme.colors.textSecondary,

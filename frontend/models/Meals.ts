@@ -32,7 +32,7 @@ export class Ingredient extends SubCardAbstract {
       },
       {
         field: "quantity",
-        label: "Quantity",
+        label: "Quantity (g)",
         type: "number",
         keyboardType: "number-pad",
         converter: fieldConverter.number,
@@ -51,7 +51,7 @@ export class Ingredient extends SubCardAbstract {
 
   getTags(): string[] {
     const tags: string[] = [];
-    if (this.quantity > 0) tags.push(`Qty: ${this.quantity}`);
+    if (this.quantity > 0) tags.push(`Qty: ${this.quantity}g`);
     if (this.calories > 0) tags.push(`${this.calories} cal`);
     return tags;
   }

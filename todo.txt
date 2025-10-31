@@ -6,13 +6,9 @@ BACKEND
 - Improve AI outputs (+ process historics before feeding)
 
 FRONTEND
-- New exercise should not open dialog
-- logo alignment
 - 1st login experience
 - Fonts for Dialogs / for Branding
-- quantity metrics for food
 - FAB group - improve design
-- Adding meal is not possible
 
 POST MVP
 - meals : plan for x days ahead

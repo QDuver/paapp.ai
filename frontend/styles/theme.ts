@@ -108,6 +108,13 @@ export const theme = {
   },
 
   typography: {
+    fontFamily: {
+      light: "Poppins_300Light",
+      regular: "Poppins_400Regular",
+      medium: "Poppins_500Medium",
+      semibold: "Poppins_600SemiBold",
+      bold: "Poppins_700Bold",
+    },
     sizes: {
       xs: 11,
       sm: 13,
@@ -173,4 +180,26 @@ export const commonStyles = {
     borderTopLeftRadius: theme.borderRadius.xxl,
     borderTopRightRadius: theme.borderRadius.xxl,
   },
+
+  // Default text style with Poppins
+  text: {
+    fontFamily: theme.typography.fontFamily.regular,
+    fontSize: theme.typography.sizes.md,
+    color: theme.colors.text,
+  },
+
+  // Default input style with Poppins
+  input: {
+    fontFamily: theme.typography.fontFamily.regular,
+    fontSize: theme.typography.sizes.md,
+  },
 } as const;
+
+// Typography helper function
+export const getTypography = (size: keyof typeof theme.typography.sizes, weight?: keyof typeof theme.typography.fontFamily) => {
+  const fontFamily = weight ? theme.typography.fontFamily[weight] : theme.typography.fontFamily.regular;
+  return {
+    fontFamily,
+    fontSize: theme.typography.sizes[size],
+  };
+};

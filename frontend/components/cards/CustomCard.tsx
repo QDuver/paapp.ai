@@ -283,12 +283,13 @@ const styles = StyleSheet.create({
     ? ({ touchAction: "none" as any, width: 40, height: 40, cursor: "grab" as any } as any)
     : ({ width: 40, height: 40 } as any),
   accordionTitle: {
-    fontWeight: theme.typography.weights.semibold,
+    fontFamily: theme.typography.fontFamily.semibold,
     fontSize: theme.typography.sizes.lg,
     color: theme.colors.text,
     letterSpacing: -0.3,
   },
   accordionDescription: {
+    fontFamily: theme.typography.fontFamily.regular,
     fontSize: theme.typography.sizes.sm,
     color: theme.colors.textSecondary,
     marginTop: 2,
@@ -307,21 +308,22 @@ const styles = StyleSheet.create({
     paddingBottom: theme.spacing.lg,
   },
   subCardTitle: {
+    fontFamily: theme.typography.fontFamily.medium,
     fontSize: theme.typography.sizes.md,
-    fontWeight: theme.typography.weights.medium,
     color: theme.colors.text,
     marginLeft: theme.spacing.sm,
     letterSpacing: -0.2,
   },
   subCardDescription: {
+    fontFamily: theme.typography.fontFamily.regular,
     fontSize: theme.typography.sizes.sm,
     color: theme.colors.textSecondary,
     marginLeft: theme.spacing.sm,
     marginTop: 3,
   },
   inlineEditInput: {
+    fontFamily: theme.typography.fontFamily.semibold,
     fontSize: theme.typography.sizes.lg,
-    fontWeight: theme.typography.weights.semibold,
     letterSpacing: -0.3,
   },
 });

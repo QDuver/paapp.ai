@@ -73,12 +73,14 @@ export const sharedDialogStyles = StyleSheet.create({
     paddingVertical: theme.spacing.xs,
   },
   fieldLabel: {
-    fontWeight: theme.typography.weights.medium,
+    fontFamily: theme.typography.fontFamily.medium,
     fontSize: theme.typography.sizes.md,
     color: theme.colors.text,
   },
   textInput: {
     backgroundColor: theme.colors.modalSecondary,
+    fontFamily: theme.typography.fontFamily.regular,
+    fontSize: theme.typography.sizes.md,
   },
   multilineInput: {
     minHeight: 80,
@@ -184,6 +186,7 @@ export const renderField = ({ fieldMetadata, formData, errors, collection, data,
             mode="outlined"
             label={fieldLabel}
             style={[sharedDialogStyles.textInput, isMultiline && sharedDialogStyles.multilineInput]}
+            contentStyle={{ fontFamily: theme.typography.fontFamily.regular }}
             value={displayValue}
             onChangeText={text => onInputChange(fieldName, text)}
             placeholder={fieldMetadata.placeholder}

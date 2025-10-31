@@ -57,6 +57,7 @@ const EditPromptDialog = ({ visible, collection, onClose }: EditPromptDialogProp
               testID="prompt-input"
               mode="outlined"
               style={[sharedDialogStyles.textInput, { minHeight: 300 }]}
+              contentStyle={{ fontFamily: theme.typography.fontFamily.regular }}
               value={prompt}
               onChangeText={setPrompt}
               placeholder="Enter AI prompt for this collection..."

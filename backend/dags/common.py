@@ -20,12 +20,12 @@ DEFAULT_ARGS = {
 
 def call_api(endpoint):
     headers = {}
-    api_key = os.getenv('API_KEY')
+    api_key = os.getenv('DAG_API_KEY')
     if api_key:
         headers['X-API-Key'] = api_key
-    
+
     response = requests.get(
-        f"'https://life-automation-api-1050310982145.europe-west2.run.app/{endpoint}",
+        f"https://life-automation-api-1050310982145.europe-west2.run.app/{endpoint}",
         headers=headers,
         timeout=300
     )

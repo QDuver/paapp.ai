@@ -151,6 +151,7 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
           testID="autocomplete-input"
           mode="flat"
           style={[textStyle, { backgroundColor, color: theme.colors.text }]}
+          contentStyle={{ fontFamily: theme.typography.fontFamily.regular }}
           value={value}
           onChangeText={handleTextChange}
           placeholder={placeholder}
@@ -261,6 +262,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
   },
   suggestionText: {
+    fontFamily: theme.typography.fontFamily.regular,
     fontSize: theme.typography.sizes.md,
   },
 });
