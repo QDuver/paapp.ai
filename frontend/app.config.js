@@ -1,6 +1,7 @@
-require('dotenv').config();
+const dotenv = require('dotenv');
+dotenv.config();
 
-export default {
+module.exports = {
   expo: {
     name: "paapp.ai",
     slug: "paappai",
@@ -55,6 +56,7 @@ export default {
       FIREBASE_IOS_APP_ID: process.env.FIREBASE_IOS_APP_ID,
       FIREBASE_IOS_CLIENT_ID: process.env.FIREBASE_IOS_CLIENT_ID,
       FIREBASE_IOS_BUNDLE_ID: process.env.FIREBASE_IOS_BUNDLE_ID,
+      apiUrl: process.env.REACT_APP_API_URL,
     }
   }
 };

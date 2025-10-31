@@ -16,7 +16,10 @@
       "Bash(cat:*)",
       "Bash(move \"C:\\projects\\life-automation\\backend\\dags.py\" \"C:\\projects\\life-automation\\backend\\dags\\dag_endpoints.py\")",
       "Bash(git log:*)",
-      "Bash(git check-ignore:*)"
+      "Bash(git check-ignore:*)",
+      "Bash(if not exist \"frontend\\services\" mkdir \"frontend\\services\")",
+      "Bash(node debug-config.js:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []
