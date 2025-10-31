@@ -20,8 +20,14 @@ DEFAULT_ARGS = {
 }
 
 def call_api(endpoint):
+    headers = {}
+    api_key = os.getenv('API_KEY')
+    if api_key:
+        headers['X-API-Key'] = api_key
+    
     response = requests.get(
         f"{CONFIG.CLOUD_RUN_URL}{endpoint}",
+        headers=headers,
         timeout=300
     )
     response.raise_for_status()

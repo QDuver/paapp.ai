@@ -50,6 +50,7 @@ jobs:
           CLOUD_RUN_URL: "${{ secrets.CLOUD_RUN_URL }}"
           ADMIN_EMAILS: "${{ secrets.ADMIN_EMAILS }}"
           ALLOWED_ORIGINS: "${{ secrets.ALLOWED_ORIGINS }}"
+          DAG_API_KEY: "${{ secrets.DAG_API_KEY }}"
           EOF
 
       - name: Deploy to Cloud Run
@@ -66,6 +67,10 @@ jobs:
           gcloud composer environments run aiapps \
             --location ${{ env.REGION }} \
             variables set -- BACKEND_API_URL ${{ secrets.CLOUD_RUN_URL }}
+
+          gcloud composer environments run aiapps \
+            --location ${{ env.REGION }} \
+            variables set -- DAG_API_KEY ${{ secrets.DAG_API_KEY }}
 
       - name: Upload DAGs to Composer
         run: |

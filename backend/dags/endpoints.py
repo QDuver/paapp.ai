@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
 from clients.firestore import FirestoreClient
 from config import CONFIG, COLLECTION_CLASS_MAPPING
 from models.users import User
+from typing import Optional
 import os
 
 router = APIRouter()
@@ -10,7 +11,15 @@ def get_admin_emails():
     admin_emails_str = os.getenv('ADMIN_EMAILS', '')
     return [email.strip() for email in admin_emails_str.split(',') if email.strip()]
 
-def verify_admin(user: User = Depends(User.from_firebase_token)):
+def verify_admin(x_api_key: Optional[str] = Header(None), user: Optional[User] = Depends(User.from_firebase_token)):
+    api_key = os.getenv('API_KEY')
+
+    if api_key and x_api_key == api_key:
+        return None
+
+    if not user:
+        raise HTTPException(status_code=401, detail="Authentication required")
+
     admin_emails = get_admin_emails()
     if not admin_emails:
         raise HTTPException(status_code=503, detail="Admin functionality not configured")
