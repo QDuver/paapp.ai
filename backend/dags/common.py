@@ -8,7 +8,6 @@ from functools import partial
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 import requests
-from config import CONFIG
 
 DEFAULT_ARGS = {
     'owner': 'airflow',
@@ -26,7 +25,7 @@ def call_api(endpoint):
         headers['X-API-Key'] = api_key
     
     response = requests.get(
-        f"{CONFIG.CLOUD_RUN_URL}{endpoint}",
+        f"'https://life-automation-api-1050310982145.europe-west2.run.app/{endpoint}",
         headers=headers,
         timeout=300
     )
